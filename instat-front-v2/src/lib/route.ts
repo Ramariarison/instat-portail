@@ -36,6 +36,38 @@ export function useRoute(): string[] {
   return segments;
 }
 
+function readQuery(): URLSearchParams {
+  const hash = window.location.hash;
+  const index = hash.indexOf("?");
+  return new URLSearchParams(index >= 0 ? hash.slice(index + 1) : "");
+}
+
+/**
+ * Paramètres après « ? » dans le hash (« #/publications?scope=regional&page=2 »).
+ * Les filtres d'une liste y sont gardés : ils survivent au retour depuis une fiche.
+ */
+export function useHashQuery(): [URLSearchParams, (next: Record<string, string | undefined>) => void] {
+  const [query, setQuery] = useState(readQuery);
+
+  useEffect(() => {
+    const onChange = () => setQuery(readQuery());
+    window.addEventListener("hashchange", onChange);
+    return () => window.removeEventListener("hashchange", onChange);
+  }, []);
+
+  const update = (next: Record<string, string | undefined>) => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(next)) if (value) params.set(key, value);
+    const path = window.location.hash.split("?")[0]!;
+    const search = params.toString();
+    // Remplace l'entrée d'historique : changer de filtre ne doit pas remplir le bouton « Retour ».
+    history.replaceState(null, "", search ? `${path}?${search}` : path);
+    setQuery(params);
+  };
+
+  return [query, update];
+}
+
 export function navigate(href: string): void {
   window.location.hash = href.startsWith("#") ? href : `#${href}`;
 }

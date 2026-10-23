@@ -117,7 +117,7 @@ export default function Publications() {
               </time>
               <a
                 href={publication.href}
-                aria-label={`Télécharger : ${publication.title}`}
+                aria-label={`Documents à télécharger : ${publication.title}`}
                 className="inline-flex h-9 w-fit items-center gap-2 border border-line px-3 font-mono text-xs text-paddy hover:border-paddy hover:bg-paddy-soft"
               >
                 <ArrowDownToLine className="size-3.5" aria-hidden="true" />

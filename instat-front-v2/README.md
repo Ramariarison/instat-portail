@@ -43,13 +43,14 @@ L'interface reprend les codes d'une publication statistique imprimée (annuaire,
 
 ```
 src/
-├── App.tsx                      assemblage de la page
+├── App.tsx                      routage : accueil, pages publiques, back-office
 ├── config.ts                    réglages VITE_* : données d'exemple, comptes de démonstration
 ├── types.ts                     types partagés (User, Role, Publication…)
 ├── context/AuthContext.tsx      état de connexion (user, login, logout)
 ├── lib/api.ts                   client de la passerelle d'API (jeton, erreurs, envoi de fichiers)
 ├── services/authService.ts      connexion par le service Auth (POST /auth/login)
-├── hooks/useApiData.ts          lecture publique d'une ressource de l'API (page d'accueil)
+├── hooks/useApiData.ts          lecture publique d'une ressource de l'API
+├── pages/                       Publications (liste, fiche), Actualités, « page en préparation »
 ├── hooks/useDismiss.ts          fermeture au clic extérieur / Échap
 ├── lib/format.ts                dates, nombres, initiales (fr-FR)
 ├── data/                        contenus fixes (navigation, thèmes…) et données d'exemple (VITE_SAMPLE_DATA)
@@ -95,7 +96,8 @@ Le front ne parle qu'à la passerelle d'API (`/api`), par `src/lib/api.ts`.
 
 - Le **logo** est une marque provisoire (`components/layout/Logo.tsx`) : remplacer par le logo officiel.
 - Les **valeurs des indicateurs** sont des exemples (signalés dans la page).
-- Les **liens** pointent vers des ancres `#/...` en attendant le routage (React Router) et les autres pages.
+- Les **liens** utilisent un routage par hash (`#/publications/…`, `src/lib/route.ts`). Les rubriques pas encore rédigées
+  affichent « Page en préparation ». Passer à React Router le jour où le référencement compte.
 - La **carte interactive** (PostGIS côté données) n'est pas incluse : le lien « Explorer la carte interactive » est prévu pour elle.
 
 ## Accessibilité

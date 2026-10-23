@@ -69,7 +69,7 @@ Lecture publique sauf mention ; écriture = jeton `Authorization: Bearer …` + 
 | Service | Routes |
 |---|---|
 | auth | `POST /auth/login` → `{ token, expiresIn, user }` · `GET /auth/me` · `POST /auth/password` · `GET /auth/permissions` · `/users` (droit `users`) |
-| publications | `GET /publications?scope=&limit=&thematiqueId=&regionId=` → `Publication[]` · `GET /publications/:id` · `GET /publications/latest-nipc` · `/admin/publications` (droit `publications`) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
+| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&limit=&offset=` → `Publication[]` (total dans `X-Total-Count`) · `GET /publications/:id` · `GET /publications/latest-nipc` · `/admin/publications` (droit `publications`) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
 | chiffres | `/indicators` → `Indicator[]` (chiffres clés de l'accueil) · `/chiffres/types` · `/chiffres/indicators?typeId=` · `/chiffres/regions` · `/chiffres/values?figureRegionId=&indicatorId=` |
 | files | `POST /files` (multipart, champ `file`, tout utilisateur connecté) → `{ id, name, size, type, url }` · `GET /files/:id` · `DELETE /files/:id` |
 
@@ -100,7 +100,9 @@ Fichier `services/<service>/migrations/NNN_description.sql`, appliqué au démar
 
 ## Le front
 
-Relié à l'API (voir « Microservices » dans `instat-front-v2/README.md`). Repères :
+Relié à l'API (voir « Microservices » dans `instat-front-v2/README.md`). Pages publiques (`src/pages/`, routées dans `App.tsx`) :
+`#/publications` (liste filtrable, filtres gardés dans l'adresse), `#/publications/:id` (fiche et documents),
+`#/actualites` ; toute autre route `#/…` affiche « Page en préparation ». Repères :
 - `src/lib/api.ts` : seul point d'accès à `/api` (jeton, erreurs `ApiError` avec le message du service, `uploadFile`).
 - `src/admin/data/AdminDataContext.tsx` : collections du back-office (`add` → POST, `update` → PATCH avec `null`
   pour un champ vidé, `remove` → DELETE) ; `src/admin/useAction.ts` annonce réussite ou erreur.
@@ -111,7 +113,8 @@ Relié à l'API (voir « Microservices » dans `instat-front-v2/README.md`). Rep
 
 - `Publication.kind` n'est pas saisi dans le back-office : il est déduit du premier secteur (`kindOf()` dans `publications/src/sectors.ts`).
 - Les chiffres clés de l'accueil (`/indicators`) et les actualités (`/news`) n'ont pas d'écran d'administration dans le front.
-- Les liens « PDF » et « Lire l'actualité » de l'accueil pointent vers des pages `#/publications/…` qui n'existent pas encore.
+- Les actualités n'ont pas de contenu (seulement titre, date, contexte) : pas de page de détail, « Lire l'actualité » mène à la page « en préparation ».
+- Routage par hash (`#/…`, `src/lib/route.ts`) : simple, mais invisible pour les moteurs de recherche. Passer à React Router (adresses `/publications/…`) le jour où le référencement compte.
 - Documents d'exemple (`doc-…` des données de démonstration) : aucun fichier réel derrière.
 - `figure_regions.region_id` désigne une région du service Publications sans clé étrangère (bases séparées) :
   supprimer une région ne touche pas « Madagascar en chiffres ».

@@ -53,7 +53,7 @@ export function onUnauthorized(listener: () => void): () => void {
   return () => unauthorizedListeners.delete(listener);
 }
 
-async function request<T>(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
+async function send(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<{ data: unknown; response: Response }> {
   const headers: Record<string, string> = {};
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -72,9 +72,9 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
     throw new ApiError(0, "NETWORK", "Le serveur est injoignable. Vérifiez votre connexion et réessayez.");
   }
 
-  if (response.status === 204) return undefined as T;
+  if (response.status === 204) return { data: undefined, response };
   const data = await response.json().catch(() => null);
-  if (response.ok) return data as T;
+  if (response.ok) return { data, response };
 
   if (response.status === 401 && token) {
     setToken(null);
@@ -88,11 +88,27 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
   throw new ApiError(response.status, error?.code ?? "HTTP_ERROR", error?.message ?? "La requête a échoué. Réessayez.");
 }
 
+async function request<T>(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
+  return (await send(method, path, body, signal)).data as T;
+}
+
+export interface Page<T> {
+  items: T[];
+  /** Nombre total d'éléments correspondant aux filtres (en-tête X-Total-Count). */
+  total: number;
+}
+
 export const api = {
   get: <T>(path: string, signal?: AbortSignal) => request<T>("GET", path, undefined, signal),
   post: <T>(path: string, body?: unknown) => request<T>("POST", path, body),
   patch: <T>(path: string, body: unknown) => request<T>("PATCH", path, body),
   delete: (path: string) => request<void>("DELETE", path),
+  /** Liste paginée : les éléments, plus le total annoncé par le service. */
+  page: async <T>(path: string, signal?: AbortSignal): Promise<Page<T>> => {
+    const { data, response } = await send("GET", path, undefined, signal);
+    const items = data as T[];
+    return { items, total: Number(response.headers.get("X-Total-Count") ?? items.length) };
+  },
 };
 
 /** Message à afficher pour une erreur quelconque (celui du service s'il y en a un). */

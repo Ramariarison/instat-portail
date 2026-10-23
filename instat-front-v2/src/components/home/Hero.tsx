@@ -124,7 +124,8 @@ export default function Hero() {
             {result.status === "ready" && result.data.length > 0 ? (
               <NewsCarousel news={result.data} />
             ) : (
-              <p role="status" className="border border-white/15 bg-paddy-night/70 px-6 py-8 font-mono text-xs text-white/70">
+              // Même hauteur que le carrousel : la page ne « saute » pas quand les actualités arrivent.
+              <p role="status" className="flex min-h-[22rem] items-center border border-white/15 bg-paddy-night/70 px-6 py-8 font-mono text-xs text-white/70">
                 {result.status === "loading"
                   ? "Chargement des actualités…"
                   : result.status === "error"

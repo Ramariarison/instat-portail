@@ -9,6 +9,7 @@ import { kindOf, sectors } from "./sectors.ts";
  * Service Publications.
  *   Site public (sans connexion) :
  *     GET /publications?scope=national|regional&limit=6   Publication[] (contrat de la page d'accueil)
+ *         + &thematiqueId= &regionId= &q= (titre, sans tenir compte des accents) &offset= ; total dans X-Total-Count
  *     GET /publications/latest-nipc                       publication marquée « la plus récente NIPC »
  *     GET /publications/:id                               détail (AdminPublication)
  *     GET /news?limit=7                                   NewsItem[] (les plus récentes d'abord)
@@ -194,8 +195,14 @@ interface PublicationQuery {
   scope?: "national" | "regional";
   thematiqueId?: string;
   regionId?: string;
+  q?: string;
   limit?: number;
+  offset?: number;
 }
+
+// Recherche sans accents ni majuscules (l'extension unaccent demanderait un super-utilisateur).
+const FOLD = "translate(lower(%s), 'àâäáãéèêëíìîïóòôöõúùûüçñ', 'aaaaaeeeeiiiiooooouuuucn')";
+const fold = (sql: string) => FOLD.replace("%s", sql);
 
 app.get<{ Querystring: PublicationQuery }>(
   "/publications",
@@ -207,23 +214,35 @@ app.get<{ Querystring: PublicationQuery }>(
           scope: { type: "string", enum: ["national", "regional"] },
           thematiqueId: { type: "string", maxLength: 100 },
           regionId: { type: "string", maxLength: 100 },
+          q: { type: "string", maxLength: 200 },
           limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+          offset: { type: "integer", minimum: 0, default: 0 },
         },
       },
     },
   },
-  async (request): Promise<Publication[]> => {
-    const { scope, thematiqueId, regionId, limit } = request.query;
-    const { rows } = await pool.query(
-      `SELECT p.id, p.title, p.date, p.level, p.sectors, t.name AS thematique
-       FROM publications p JOIN thematiques t ON t.id = p.thematique_id
+  async (request, reply): Promise<Publication[]> => {
+    const { scope, thematiqueId, regionId, q, limit, offset } = request.query;
+    // Les jokers LIKE saisis par l'utilisateur sont pris au pied de la lettre.
+    const pattern = q?.trim() ? `%${q.trim().replace(/[\\%_]/g, (c) => `\\${c}`)}%` : null;
+    const filters = `
        WHERE ($1::text IS NULL OR p.level = $1)
          AND ($2::text IS NULL OR p.thematique_id = $2)
          AND ($3::text IS NULL OR p.region_id = $3)
-       ORDER BY p.date DESC, p.title
-       LIMIT $4`,
-      [scope ?? null, thematiqueId ?? null, regionId ?? null, limit],
-    );
+         AND ($4::text IS NULL OR ${fold("p.title")} LIKE ${fold("$4")})`;
+    const params = [scope ?? null, thematiqueId ?? null, regionId ?? null, pattern];
+
+    const [{ rows }, count] = await Promise.all([
+      pool.query(
+        `SELECT p.id, p.title, p.date, p.level, p.sectors, t.name AS thematique
+         FROM publications p JOIN thematiques t ON t.id = p.thematique_id ${filters}
+         ORDER BY p.date DESC, p.title
+         LIMIT $5 OFFSET $6`,
+        [...params, limit, offset],
+      ),
+      pool.query<{ total: number }>(`SELECT count(*)::int AS total FROM publications p ${filters}`, params),
+    ]);
+    reply.header("X-Total-Count", count.rows[0].total);
     return rows.map((row) => ({
       id: row.id,
       title: row.title,

@@ -11,17 +11,62 @@ import KeyFigures from "./components/home/KeyFigures";
 import Publications from "./components/home/Publications";
 import Themes from "./components/home/Themes";
 import DataAndServices from "./components/home/DataAndServices";
+import ComingSoonPage from "./pages/ComingSoonPage";
+import NewsPage from "./pages/NewsPage";
+import PublicationPage from "./pages/PublicationPage";
+import PublicationsPage from "./pages/PublicationsPage";
 
-function PublicSite() {
+function Home() {
+  return (
+    <>
+      <Hero />
+      <KeyFigures />
+      <Publications />
+      <Themes />
+      <DataAndServices />
+    </>
+  );
+}
+
+/** Page publique correspondant à la route (« #/publications/pub-… » → fiche de la publication). */
+function PublicPage({ segments }: { segments: string[] }) {
+  const [section, id, extra] = segments;
+  if (!section) return <Home />;
+  if (section === "publications" && !extra) return id ? <PublicationPage key={id} id={id} /> : <PublicationsPage />;
+  if (section === "actualites" && !id) return <NewsPage />;
+  return <ComingSoonPage />;
+}
+
+function PublicSite({ segments }: { segments: string[] }) {
   const [loginOpen, setLoginOpen] = useState(false);
+  const routeKey = segments.join("/");
 
-  // Au retour du back-office (ou à l'ouverture d'un lien d'ancre), on se place au bon endroit de la page.
+  // À chaque changement de page (et au retour du back-office) : ancre de l'accueil (#chiffres…) ou haut de page.
+  // Saut immédiat : le défilement doux (index.css) partirait de l'ancienne page pendant que la nouvelle s'affiche.
   useEffect(() => {
-    const id = decodeURIComponent(window.location.hash.slice(1));
+    const hash = window.location.hash;
+    const id = hash.startsWith("#/") ? "" : decodeURIComponent(hash.slice(1));
     const target = id ? document.getElementById(id) : null;
-    if (target) target.scrollIntoView();
-    else window.scrollTo(0, 0);
-  }, []);
+    if (!target) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    target.scrollIntoView({ behavior: "instant" });
+
+    // Les sections au-dessus de l'ancre se remplissent après coup (données de l'API) et la repoussent :
+    // on la garde en place tant que la page change de taille, 2 s au plus, sauf si la personne fait défiler.
+    const observer = new ResizeObserver(() => target.scrollIntoView({ behavior: "instant" }));
+    observer.observe(document.getElementById("contenu") ?? document.body);
+    const stop = () => observer.disconnect();
+    const timer = window.setTimeout(stop, 2000);
+    const userEvents = ["wheel", "touchstart", "keydown", "mousedown"] as const;
+    userEvents.forEach((type) => window.addEventListener(type, stop, { once: true, passive: true }));
+    return () => {
+      stop();
+      window.clearTimeout(timer);
+      userEvents.forEach((type) => window.removeEventListener(type, stop));
+    };
+  }, [routeKey]);
 
   return (
     <>
@@ -34,11 +79,7 @@ function PublicSite() {
       <TopBar />
       <Navbar onLoginClick={() => setLoginOpen(true)} />
       <main id="contenu">
-        <Hero />
-        <KeyFigures />
-        <Publications />
-        <Themes />
-        <DataAndServices />
+        <PublicPage segments={segments} />
       </main>
       <Footer />
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
@@ -50,6 +91,6 @@ export default function App() {
   const segments = useRoute();
 
   return (
-    <AuthProvider>{segments[0] === "admin" ? <AdminApp segments={segments} /> : <PublicSite />}</AuthProvider>
+    <AuthProvider>{segments[0] === "admin" ? <AdminApp segments={segments} /> : <PublicSite segments={segments} />}</AuthProvider>
   );
 }
