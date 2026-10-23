@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "INSTAT (local)",
+      "Group": "Portail INSTAT",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "SSLMode": "prefer"
+    }
+  }
+}

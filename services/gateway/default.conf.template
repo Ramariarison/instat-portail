@@ -1,0 +1,92 @@
+# Passerelle d'API du portail INSTAT. Le front ne parle qu'à elle :
+#   /api/<route>  →  service concerné, sans le préfixe /api
+#   /             →  build du front (instat-front-v2/dist)
+# Fichier modèle : ${VAR} est remplacé au démarrage par l'image nginx (envsubst des variables définies).
+
+limit_req_zone $binary_remote_addr zone=login:10m rate=10r/m;
+
+# CORS : seulement pour le serveur de développement Vite (CORS_ORIGIN), le site servi ici est same-origin.
+map $http_origin $cors_origin {
+  default "";
+  "${CORS_ORIGIN}" $http_origin;
+}
+
+upstream auth         { server auth:3000; }
+upstream publications { server publications:3000; }
+upstream chiffres     { server chiffres:3000; }
+upstream files        { server files:3000; }
+
+server {
+  listen 80;
+  server_name _;
+  server_tokens off;
+  client_max_body_size 2m;
+
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Frame-Options "DENY" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  add_header Access-Control-Allow-Origin $cors_origin always;
+  add_header Access-Control-Allow-Methods "GET, POST, PATCH, DELETE, OPTIONS" always;
+  add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;
+  add_header Access-Control-Max-Age "600" always;
+  add_header Vary "Origin" always;
+
+  proxy_set_header Host $host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_http_version 1.1;
+  # Service arrêté : réponse 502 en quelques secondes plutôt qu'au bout d'une minute.
+  proxy_connect_timeout 5s;
+
+  # Pré-requêtes CORS : répondues ici, avant de choisir le service.
+  if ($request_method = OPTIONS) { return 204; }
+
+  location = /api/auth/login {
+    limit_req zone=login burst=5 nodelay;
+    limit_req_status 429;
+    error_page 429 = @too_many_logins;
+    rewrite ^/api/(.*)$ /$1 break;
+    proxy_pass http://auth;
+  }
+  location @too_many_logins {
+    default_type application/json;
+    return 429 '{"error":{"code":"TOO_MANY_ATTEMPTS","message":"Trop de tentatives de connexion : réessayez dans une minute."}}';
+  }
+  location ~ ^/api/(auth|users)(/|$) {
+    rewrite ^/api/(.*)$ /$1 break;
+    proxy_pass http://auth;
+  }
+  location ~ ^/api/(publications|admin/publications|thematiques|regions|sectors|news)(/|$) {
+    rewrite ^/api/(.*)$ /$1 break;
+    proxy_pass http://publications;
+  }
+  location ~ ^/api/(indicators|chiffres)(/|$) {
+    rewrite ^/api/(.*)$ /$1 break;
+    proxy_pass http://chiffres;
+  }
+  location ~ ^/api/files(/|$) {
+    client_max_body_size 50m;
+    proxy_request_buffering off;
+    rewrite ^/api/(.*)$ /$1 break;
+    proxy_pass http://files;
+  }
+  location = /api/health {
+    default_type application/json;
+    return 200 '{"status":"ok","service":"gateway"}';
+  }
+  location /api/ {
+    default_type application/json;
+    return 404 '{"error":{"code":"NOT_FOUND","message":"Route inconnue."}}';
+  }
+
+  location / {
+    root /usr/share/nginx/html;
+    try_files $uri $uri/ /index.html;
+  }
+
+  location /assets/ {
+    root /usr/share/nginx/html;
+    expires 1y;
+  }
+}

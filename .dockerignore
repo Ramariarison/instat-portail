@@ -1,0 +1,7 @@
+# Contexte de build de la passerelle (racine du dépôt).
+**/node_modules
+instat-front-v2/dist
+services/*/src
+services/shared
+.env
+instat-front-v2/*.local

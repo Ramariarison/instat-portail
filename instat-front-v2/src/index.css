@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+/*
+ * Identité visuelle : celle d'une publication statistique imprimée (annuaire, bulletin).
+ * - paddy : vert des rizières, couleur d'ancrage
+ * - laterite : rouge des sols des Hautes Terres, réservé aux repères (filets, numéros, valeur mise en avant)
+ * - paper : fond clair légèrement verdi (pas de blanc cassé chaud)
+ * - angles vifs, filets fins, chiffres en police à chasse fixe comme dans un tableau
+ */
+@theme {
+  --font-display: "Newsreader Variable", Georgia, serif;
+  --font-sans: "Public Sans Variable", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-paper: #f4f7f5;
+  --color-ink: #10231b;
+  --color-muted: #51635a;
+  --color-line: #d6dfd9;
+  --color-rule: #b9c7be;
+  --color-paddy: #14573f;
+  --color-paddy-deep: #0d3b2b;
+  --color-paddy-night: #092a1f;
+  --color-paddy-soft: #e3eee8;
+  --color-laterite: #b3392b;
+
+  /* Angles presque droits : rien d'arrondi « application », tout reste net comme une page imprimée. */
+  --radius-sm: 1px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern", "liga";
+  }
+
+  ::selection {
+    background-color: var(--color-laterite);
+    color: #ffffff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-laterite);
+    outline-offset: 2px;
+  }
+
+  .on-dark :focus-visible {
+    outline-color: #ffffff;
+  }
+}
+
+@layer components {
+  /*
+   * Repère de section, à la manière d'un intitulé de tableau : « 01 ── Madagascar en chiffres ».
+   * Le numéro est en laterite, le filet prend toute la largeur restante.
+   */
+  .running-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+  }
+
+  .running-head::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-rule);
+  }
+
+  .on-dark .running-head {
+    color: rgb(255 255 255 / 0.65);
+  }
+
+  .on-dark .running-head::after {
+    background-color: rgb(255 255 255 / 0.2);
+  }
+
+  /* Papier millimétré : grand carreau tous les 5 petits, comme le papier des statisticiens. */
+  .graph-paper {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.07) 1px, transparent 1px),
+      linear-gradient(to right, rgb(255 255 255 / 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+    background-size:
+      120px 120px,
+      120px 120px,
+      24px 24px,
+      24px 24px;
+    background-position: -1px -1px;
+  }
+
+  /* Points de conduite entre un intitulé et son renvoi, comme dans un sommaire. */
+  .leader {
+    flex: 1;
+    min-width: 1.5rem;
+    align-self: flex-end;
+    margin-bottom: 0.35em;
+    border-bottom: 1px dotted var(--color-rule);
+  }
+}
+
+/* Seul moment animé de la page : l'histogramme du bandeau qui se dessine au chargement. */
+@keyframes grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Réponse à une action : changement d'actualité. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bar-grow {
+  transform-origin: bottom;
+  animation: grow 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.fade-in {
+  animation: fade-in 220ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
