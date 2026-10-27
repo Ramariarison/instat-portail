@@ -2,7 +2,7 @@ import type { AdminPublication, NewsItem, Publication } from "../../shared/contr
 import { findAll, findOne, idParams, insertRow, nullable, registerCrud, text, type Table, updateRow } from "../../shared/crud.ts";
 import { createPool, migrate, transaction } from "../../shared/db.ts";
 import { createApp, HttpError, notFound, requirePermission, start } from "../../shared/http.ts";
-import { seedDemo } from "./seed.ts";
+import { seedDemo, seedDemoExtras } from "./seed.ts";
 import { kindOf, sectors } from "./sectors.ts";
 
 /**
@@ -10,6 +10,7 @@ import { kindOf, sectors } from "./sectors.ts";
  *   Site public (sans connexion) :
  *     GET /publications?scope=national|regional&limit=6   Publication[] (contrat de la page d'accueil)
  *         + &thematiqueId= &regionId= &q= (titre, sans tenir compte des accents) &offset= ; total dans X-Total-Count
+ *         + &sector=mics&sector=epm : publications portant au moins un de ces secteurs
  *     GET /publications/latest-nipc                       publication marquée « la plus récente NIPC »
  *     GET /publications/:id                               détail (AdminPublication)
  *     GET /news?limit=7                                   NewsItem[] (les plus récentes d'abord)
@@ -22,7 +23,10 @@ import { kindOf, sectors } from "./sectors.ts";
 
 const pool = createPool();
 await migrate(pool, new URL("../migrations", import.meta.url).pathname);
-if (process.env.SEED_DEMO === "true") await seedDemo(pool);
+if (process.env.SEED_DEMO === "true") {
+  await seedDemo(pool);
+  await seedDemoExtras(pool);
+}
 
 const app = createApp("publications");
 
@@ -196,6 +200,7 @@ interface PublicationQuery {
   thematiqueId?: string;
   regionId?: string;
   q?: string;
+  sector?: string[];
   limit?: number;
   offset?: number;
 }
@@ -215,6 +220,8 @@ app.get<{ Querystring: PublicationQuery }>(
           thematiqueId: { type: "string", maxLength: 100 },
           regionId: { type: "string", maxLength: 100 },
           q: { type: "string", maxLength: 200 },
+          // Un ou plusieurs secteurs (?sector=a&sector=b) : Fastify transforme une valeur seule en tableau.
+          sector: { type: "array", maxItems: sectors.length, items: { type: "string", enum: sectors.map((s) => s.id) } },
           limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
           offset: { type: "integer", minimum: 0, default: 0 },
         },
@@ -222,22 +229,23 @@ app.get<{ Querystring: PublicationQuery }>(
     },
   },
   async (request, reply): Promise<Publication[]> => {
-    const { scope, thematiqueId, regionId, q, limit, offset } = request.query;
+    const { scope, thematiqueId, regionId, q, sector, limit, offset } = request.query;
     // Les jokers LIKE saisis par l'utilisateur sont pris au pied de la lettre.
     const pattern = q?.trim() ? `%${q.trim().replace(/[\\%_]/g, (c) => `\\${c}`)}%` : null;
     const filters = `
        WHERE ($1::text IS NULL OR p.level = $1)
          AND ($2::text IS NULL OR p.thematique_id = $2)
          AND ($3::text IS NULL OR p.region_id = $3)
-         AND ($4::text IS NULL OR ${fold("p.title")} LIKE ${fold("$4")})`;
-    const params = [scope ?? null, thematiqueId ?? null, regionId ?? null, pattern];
+         AND ($4::text IS NULL OR ${fold("p.title")} LIKE ${fold("$4")})
+         AND ($5::text[] IS NULL OR p.sectors && $5::text[])`;
+    const params = [scope ?? null, thematiqueId ?? null, regionId ?? null, pattern, sector?.length ? sector : null];
 
     const [{ rows }, count] = await Promise.all([
       pool.query(
         `SELECT p.id, p.title, p.date, p.level, p.sectors, t.name AS thematique
          FROM publications p JOIN thematiques t ON t.id = p.thematique_id ${filters}
          ORDER BY p.date DESC, p.title
-         LIMIT $5 OFFSET $6`,
+         LIMIT $6 OFFSET $7`,
         [...params, limit, offset],
       ),
       pool.query<{ total: number }>(`SELECT count(*)::int AS total FROM publications p ${filters}`, params),

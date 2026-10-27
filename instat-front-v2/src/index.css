@@ -122,7 +122,7 @@
   }
 }
 
-/* Réponse à une action : changement d'actualité. */
+/* Réponse à une action : apparition d'un message ou d'un menu. (Le fil d'actualités glisse : transition dans Hero.tsx.) */
 @keyframes fade-in {
   from {
     opacity: 0;

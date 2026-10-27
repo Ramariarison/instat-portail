@@ -50,10 +50,10 @@ src/
 ├── lib/api.ts                   client de la passerelle d'API (jeton, erreurs, envoi de fichiers)
 ├── services/authService.ts      connexion par le service Auth (POST /auth/login)
 ├── hooks/useApiData.ts          lecture publique d'une ressource de l'API
-├── pages/                       Publications (liste, fiche), Actualités, « page en préparation »
+├── pages/                       Publications (liste, fiche, rubriques #/themes/…), Actualités, « page en préparation »
 ├── hooks/useDismiss.ts          fermeture au clic extérieur / Échap
 ├── lib/format.ts                dates, nombres, initiales (fr-FR)
-├── data/                        contenus fixes (navigation, thèmes…) et données d'exemple (VITE_SAMPLE_DATA)
+├── data/                        contenus fixes (navigation, thèmes, rubriques par secteurs) et données d'exemple (VITE_SAMPLE_DATA)
 └── components/
     ├── layout/   TopBar, Navbar (menus + mobile), Logo, Footer
     ├── auth/     LoginModal, UserMenu

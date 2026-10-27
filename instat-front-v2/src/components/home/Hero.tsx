@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { news as sampleNews } from "../../data/news";
 import { useApiData } from "../../hooks/useApiData";
@@ -10,8 +10,12 @@ const HIGHLIGHT = 13;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
+/** Distance (px) d'un glissement du doigt pour changer d'actualité. */
+const SWIPE = 50;
+
 function NewsCarousel({ news }: { news: NewsItem[] }) {
   const [index, setIndex] = useState(0);
+  const swipeStart = useRef<number | null>(null);
   const item = news[index]!;
   const go = (step: number) => setIndex((current) => (current + step + news.length) % news.length);
 
@@ -45,21 +49,55 @@ function NewsCarousel({ news }: { news: NewsItem[] }) {
         </div>
       </div>
 
-      <div aria-live="polite" aria-atomic="true" className="min-h-64 px-5 py-6 sm:px-6">
-        <article key={item.id} className="fade-in flex h-full min-h-52 flex-col">
-          <p className="font-mono text-xs text-white/60">
-            {[item.dateLabel, item.context].filter(Boolean).join("  ·  ")}
-          </p>
-          <h3 className="mt-3 font-display text-[1.6rem] leading-[1.2] font-normal sm:text-[1.8rem]">{item.title}</h3>
-          <a
-            href={item.href}
-            className="group mt-auto inline-flex w-fit items-center gap-2 pt-6 text-[0.95rem] font-medium text-white underline decoration-white/30 underline-offset-[6px] hover:decoration-white"
-          >
-            Lire l'actualité
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-          </a>
-        </article>
+      {/* Toutes les actualités sont posées sur une bande qui glisse. Seule la visible est accessible
+          (les autres sont inertes) ; le changement est annoncé à part, pour les lecteurs d'écran. */}
+      <div
+        className="touch-pan-y overflow-hidden"
+        onPointerDown={(event) => {
+          if (event.pointerType !== "mouse") swipeStart.current = event.clientX;
+        }}
+        onPointerUp={(event) => {
+          if (swipeStart.current === null) return;
+          const distance = event.clientX - swipeStart.current;
+          swipeStart.current = null;
+          if (Math.abs(distance) > SWIPE) go(distance < 0 ? 1 : -1);
+        }}
+        onPointerCancel={() => {
+          swipeStart.current = null;
+        }}
+      >
+        <div
+          className="flex transition-transform duration-500 ease-[cubic-bezier(0.22,0.7,0.2,1)]"
+          style={{ transform: `translateX(-${index * 100}%)` }}
+        >
+          {news.map((entry, entryIndex) => {
+            const current = entryIndex === index;
+            return (
+              <article
+                key={entry.id}
+                aria-hidden={!current}
+                inert={!current}
+                className="flex min-h-64 w-full shrink-0 flex-col px-5 py-6 sm:px-6"
+              >
+                <p className="font-mono text-xs text-white/60">
+                  {[entry.dateLabel, entry.context].filter(Boolean).join("  ·  ")}
+                </p>
+                <h3 className="mt-3 font-display text-[1.6rem] leading-[1.2] font-normal sm:text-[1.8rem]">{entry.title}</h3>
+                <a
+                  href={entry.href}
+                  className="group mt-auto inline-flex w-fit items-center gap-2 pt-6 text-[0.95rem] font-medium text-white underline decoration-white/30 underline-offset-[6px] hover:decoration-white"
+                >
+                  Lire l'actualité
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </a>
+              </article>
+            );
+          })}
+        </div>
       </div>
+      <p aria-live="polite" aria-atomic="true" className="sr-only">
+        {`Actualité ${index + 1} sur ${news.length} : ${item.title}`}
+      </p>
 
       <div className="flex gap-1 px-5 pb-4 sm:px-6">
         {news.map((entry, entryIndex) => (
@@ -120,7 +158,8 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="lg:col-span-5 lg:pt-2">
+          {/* min-w-0 : sans lui, la colonne prendrait la largeur cumulée de toutes les actualités du carrousel. */}
+          <div className="min-w-0 lg:col-span-5 lg:pt-2">
             {result.status === "ready" && result.data.length > 0 ? (
               <NewsCarousel news={result.data} />
             ) : (

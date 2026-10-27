@@ -11,6 +11,7 @@ import KeyFigures from "./components/home/KeyFigures";
 import Publications from "./components/home/Publications";
 import Themes from "./components/home/Themes";
 import DataAndServices from "./components/home/DataAndServices";
+import CollectionPage from "./pages/CollectionPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import NewsPage from "./pages/NewsPage";
 import PublicationPage from "./pages/PublicationPage";
@@ -34,6 +35,7 @@ function PublicPage({ segments }: { segments: string[] }) {
   if (!section) return <Home />;
   if (section === "publications" && !extra) return id ? <PublicationPage key={id} id={id} /> : <PublicationsPage />;
   if (section === "actualites" && !id) return <NewsPage />;
+  if (section === "themes" && id && !extra) return <CollectionPage key={id} slug={id} />;
   return <ComingSoonPage />;
 }
 

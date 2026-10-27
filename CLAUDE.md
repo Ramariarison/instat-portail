@@ -45,7 +45,8 @@ pgAdmin (profil `outils`, jamais démarré par défaut) : le serveur « INSTAT (
 (`services/pgadmin/servers.json`) ; se connecter avec l'utilisateur `postgres` et `POSTGRES_PASSWORD` du `.env`.
 Il tourne sans écran de connexion et n'écoute que sur 127.0.0.1 : ne pas l'exposer ailleurs.
 
-`SEED_DEMO=true` charge les données d'exemple du front (mêmes identifiants) et les comptes de démonstration
+`SEED_DEMO=true` charge les données d'exemple du front (mêmes identifiants), plus un lot d'exemples couvrant toutes
+les thématiques (chaque lot une seule fois : table `demo_seeds` du service Publications), et les comptes de démonstration
 `superadmin@instat.demo`, `admin@instat.demo`, `editeur@instat.demo` (mot de passe `demo1234`), seulement si les tables sont vides.
 En production : `SEED_DEMO=false` et `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD` pour le premier super administrateur.
 
@@ -69,7 +70,7 @@ Lecture publique sauf mention ; écriture = jeton `Authorization: Bearer …` + 
 | Service | Routes |
 |---|---|
 | auth | `POST /auth/login` → `{ token, expiresIn, user }` · `GET /auth/me` · `POST /auth/password` · `GET /auth/permissions` · `/users` (droit `users`) |
-| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&limit=&offset=` → `Publication[]` (total dans `X-Total-Count`) · `GET /publications/:id` · `GET /publications/latest-nipc` · `/admin/publications` (droit `publications`) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
+| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&sector=…&limit=&offset=` → `Publication[]` (total dans `X-Total-Count` ; `sector` répétable : au moins un des secteurs) · `GET /publications/:id` · `GET /publications/latest-nipc` · `/admin/publications` (droit `publications`) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
 | chiffres | `/indicators` → `Indicator[]` (chiffres clés de l'accueil) · `/chiffres/types` · `/chiffres/indicators?typeId=` · `/chiffres/regions` · `/chiffres/values?figureRegionId=&indicatorId=` |
 | files | `POST /files` (multipart, champ `file`, tout utilisateur connecté) → `{ id, name, size, type, url }` · `GET /files/:id` · `DELETE /files/:id` |
 
@@ -102,7 +103,9 @@ Fichier `services/<service>/migrations/NNN_description.sql`, appliqué au démar
 
 Relié à l'API (voir « Microservices » dans `instat-front-v2/README.md`). Pages publiques (`src/pages/`, routées dans `App.tsx`) :
 `#/publications` (liste filtrable, filtres gardés dans l'adresse), `#/publications/:id` (fiche et documents),
-`#/actualites` ; toute autre route `#/…` affiche « Page en préparation ». Repères :
+`#/actualites`, `#/themes/<slug>` (rubriques du menu « Thèmes et données » : `slug` = alias d'une thématique
+du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; toute autre route `#/…` affiche
+« Page en préparation ». Repères :
 - `src/lib/api.ts` : seul point d'accès à `/api` (jeton, erreurs `ApiError` avec le message du service, `uploadFile`).
 - `src/admin/data/AdminDataContext.tsx` : collections du back-office (`add` → POST, `update` → PATCH avec `null`
   pour un champ vidé, `remove` → DELETE) ; `src/admin/useAction.ts` annonce réussite ou erreur.

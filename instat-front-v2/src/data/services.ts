@@ -16,21 +16,21 @@ export const databases: ServiceLink[] = [
     label: "Indice des prix à la consommation",
     description: "Suivi des prix et de l'inflation, mois après mois.",
     icon: TrendingUp,
-    href: "#/ipc",
+    href: "#/themes/ipc",
   },
   {
     id: "comptes-nationaux",
     label: "Comptes nationaux",
     description: "Les grands agrégats de l'économie malgache.",
     icon: Database,
-    href: "#/bd-comptes-nationaux",
+    href: "#/themes/comptes-nationaux",
   },
   {
     id: "covid-19",
     label: "Impact de la COVID-19",
     description: "Effets de la crise sur l'économie, les entreprises et les ménages.",
     icon: BookOpen,
-    href: "#/covid-19",
+    href: "#/themes/impact-de-la-covid-19",
   },
 ];
 

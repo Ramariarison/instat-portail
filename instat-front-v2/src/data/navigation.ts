@@ -10,6 +10,10 @@ export const quickLinks: NavLink[] = [
   { label: "Contact", href: "#/contact" },
 ];
 
+/**
+ * Les rubriques « Thèmes et données » mènent à #/themes/<slug> : alias d'une thématique du back-office,
+ * ou groupe de secteurs défini dans data/collections.ts.
+ */
 export const mainNav: NavItem[] = [
   { label: "Accueil", href: "#accueil" },
   {
@@ -20,36 +24,36 @@ export const mainNav: NavItem[] = [
         title: "Publications et statistiques",
         links: [
           { label: "Publications INSTAT", href: "#/publications" },
-          { label: "Enquêtes et recensements", href: "#/enquetes-recensements" },
-          { label: "Études et analyses", href: "#/etudes-analyses" },
-          { label: "Annuaires statistiques", href: "#/annuaires" },
-          { label: "Comptes nationaux", href: "#/comptes-nationaux" },
-          { label: "Économie", href: "#/economie" },
-          { label: "Démographie et population", href: "#/demographie" },
-          { label: "Conditions de vie des ménages", href: "#/conditions-de-vie" },
+          { label: "Enquêtes et recensements", href: "#/themes/enquetes-recensements" },
+          { label: "Études et analyses", href: "#/themes/etudes-analyses" },
+          { label: "Annuaires statistiques", href: "#/themes/annuaires" },
+          { label: "Comptes nationaux", href: "#/themes/comptes-nationaux" },
+          { label: "Économie", href: "#/themes/economie" },
+          { label: "Démographie et population", href: "#/themes/demographie-et-population" },
+          { label: "Conditions de vie des ménages", href: "#/themes/conditions-de-vie-des-menages" },
         ],
       },
       {
         title: "Publications sectorielles",
         links: [
-          { label: "Agriculture, élevage et pêche", href: "#/agriculture" },
-          { label: "Éducation", href: "#/education" },
-          { label: "Santé", href: "#/sante" },
-          { label: "Eau, assainissement et hygiène", href: "#/eau" },
-          { label: "Environnement", href: "#/environnement" },
-          { label: "Énergie et hydrocarbures", href: "#/energie" },
-          { label: "Tourisme et artisanat", href: "#/tourisme" },
-          { label: "Commerce et consommation", href: "#/commerce" },
-          { label: "Travail", href: "#/travail" },
+          { label: "Agriculture, élevage et pêche", href: "#/themes/agriculture-elevage-et-peche" },
+          { label: "Éducation", href: "#/themes/education" },
+          { label: "Santé", href: "#/themes/sante" },
+          { label: "Eau, assainissement et hygiène", href: "#/themes/eau-assainissement-et-hygiene" },
+          { label: "Environnement", href: "#/themes/environnement" },
+          { label: "Énergie et hydrocarbures", href: "#/themes/energie-et-hydrocarbures" },
+          { label: "Tourisme et artisanat", href: "#/themes/tourisme-et-artisanat" },
+          { label: "Commerce et consommation", href: "#/themes/commerce-et-consommation" },
+          { label: "Travail", href: "#/themes/travail" },
         ],
       },
       {
         title: "Bases de données",
         links: [
-          { label: "Indice des prix à la consommation", href: "#/ipc" },
-          { label: "Comptes nationaux", href: "#/bd-comptes-nationaux" },
-          { label: "Impact de la COVID-19", href: "#/covid-19" },
-          { label: "RGPH-3", href: "#/rgph-3" },
+          { label: "Indice des prix à la consommation", href: "#/themes/ipc" },
+          { label: "Comptes nationaux", href: "#/themes/comptes-nationaux" },
+          { label: "Impact de la COVID-19", href: "#/themes/impact-de-la-covid-19" },
+          { label: "RGPH-3", href: "#/themes/rgph-3" },
           { label: "Madagascar en chiffres", href: "#chiffres" },
         ],
       },

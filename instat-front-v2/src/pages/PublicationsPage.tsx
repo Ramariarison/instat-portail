@@ -23,11 +23,23 @@ const fieldClass =
 
 type State = { status: "loading" } | { status: "error"; message: string } | { status: "ready"; page: Page<Publication> };
 
+/** Rubrique du menu « Thèmes et données » : même liste, avec un filtre imposé. */
+export interface Preset {
+  kicker: string;
+  title: string;
+  description: string;
+  /** Thématique imposée (le sélecteur de thématique est alors masqué). */
+  thematiqueId?: string;
+  /** Secteurs : une publication y figure si elle porte au moins l'un d'eux. */
+  sectors?: string[];
+}
+
 /** Liste publique des publications : filtres gardés dans l'adresse (#/publications?scope=…&page=2). */
-export default function PublicationsPage() {
+export default function PublicationsPage({ preset }: { preset?: Preset }) {
   const [query, setQuery] = useHashQuery();
   const scope = (query.get("scope") ?? "") as "" | Publication["scope"];
-  const thematiqueId = query.get("theme") ?? "";
+  const thematiqueId = preset?.thematiqueId ?? query.get("theme") ?? "";
+  const presetSectors = preset?.sectors?.join(",") ?? "";
   const regionId = query.get("region") ?? "";
   const q = query.get("q") ?? "";
   const page = Math.max(1, Number(query.get("page")) || 1);
@@ -44,7 +56,7 @@ export default function PublicationsPage() {
   const [state, setState] = useState<State>({ status: "loading" });
   const searchId = useId();
 
-  const filters = { scope, theme: thematiqueId, region: regionId, q };
+  const filters = { scope, theme: preset?.thematiqueId ? undefined : thematiqueId, region: regionId, q };
   const change = (patch: Partial<typeof filters & { page: string }>) =>
     setQuery({ ...filters, page: undefined, ...patch });
   // Changement de page : on remonte au début des résultats une fois la nouvelle page affichée
@@ -74,6 +86,7 @@ export default function PublicationsPage() {
     if (thematiqueId) params.set("thematiqueId", thematiqueId);
     if (regionId) params.set("regionId", regionId);
     if (q) params.set("q", q);
+    for (const sector of presetSectors.split(",").filter(Boolean)) params.append("sector", sector);
 
     const controller = new AbortController();
     setState({ status: "loading" });
@@ -84,7 +97,7 @@ export default function PublicationsPage() {
       },
     );
     return () => controller.abort();
-  }, [scope, thematiqueId, regionId, q, page]);
+  }, [scope, thematiqueId, regionId, q, page, presetSectors]);
 
   useEffect(() => {
     if (state.status !== "ready" || !scrollOnLoad.current) return;
@@ -102,16 +115,25 @@ export default function PublicationsPage() {
       : [];
   const sortedRegions =
     regions.status === "ready" ? regions.data.slice().sort((a, b) => a.name.localeCompare(b.name, "fr")) : [];
-  const filtered = Boolean(scope || thematiqueId || regionId || q);
+  const filtered = Boolean(scope || filters.theme || regionId || q);
 
   return (
     <>
-      <PageBanner
-        kicker="Publications"
-        title="Toutes les publications"
-        description="Tableaux de bord, indices des prix, enquêtes et publications régionales de l'INSTAT."
-        crumbs={[{ label: "Publications" }]}
-      />
+      {preset ? (
+        <PageBanner
+          kicker={preset.kicker}
+          title={preset.title}
+          description={preset.description}
+          crumbs={[{ label: "Publications", href: "#/publications" }, { label: preset.title }]}
+        />
+      ) : (
+        <PageBanner
+          kicker="Publications"
+          title="Toutes les publications"
+          description="Tableaux de bord, indices des prix, enquêtes et publications régionales de l'INSTAT."
+          crumbs={[{ label: "Publications" }]}
+        />
+      )}
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <form
@@ -121,7 +143,11 @@ export default function PublicationsPage() {
             event.preventDefault();
             change({ q: search.trim() });
           }}
-          className="grid gap-4 border-t-2 border-ink pt-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]"
+          className={`grid gap-4 border-t-2 border-ink pt-6 ${
+            preset?.thematiqueId
+              ? "md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
+              : "md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]"
+          }`}
         >
           <div>
             <label htmlFor={searchId} className="text-sm font-medium">
@@ -139,7 +165,7 @@ export default function PublicationsPage() {
               />
             </div>
           </div>
-          <label className="text-sm font-medium">
+          <label hidden={Boolean(preset?.thematiqueId)} className="text-sm font-medium">
             Thématique
             <select
               value={thematiqueId}
@@ -213,7 +239,11 @@ export default function PublicationsPage() {
 
         {state.status === "ready" && state.page.items.length === 0 && (
           <div className="py-10">
-            <p className="text-[1.05rem]">Aucune publication ne correspond à ces critères.</p>
+            <p className="text-[1.05rem]">
+              {preset && !filtered
+                ? "Aucune publication dans cette rubrique pour le moment."
+                : "Aucune publication ne correspond à ces critères."}
+            </p>
             {filtered && (
               <button
                 type="button"
