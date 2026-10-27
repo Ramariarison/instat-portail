@@ -1,18 +1,37 @@
 {
   "compilerOptions": {
-    "target": "es2024",
-    "lib": ["es2024"],
+    "target": "es2023",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "types": ["node"],
-    "noEmit": true,
+    "lib": [
+      "es2023"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ],
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "erasableSyntaxOnly": true,
-    "verbatimModuleSyntax": true
+    "sourceMap": true,
+    "outDir": "./dist",
+    "paths": {
+      "@app/common": [
+        "./libs/common/src"
+      ],
+      "@app/common/*": [
+        "./libs/common/src/*"
+      ]
+    },
+    "rootDir": "./"
   },
-  "include": ["shared", "auth/src", "publications/src", "chiffres/src", "files/src"]
+  "include": [
+    "apps/**/*.ts",
+    "libs/**/*.ts"
+  ]
 }

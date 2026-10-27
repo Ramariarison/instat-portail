@@ -71,6 +71,17 @@ server {
     rewrite ^/api/(.*)$ /$1 break;
     proxy_pass http://files;
   }
+  # Documentation OpenAPI (Swagger) de chaque service : /api/docs/auth/, /api/docs/publications/…
+  location ~ ^/api/docs/(auth|publications|chiffres|files)$ {
+    return 301 $uri/;
+  }
+  location ~ ^/api/docs/(?<docs_service>auth|publications|chiffres|files)/ {
+    # La page (/docs du service) charge ses fichiers en relatif : « ./docs/swagger-ui.css ».
+    rewrite ^/api/docs/[a-z]+/docs/(.*)$ /docs/$1 break;
+    rewrite ^ /docs break;
+    proxy_pass http://$docs_service;
+  }
+
   location = /api/health {
     default_type application/json;
     return 200 '{"status":"ok","service":"gateway"}';

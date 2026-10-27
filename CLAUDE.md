@@ -5,13 +5,15 @@ Front React existant + microservices back-end, orchestrés par `docker-compose.y
 ```
 instat-portail/
 ├── instat-front-v2/     front React 19 + TypeScript + Tailwind 4 (Vite) — NE PAS MODIFIER sans accord explicite
-├── services/            microservices (Node 24 + TypeScript + Fastify, PostgreSQL)
-│   ├── shared/          code commun : contrat, RBAC, JWT, HTTP, SQL, CRUD générique
-│   ├── auth/            connexion, jetons, comptes            → base « auth »
-│   ├── publications/    thématiques, régions, publications, actualités → base « publications »
-│   ├── chiffres/        « Madagascar en chiffres » + chiffres clés      → base « chiffres »
-│   ├── files/           fichiers envoyés (images, documents)  → volume disque
+├── services/            microservices NestJS 12 (moteur HTTP Fastify), PostgreSQL — monorepo Nest
+│   ├── libs/common/     bibliothèque commune (@app/common) : contrat, RBAC, sécurité, base, erreurs, démarrage
+│   ├── apps/auth/       connexion, jetons, comptes            → base « auth »
+│   ├── apps/publications/  thématiques, régions, secteurs, publications, actualités → base « publications »
+│   ├── apps/chiffres/   « Madagascar en chiffres » + chiffres clés      → base « chiffres »
+│   ├── apps/files/      fichiers envoyés (images, documents)  → volume disque
+│   ├── test/            scénario de bout en bout de l'API (api-smoke.sh)
 │   ├── gateway/         nginx : passerelle /api + sert le build du front
+│   ├── pgadmin/         serveur déclaré pour pgAdmin (outil de développement)
 │   └── postgres/        script de création des bases (une base et un rôle par service)
 ├── docker-compose.yml
 └── .env.example
@@ -25,11 +27,11 @@ Le front fait foi. Les réponses JSON reprennent **exactement** ses types :
 - `instat-front-v2/src/admin/data/types.ts` (back-office : `Thematique`, `Region`, `AdminPublication`, `DataType`, `IndicatorDef`, `FigureRegion`, `FigureValue`, `AdminUser`)
 - `instat-front-v2/src/admin/permissions.ts` (matrice RBAC)
 
-Ils sont recopiés dans `services/shared/contract.ts` et `services/shared/permissions.ts`, et la liste des secteurs dans
-`services/publications/src/sectors.ts`. **Si l'un change, changer l'autre.**
+Ils sont recopiés dans `services/libs/common/src/contract/` (`contract.types.ts`, `permissions.ts`), et la liste des
+secteurs dans `services/apps/publications/src/sectors/sectors.constants.ts`. **Si l'un change, changer l'autre.**
 
 Règles de forme : camelCase ; un champ optionnel absent n'est pas renvoyé (jamais `null`, voir `compact()` dans
-`shared/db.ts`) ; en écriture, `null` efface un champ optionnel ; identifiants texte préfixés (`pub-…`, `th-…`) ;
+`libs/common/src/database/compact.ts`) ; en écriture, `null` efface un champ optionnel ; identifiants texte préfixés (`pub-…`, `th-…`) ;
 dates `AAAA-MM-JJ`. Erreurs : `{ "error": { "code": "IN_USE", "message": "…" } }`, code stable + message en français.
 
 ## Lancer
@@ -50,21 +52,50 @@ les thématiques (chaque lot une seule fois : table `demo_seeds` du service Publ
 `superadmin@instat.demo`, `admin@instat.demo`, `editeur@instat.demo` (mot de passe `demo1234`), seulement si les tables sont vides.
 En production : `SEED_DEMO=false` et `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD` pour le premier super administrateur.
 
-Hors Docker (un PostgreSQL accessible est nécessaire) :
+Hors Docker (un PostgreSQL accessible est nécessaire), depuis `services/` :
 
 ```bash
-cd services && npm install
-npm run typecheck
-JWT_SECRET=<32+ caractères> DATABASE_URL=postgres://… SEED_DEMO=true PORT=3001 npm run dev:auth
+npm install
+npm run typecheck && npm test          # typage + tests unitaires (Jest, fichiers *.spec.ts)
+JWT_SECRET=<32+ caractères> DATABASE_URL=postgres://… SEED_DEMO=true PORT=3001 npm run start:auth
+test/api-smoke.sh http://localhost:8080/api   # scénario de bout en bout, sur une stack fraîche
 ```
 
-Pas d'étape de build : Node 24 exécute le TypeScript directement (suppression des types). Conséquences :
-imports relatifs **avec l'extension `.ts`**, `import type` pour les types, pas d'`enum`, pas de `namespace`,
-pas de propriétés de paramètres de constructeur (`erasableSyntaxOnly` dans `services/tsconfig.json`).
+Documentation OpenAPI (Swagger) de chaque service : http://localhost:8080/api/docs/auth/ (idem `publications`,
+`chiffres`, `files`), générée à partir des contrôleurs et des DTO.
+
+## Organisation du code (NestJS)
+
+Un dossier par ressource, un fichier par rôle — ne pas tout regrouper dans un même fichier :
+
+```
+apps/<service>/src/
+├── main.ts                    démarrage (bootstrapService de @app/common)
+├── app.module.ts              module racine : base, sécurité, santé, modules métier
+├── <ressource>/
+│   ├── <ressource>.module.ts
+│   ├── <ressource>.controller.ts   routes HTTP, décorateurs @Public / @RequirePermission
+│   ├── <ressource>.service.ts      règles métier
+│   ├── <ressource>.repository.ts   SQL (hérite de SqlRepository)
+│   └── dto/                        create-*.dto.ts, update-*.dto.ts (PartialType), list-*.query.ts (class-validator)
+└── seed/                      données d'exemple (SEED_DEMO=true)
+apps/<service>/migrations/     NNN_description.sql
+```
+
+- **Sécurité** : `SecurityModule` installe une garde globale (`AccessGuard`). Toute route exige un jeton, sauf
+  `@Public()` ; `@RequirePermission(ressource, action)` vérifie la matrice RBAC ; `@CurrentUser()` donne l'utilisateur.
+- **Erreurs** : lever `ApiException` (`notFound`, `forbidden`, `badRequest`, `conflict`) ; `AllExceptionsFilter` produit
+  le format `{ error: { code, message } }` et traduit les contraintes PostgreSQL (409 `ALREADY_EXISTS` / `IN_USE`…).
+- **Validation** : DTO class-validator ; les champs inconnus sont retirés (whitelist), les paramètres de requête convertis.
+- **Accès aux données** : SQL écrit à la main (pas d'ORM), via `SqlRepository` (lecture, création, mise à jour partielle,
+  suppression) et `runInTransaction`. Les colonnes viennent du code, les valeurs sont toujours paramétrées.
+- **Build** : webpack (Nest CLI) produit un fichier par service ; l'image Docker ne contient que ce fichier, les
+  migrations et les dépendances de production.
 
 ## Routes (via la passerelle, préfixe `/api`)
 
 La passerelle retire `/api` et route selon le premier segment (`services/gateway/default.conf.template`).
+Le détail de chaque route (paramètres, corps, réponses) est dans la documentation Swagger.
 Lecture publique sauf mention ; écriture = jeton `Authorization: Bearer …` + droit de la matrice RBAC.
 
 | Service | Routes |
@@ -74,9 +105,8 @@ Lecture publique sauf mention ; écriture = jeton `Authorization: Bearer …` + 
 | chiffres | `/indicators` → `Indicator[]` (chiffres clés de l'accueil) · `/chiffres/types` · `/chiffres/indicators?typeId=` · `/chiffres/regions` · `/chiffres/values?figureRegionId=&indicatorId=` |
 | files | `POST /files` (multipart, champ `file`, tout utilisateur connecté) → `{ id, name, size, type, url }` · `GET /files/:id` · `DELETE /files/:id` |
 
-Convention CRUD (`registerCrud` dans `shared/crud.ts`) : `GET /x`, `GET /x/:id`, `POST /x` (201), `PATCH /x/:id`
-(mise à jour **partielle**, comme `Collection.update` côté front), `DELETE /x/:id` (204), `?limit=` sur la liste.
-`/users` et `/admin/publications` suivent la même convention mais sont écrits à la main (règles propres).
+Convention CRUD : `GET /x`, `GET /x/:id`, `POST /x` (201), `PATCH /x/:id` (mise à jour **partielle**, comme
+`Collection.update` côté front), `DELETE /x/:id` (204).
 
 Correspondance avec le magasin en mémoire du front (`src/admin/data/AdminDataContext.tsx`) :
 `add` → POST, `update` → PATCH, `remove` → DELETE, `savePublication` → POST/PATCH `/admin/publications`
@@ -97,7 +127,7 @@ Correspondance avec le magasin en mémoire du front (`src/admin/data/AdminDataCo
 ## Ajouter une migration
 
 Fichier `services/<service>/migrations/NNN_description.sql`, appliqué au démarrage, une seule fois, dans une transaction
-(`migrate()` dans `shared/db.ts`). Ne jamais modifier une migration déjà appliquée : en ajouter une nouvelle.
+(`MigrationRunner` dans `libs/common/src/database/`). Ne jamais modifier une migration déjà appliquée : en ajouter une nouvelle.
 
 ## Le front
 
@@ -114,7 +144,7 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
 
 ## Points ouverts
 
-- `Publication.kind` n'est pas saisi dans le back-office : il est déduit du premier secteur (`kindOf()` dans `publications/src/sectors.ts`).
+- `Publication.kind` n'est pas saisi dans le back-office : il est déduit du premier secteur (`kindOf()` dans `apps/publications/src/publications/publication-kind.ts`).
 - Les chiffres clés de l'accueil (`/indicators`) et les actualités (`/news`) n'ont pas d'écran d'administration dans le front.
 - Les actualités n'ont pas de contenu (seulement titre, date, contexte) : pas de page de détail, « Lire l'actualité » mène à la page « en préparation ».
 - Routage par hash (`#/…`, `src/lib/route.ts`) : simple, mais invisible pour les moteurs de recherche. Passer à React Router (adresses `/publications/…`) le jour où le référencement compte.
