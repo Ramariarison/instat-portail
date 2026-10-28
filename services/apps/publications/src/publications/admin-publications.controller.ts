@@ -1,10 +1,18 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { type AdminPublication, CurrentUser, type PublicationReview, RequirePermission, type TokenPayload } from "@app/common";
+import {
+  type AdminPublication,
+  CurrentUser,
+  type PublicationReview,
+  type PublicationStats,
+  RequirePermission,
+  type TokenPayload,
+} from "@app/common";
 import { CreatePublicationDto } from "./dto/create-publication.dto";
 import { ReturnPublicationDto } from "./dto/return-publication.dto";
 import { UpdatePublicationDto } from "./dto/update-publication.dto";
 import { PublicationsService } from "./publications.service";
+import { PublicationStatsService } from "./stats/publication-stats.service";
 import { PublicationWorkflowService } from "./workflow/publication-workflow.service";
 
 /**
@@ -18,6 +26,7 @@ export class AdminPublicationsController {
   constructor(
     private readonly publications: PublicationsService,
     private readonly workflow: PublicationWorkflowService,
+    private readonly stats: PublicationStatsService,
   ) {}
 
   /** Toutes les publications, quel que soit leur statut. */
@@ -25,6 +34,13 @@ export class AdminPublicationsController {
   @RequirePermission("publications", "view")
   findAll(): Promise<AdminPublication[]> {
     return this.publications.findAll();
+  }
+
+  /** Tableau de bord : nombre de publications par statut, par niveau, par thématique, et activité récente. */
+  @Get("stats")
+  @RequirePermission("publications", "view")
+  overview(): Promise<PublicationStats> {
+    return this.stats.overview();
   }
 
   @Get(":id")

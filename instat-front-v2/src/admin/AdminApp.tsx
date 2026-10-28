@@ -21,21 +21,12 @@ import PublicationsPage from "./pages/publications/PublicationsPage";
 import RegionsPage from "./pages/publications/RegionsPage";
 import ThematiquesPage from "./pages/publications/ThematiquesPage";
 import AccountPage from "./pages/compte/AccountPage";
+import DashboardPage from "./pages/tableau-de-bord/DashboardPage";
 import RolesPage from "./pages/utilisateurs/RolesPage";
 import UsersPage from "./pages/utilisateurs/UsersPage";
 import type { Role } from "../types";
 
-/** Première page que le rôle a le droit de consulter (point d'arrivée de « #/admin »). */
-function firstAllowedHref(role: Role): string {
-  for (const group of adminNav) {
-    for (const item of group.items) {
-      if (can(role, item.resource, "view")) return item.href;
-    }
-  }
-  return "#/admin";
-}
-
-function renderPage(route: AdminRoute, role: Role): ReactNode {
+function renderPage(route: AdminRoute): ReactNode {
   switch (route.page) {
     case "thematiques":
       return <ThematiquesPage />;
@@ -59,8 +50,10 @@ function renderPage(route: AdminRoute, role: Role): ReactNode {
       return <RolesPage />;
     case "account":
       return <AccountPage />;
+    case "home":
+      return <DashboardPage />;
     default:
-      return <NotFoundPanel homeHref={firstAllowedHref(role)} />;
+      return <NotFoundPanel homeHref="#/admin" />;
   }
 }
 
@@ -103,15 +96,12 @@ function DataStatus() {
 function Shell({ route, role }: { route: AdminRoute; role: Role }) {
   const { state } = useAdminData();
   const required = requirement(route);
-  const homeHref = firstAllowedHref(role);
-
-  // « #/admin » seul : on arrive directement sur la première section autorisée.
-  useEffect(() => {
-    if (route.page === "home") window.location.replace(homeHref);
-  }, [route.page, homeHref]);
+  const homeHref = "#/admin";
 
   const currentLabel =
-    adminNav.flatMap((group) => group.items).find((item) => item.pages.includes(route.page))?.label ?? "Menu";
+    route.page === "home"
+      ? "Tableau de bord"
+      : (adminNav.flatMap((group) => group.items).find((item) => item.pages.includes(route.page))?.label ?? "Menu");
 
   const allowed = required === null || can(role, required.resource, required.action);
 
@@ -141,10 +131,10 @@ function Shell({ route, role }: { route: AdminRoute; role: Role }) {
       </aside>
 
       <main id="admin-contenu" className="min-w-0">
-        {route.page === "home" ? null : state.status !== "ready" ? (
+        {state.status !== "ready" ? (
           <DataStatus />
         ) : allowed ? (
-          <AdminSectionContext.Provider value={sectionOf(route, role)}>{renderPage(route, role)}</AdminSectionContext.Provider>
+          <AdminSectionContext.Provider value={sectionOf(route, role)}>{renderPage(route)}</AdminSectionContext.Provider>
         ) : (
           <AccessDenied roleLabel={roleLabels[role]} homeHref={homeHref} />
         )}

@@ -55,6 +55,24 @@ export type PublicationStatus = "draft" | "submitted" | "returned" | "published"
 /** Ce que le formulaire envoie : le statut, l'auteur et les commentaires sont gérés par le service. */
 export type PublicationInput = Omit<AdminPublication, "id" | "status" | "createdBy" | "createdByName" | "returnComment">;
 
+/** Tableau de bord du back-office : chiffres sur les publications et activité récente du circuit de validation. */
+export interface PublicationStats {
+  byStatus: Record<PublicationStatus, number>;
+  /** Publications en ligne, par niveau. */
+  publishedByLevel: { national: number; regional: number };
+  /** Mises en ligne des 30 derniers jours. */
+  publishedLast30Days: number;
+  /** Publications en ligne par thématique (toutes les thématiques, même vides), de la plus fournie à la moins fournie. */
+  byThematique: { thematiqueId: string; name: string; published: number }[];
+  /** Dernières étapes du circuit de validation, les plus récentes d'abord. */
+  recentActivity: PublicationActivity[];
+}
+
+export interface PublicationActivity extends PublicationReview {
+  publicationId: string;
+  title: string;
+}
+
 /** Étape de l'historique d'une publication (soumission, renvoi avec commentaire, publication). */
 export interface PublicationReview {
   id: string;

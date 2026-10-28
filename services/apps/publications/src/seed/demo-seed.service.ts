@@ -55,7 +55,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
       await client.query(
         `INSERT INTO publications (id, title, level, region_id, thematique_id, excerpt, content, documents, date, latest_nipc, sectors,
                                    status, published_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'published', now())`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'published', $9::date)`,
         [
           `pub-${p.id}`,
           p.title,
@@ -86,7 +86,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
     for (const p of extraPublicationSeeds) {
       await client.query(
         `INSERT INTO publications (id, title, level, region_id, thematique_id, excerpt, content, date, sectors, status, published_at)
-         SELECT $1, $2, $3, $4, t.id, $6, $7, $8, $9, 'published', now() FROM thematiques t WHERE t.id = $5
+         SELECT $1, $2, $3, $4, t.id, $6, $7, $8, $9, 'published', $8::date FROM thematiques t WHERE t.id = $5
          ON CONFLICT (id) DO NOTHING`,
         [
           `pub-${p.id}`,

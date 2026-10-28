@@ -1,3 +1,4 @@
+import { LayoutDashboard } from "lucide-react";
 import type { Role } from "../../types";
 import { can } from "../permissions";
 import { adminNav, type AdminRoute } from "../routes";
@@ -16,8 +17,27 @@ export default function AdminNav({ route, role }: AdminNavProps) {
     .map((group) => ({ ...group, items: group.items.filter((item) => can(role, item.resource, "view")) }))
     .filter((group) => group.items.length > 0);
 
+  const home = route.page === "home";
+
   return (
     <nav aria-label="Administration">
+      {/* Tableau de bord : page d'accueil du back-office, pour tous les rôles. */}
+      <a
+        href="#/admin"
+        aria-current={home ? "page" : undefined}
+        className={`group mb-7 flex h-11 items-center gap-3 border-y border-l-2 border-y-line px-3 ${
+          home ? "border-l-laterite bg-white text-paddy" : "border-l-transparent text-ink hover:bg-white"
+        }`}
+      >
+        <span className={`flex-1 font-display text-[1.07rem] leading-tight ${home ? "" : "group-hover:text-paddy"}`}>
+          Tableau de bord
+        </span>
+        <LayoutDashboard
+          className={`size-4 shrink-0 ${home ? "text-paddy" : "text-muted/60 group-hover:text-paddy"}`}
+          strokeWidth={1.5}
+          aria-hidden="true"
+        />
+      </a>
       {groups.map((group, groupIndex) => (
         <div key={group.title} className="mb-7 last:mb-0">
           <p className="mb-1 flex items-baseline gap-2 border-b-2 border-ink pb-2 font-mono text-xs text-ink">

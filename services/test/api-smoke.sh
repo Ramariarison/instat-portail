@@ -138,6 +138,11 @@ check "l'éditeur ne modifie plus une publication en ligne" 403 "$(req PATCH "/a
 check "l'admin corrige une publication en ligne" 200 "$(req PATCH "/admin/publications/$NEW_PUB" "$AD" '{"title":"NIPC test (corrigé)"}')"
 check "historique" 200 "$(req GET "/admin/publications/$NEW_PUB/reviews" "$ED")"
 check "4 étapes dans l'historique" "submitted,returned,submitted,published" "$(json "','.join(r['action'] for r in d)")"
+check "tableau de bord sans jeton" 401 "$(req GET /admin/publications/stats)"
+check "tableau de bord (éditeur)" 200 "$(req GET /admin/publications/stats "$ED")"
+check "dernière activité = la mise en ligne" published "$(json "d['recentActivity'][0]['action']")"
+check "toutes les thématiques comptées" 16 "$(json "len(d['byThematique'])")"
+check "publications en ligne = national + régional" True "$(json "d['byStatus']['published'] == d['publishedByLevel']['national'] + d['publishedByLevel']['regional']")"
 check "l'admin publie directement un brouillon" 201 "$(req POST /admin/publications "$AD" "${PUB/NIPC test/Brouillon admin}")"
 ADMIN_PUB=$(json "d['id']")
 check "publication directe" 200 "$(req POST "/admin/publications/$ADMIN_PUB/publish" "$AD")"

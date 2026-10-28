@@ -92,6 +92,7 @@ Le front ne parle qu'à la passerelle d'API (`/api`), par `src/lib/api.ts`.
 - Publications : circuit de validation (brouillon, à valider, renvoyée, en ligne) ; règles dans `admin/workflow.ts`,
   écrans dans `admin/pages/publications/` (`WorkflowPanel`, `ReturnDialog`).
 - « Mon compte » (`admin/pages/compte/`) : nom et mot de passe, pour tous les rôles.
+- Tableau de bord (`admin/pages/tableau-de-bord/`) : page d'accueil du back-office, adaptée au rôle.
 - Une écriture refusée (doublon, élément utilisé ailleurs, droits) affiche le message du service ; la fenêtre reste ouverte.
 - Réglages au build (`.env.example`) : `VITE_API_URL`, `VITE_API_PROXY`, `VITE_SAMPLE_DATA`, `VITE_SHOW_DEMO_ACCOUNTS`.
 

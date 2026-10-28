@@ -101,7 +101,7 @@ Lecture publique sauf mention ; écriture = jeton `Authorization: Bearer …` + 
 | Service | Routes |
 |---|---|
 | auth | `POST /auth/login` → `{ token, expiresIn, user }` · `GET /auth/me` · `PATCH /auth/me` (nom) · `POST /auth/password` · `GET /auth/permissions` · `/users` (droit `users`) |
-| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&sector=…&limit=&offset=` → `Publication[]` (total dans `X-Total-Count` ; `sector` répétable : au moins un des secteurs) · `GET /publications/:id` · `GET /publications/latest-nipc` (site public : publications en ligne seulement) · `/admin/publications` (droit `publications`) + `POST /admin/publications/:id/submit` · `/publish` · `/return` `{ comment }` (droit `validate`) · `GET /admin/publications/:id/reviews` · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
+| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&sector=…&limit=&offset=` → `Publication[]` (total dans `X-Total-Count` ; `sector` répétable : au moins un des secteurs) · `GET /publications/:id` · `GET /publications/latest-nipc` (site public : publications en ligne seulement) · `/admin/publications` (droit `publications`) + `POST /admin/publications/:id/submit` · `/publish` · `/return` `{ comment }` (droit `validate`) · `GET /admin/publications/:id/reviews` · `GET /admin/publications/stats` (tableau de bord) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
 | chiffres | `/indicators` → `Indicator[]` (chiffres clés de l'accueil) · `/chiffres/types` · `/chiffres/indicators?typeId=` · `/chiffres/regions` · `/chiffres/values?figureRegionId=&indicatorId=` |
 | files | `POST /files` (multipart, champ `file`, tout utilisateur connecté) → `{ id, name, size, type, url }` · `GET /files/:id` · `DELETE /files/:id` |
 
@@ -160,6 +160,10 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
 - `src/admin/workflow.ts` : mêmes règles de workflow que le service, pour afficher les bons boutons (« Enregistrer et
   soumettre », « Enregistrer et publier », « Renvoyer… ») ; une publication non modifiable s'ouvre en consultation.
 - `#/admin/compte` : « Mon compte » (nom, mot de passe), pour tous les rôles, depuis le menu du compte.
+- `#/admin` : tableau de bord selon le rôle (`src/admin/pages/tableau-de-bord/`) — éditeur : ses publications à
+  corriger, en attente, en brouillon ; administrateur : file « À valider », activité récente, publications en ligne par
+  thématique, couverture de « Madagascar en chiffres » ; super administrateur : en plus, l'état des comptes. Pas de
+  graphique décoratif : chiffres, tableaux et barres de longueur (une couleur, valeur toujours écrite).
 - `npm run dev` relaie `/api` vers la passerelle (`vite.config.ts`) : lancer `docker compose up` d'abord.
 - Images et documents passent par `POST /api/files` ; on enregistre l'`url` (image) ou l'`id` (document) renvoyés.
 
