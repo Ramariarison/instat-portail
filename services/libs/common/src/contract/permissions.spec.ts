@@ -8,10 +8,19 @@ describe("matrice des droits (RBAC)", () => {
     }
   });
 
-  it("refuse à l'éditeur la suppression et tout ce qui n'est pas une publication", () => {
+  it("laisse l'éditeur rédiger et saisir les données par région, sans supprimer ni valider", () => {
     expect(can("editor", "publications", "create")).toBe(true);
+    expect(can("editor", "figures", "update")).toBe(true);
     expect(can("editor", "publications", "delete")).toBe(false);
+    expect(can("editor", "publications", "validate")).toBe(false);
+    expect(can("editor", "figures", "delete")).toBe(false);
     expect(can("editor", "thematiques", "view")).toBe(false);
+  });
+
+  it("laisse l'administrateur valider et gérer les comptes, sans en supprimer", () => {
+    expect(can("admin", "publications", "validate")).toBe(true);
+    expect(can("admin", "users", "create")).toBe(true);
+    expect(can("admin", "users", "delete")).toBe(false);
   });
 
   it("refuse tout sans rôle", () => {

@@ -55,6 +55,16 @@ export async function restoreSession(): Promise<User | null> {
   }
 }
 
+/** « Mon compte » : changer son nom. Renvoie l'utilisateur à jour. */
+export function updateProfile(name: string): Promise<User> {
+  return api.patch<User>("/auth/me", { name });
+}
+
+/** « Mon compte » : changer son mot de passe (l'actuel est vérifié par le service). */
+export function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  return api.post<void>("/auth/password", { currentPassword, newPassword });
+}
+
 export function signOut(): void {
   setToken(null);
 }

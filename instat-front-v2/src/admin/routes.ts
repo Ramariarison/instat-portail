@@ -23,6 +23,7 @@ export type AdminRoute =
   | { page: "figure-region"; id: string; edit: boolean }
   | { page: "users" }
   | { page: "roles" }
+  | { page: "account" }
   | { page: "not-found" };
 
 /** `seg` = segments de l'URL après « admin ». */
@@ -47,6 +48,8 @@ export function matchAdmin(seg: string[]): AdminRoute {
       if (d === "modifier" && seg.length === 4) return { page: "figure-region", id: c, edit: true };
     }
   }
+
+  if (a === "compte" && !b) return { page: "account" };
 
   if (a === "utilisateurs") {
     if (!b) return { page: "users" };

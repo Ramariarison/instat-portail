@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
+import { useAuth } from "../../../context/AuthContext";
 import { formatDate, matches } from "../../../lib/format";
 import { useAdminData } from "../../data/AdminDataContext";
-import type { AdminPublication } from "../../data/types";
+import type { AdminPublication, PublicationStatus } from "../../data/types";
 import { usePermissions } from "../../usePermissions";
 import Badge from "../../ui/Badge";
 import { buttonClass } from "../../ui/Button";
@@ -13,12 +14,17 @@ import PageHeader, { EmptyState } from "../../ui/PageHeader";
 import { Pagination, usePagination } from "../../ui/Pagination";
 import SearchInput from "../../ui/SearchInput";
 import { useAction } from "../../useAction";
+import { canEditPublication, isReviewer, statusLabels, statusOrder, statusTones } from "../../workflow";
 
 export default function PublicationsPage() {
   const { publications, thematiques, regions } = useAdminData();
   const { canCreate, canUpdate, canDelete } = usePermissions("publications");
+  const { user } = useAuth();
+  const actor = { id: user?.id ?? "", role: user?.role ?? "editor" };
+  const reviewer = isReviewer(actor.role);
   const run = useAction();
   const [query, setQuery] = useState("");
+  const [status, setStatus] = useState<PublicationStatus | "">("");
   const [level, setLevel] = useState("");
   const [thematiqueId, setThematiqueId] = useState("");
   const [deleting, setDeleting] = useState<AdminPublication | null>(null);
@@ -32,10 +38,13 @@ export default function PublicationsPage() {
         .filter((p) => matches(query, p.title))
         .filter((p) => !level || p.level === level)
         .filter((p) => !thematiqueId || p.thematiqueId === thematiqueId)
+        .filter((p) => !status || p.status === status)
         .sort((a, b) => b.date.localeCompare(a.date)),
-    [publications.items, query, level, thematiqueId],
+    [publications.items, query, level, thematiqueId, status],
   );
-  const pager = usePagination(rows, 8, `${query}|${level}|${thematiqueId}`);
+  const pager = usePagination(rows, 8, `${query}|${level}|${thematiqueId}|${status}`);
+  const toReview = publications.items.filter((p) => p.status === "submitted").length;
+  const editable = (p: AdminPublication) => canUpdate && canEditPublication(p, actor);
 
   const columns: Column<AdminPublication>[] = [
     {
@@ -44,13 +53,14 @@ export default function PublicationsPage() {
       className: "min-w-72 max-w-lg",
       cell: (p) => (
         <div>
-          {canUpdate ? (
-            <a href={`#/admin/publications/modifier/${p.id}`} className={`${cellTitleClass} decoration-paddy/40 underline-offset-4 hover:text-paddy hover:underline`}>
-              {p.title}
-            </a>
-          ) : (
-            <span className={cellTitleClass}>{p.title}</span>
-          )}
+          {/* La fiche s'ouvre toujours : en modification si c'est permis, en consultation sinon. */}
+          <a
+            href={`#/admin/publications/modifier/${p.id}`}
+            className={`${cellTitleClass} decoration-paddy/40 underline-offset-4 hover:text-paddy hover:underline`}
+          >
+            {p.title}
+          </a>
+          {p.createdByName && <span className="block font-mono text-xs text-muted">par {p.createdByName}</span>}
           {p.latestNipc && (
             <div className="mt-1">
               <Badge tone="green">Dernière publication NIPC</Badge>
@@ -58,6 +68,11 @@ export default function PublicationsPage() {
           )}
         </div>
       ),
+    },
+    {
+      key: "status",
+      header: "Statut",
+      cell: (p) => <Badge tone={statusTones[p.status]}>{statusLabels[p.status]}</Badge>,
     },
     {
       key: "level",
@@ -76,7 +91,7 @@ export default function PublicationsPage() {
             cell: (p: AdminPublication) => (
               <RowActions
                 label={p.title}
-                editHref={canUpdate ? `#/admin/publications/modifier/${p.id}` : undefined}
+                editHref={editable(p) ? `#/admin/publications/modifier/${p.id}` : undefined}
                 onDelete={canDelete ? () => setDeleting(p) : undefined}
               />
             ),
@@ -90,7 +105,11 @@ export default function PublicationsPage() {
       <PageHeader
         title="Publications"
         count={publications.items.length}
-        description="Les publications affichées sur le site, nationales ou régionales."
+        description={
+          reviewer && toReview > 0
+            ? `${toReview} publication${toReview > 1 ? "s" : ""} à valider. Seules les publications « En ligne » apparaissent sur le site.`
+            : "Seules les publications « En ligne » apparaissent sur le site. Les autres suivent le circuit de validation."
+        }
         actions={
           canCreate && (
             <a href="#/admin/publications/nouvelle" className={buttonClass("primary")}>
@@ -103,6 +122,19 @@ export default function PublicationsPage() {
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <SearchInput value={query} onChange={setQuery} label="Rechercher une publication par titre" />
+        <select
+          aria-label="Filtrer par statut"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as PublicationStatus | "")}
+          className={filterClass}
+        >
+          <option value="">Tous les statuts</option>
+          {statusOrder.map((s) => (
+            <option key={s} value={s}>
+              {statusLabels[s]}
+            </option>
+          ))}
+        </select>
         <select aria-label="Filtrer par niveau" value={level} onChange={(e) => setLevel(e.target.value)} className={filterClass}>
           <option value="">Tous les niveaux</option>
           <option value="national">National</option>

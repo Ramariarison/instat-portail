@@ -82,6 +82,25 @@ export interface AdminPublication {
   date: string;
   latestNipc: boolean;
   sectors: string[];
+  /** Workflow de validation : seules les publications « published » sont sur le site public. */
+  status: PublicationStatus;
+  /** Auteur (absent pour les publications d'avant le workflow). */
+  createdBy?: string;
+  createdByName?: string;
+  /** Dernier commentaire de renvoi, tant que la publication est « returned ». */
+  returnComment?: string;
+}
+
+export type PublicationStatus = "draft" | "submitted" | "returned" | "published";
+
+/** Étape de l'historique d'une publication (soumission, renvoi avec commentaire, publication). */
+export interface PublicationReview {
+  id: string;
+  action: "submitted" | "returned" | "published";
+  comment?: string;
+  authorName: string;
+  /** Date et heure ISO. */
+  createdAt: string;
 }
 
 export interface DataType {

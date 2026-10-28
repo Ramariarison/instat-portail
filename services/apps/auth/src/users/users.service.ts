@@ -2,14 +2,15 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { Pool } from "pg";
 import { type AdminUser, ApiException, type Db, PG_POOL, runInTransaction, type TokenPayload } from "@app/common";
 import { PasswordService } from "../password/password.service";
+import { canCreateAccount, canDeleteAccount, canUpdateAccount, type Decision } from "./account-policy";
 import type { CreateUserDto } from "./dto/create-user.dto";
 import type { UpdateUserDto } from "./dto/update-user.dto";
 import { UsersRepository } from "./users.repository";
 
 /**
- * Gestion des comptes. Règles tenues ici, quel que soit le front :
- * on ne modifie ni son propre rôle ni son propre statut, on ne se supprime pas,
- * et il reste toujours au moins un super administrateur actif.
+ * Gestion des comptes. Règles tenues ici, quel que soit le front (détail dans account-policy.ts) :
+ * l'administrateur ne gère que les comptes éditeurs ; personne ne modifie son propre rôle ni ne se suspend,
+ * ni ne se supprime ; il reste toujours au moins un super administrateur actif.
  */
 @Injectable()
 export class UsersService {
@@ -27,7 +28,8 @@ export class UsersService {
     return this.users.getById(id);
   }
 
-  async create(dto: CreateUserDto): Promise<AdminUser> {
+  async create(dto: CreateUserDto, actor: TokenPayload): Promise<AdminUser> {
+    this.enforce(canCreateAccount(this.asActor(actor), dto.role));
     return this.users.insert(await this.toRow(dto));
   }
 
@@ -35,12 +37,10 @@ export class UsersService {
     return runInTransaction(this.pool, async (client) => {
       const before = await this.users.lockStatus(id, client);
       if (!before) throw ApiException.notFound("Utilisateur");
+      this.enforce(canUpdateAccount(this.asActor(actor), { id, ...before }, dto));
 
       const roleChanged = dto.role !== undefined && dto.role !== before.role;
       const disabled = dto.active === false && before.active;
-      if (id === actor.sub && (roleChanged || disabled)) {
-        throw new ApiException(403, "SELF_LOCKOUT", "Vous ne pouvez pas modifier votre propre rôle ni désactiver votre compte.");
-      }
       if (before.role === "super_admin" && before.active && (roleChanged || disabled)) {
         await this.assertAnotherSuperAdmin(id, client);
       }
@@ -49,9 +49,7 @@ export class UsersService {
   }
 
   async remove(id: string, actor: TokenPayload): Promise<void> {
-    if (id === actor.sub) {
-      throw new ApiException(403, "SELF_LOCKOUT", "Vous ne pouvez pas supprimer votre propre compte.");
-    }
+    this.enforce(canDeleteAccount(this.asActor(actor), { id }));
     await runInTransaction(this.pool, async (client) => {
       const before = await this.users.lockStatus(id, client);
       if (!before) throw ApiException.notFound("Utilisateur");
@@ -69,6 +67,14 @@ export class UsersService {
       email: rest.email?.trim().toLowerCase(),
       passwordHash: password ? await this.passwords.hash(password) : undefined,
     };
+  }
+
+  private asActor(actor: TokenPayload): { id: string; role: TokenPayload["role"] } {
+    return { id: actor.sub, role: actor.role };
+  }
+
+  private enforce(decision: Decision): void {
+    if (!decision.allowed) throw new ApiException(403, decision.code, decision.reason);
   }
 
   private async assertAnotherSuperAdmin(exceptId: string, db: Db): Promise<void> {

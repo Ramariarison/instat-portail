@@ -5,6 +5,7 @@ import { PasswordService } from "../password/password.service";
 import { UsersRepository } from "../users/users.repository";
 import type { ChangePasswordDto } from "./dto/change-password.dto";
 import type { LoginDto } from "./dto/login.dto";
+import type { UpdateProfileDto } from "./dto/update-profile.dto";
 import type { LoginResponse } from "./login-response";
 
 const TOKEN_TTL = Number(process.env.JWT_TTL_SECONDS ?? 8 * 3600);
@@ -43,6 +44,13 @@ export class AuthService {
 
   async me(actor: TokenPayload): Promise<User> {
     const { id, name, email, role } = await this.currentAccount(actor);
+    return { id, name, email, role };
+  }
+
+  /** « Mon compte » : modifier son nom. Le nouveau nom figurera dans les jetons émis ensuite. */
+  async updateProfile(actor: TokenPayload, dto: UpdateProfileDto): Promise<User> {
+    const account = await this.currentAccount(actor);
+    const { id, name, email, role } = await this.users.update(account.id, { name: dto.name.trim() });
     return { id, name, email, role };
   }
 

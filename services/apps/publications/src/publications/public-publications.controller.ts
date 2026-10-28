@@ -1,11 +1,11 @@
 import { Controller, Get, Param, Query, Res } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import type { FastifyReply } from "fastify";
-import { type AdminPublication, Public, type Publication } from "@app/common";
+import { Public, type Publication } from "@app/common";
 import { ListPublicationsQuery } from "./dto/list-publications.query";
 import { PublicationsService } from "./publications.service";
 
-/** Lecture publique (site) : liste filtrée, fiche, dernière publication NIPC. */
+/** Lecture publique (site) : publications en ligne seulement — liste filtrée, fiche, dernière publication NIPC. */
 @ApiTags("Publications (site public)")
 @Public()
 @Controller("publications")
@@ -24,12 +24,13 @@ export class PublicPublicationsController {
   }
 
   @Get("latest-nipc")
-  latestNipc(): Promise<AdminPublication> {
+  latestNipc(): ReturnType<PublicationsService["latestNipc"]> {
     return this.publications.latestNipc();
   }
 
+  /** Fiche d'une publication en ligne (404 si elle n'est pas publiée). */
   @Get(":id")
-  findOne(@Param("id") id: string): Promise<AdminPublication> {
-    return this.publications.findOne(id);
+  findOne(@Param("id") id: string): ReturnType<PublicationsService["findPublished"]> {
+    return this.publications.findPublished(id);
   }
 }

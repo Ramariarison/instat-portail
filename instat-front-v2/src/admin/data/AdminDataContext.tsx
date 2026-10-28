@@ -15,6 +15,8 @@ import { can } from "../permissions";
 import type {
   AdminPublication,
   AdminUser,
+  PublicationInput,
+  PublicationReview,
   DataType,
   FigureRegion,
   FigureValue,
@@ -86,10 +88,16 @@ interface AdminData {
   figureRegions: Collection<FigureRegion>;
   figureValues: Collection<FigureValue>;
   users: Collection<AdminUser, UserInput>;
-  /** Enregistre une publication ; si elle porte « la plus récente NIPC », le serveur retire le marqueur des autres. */
-  savePublication: (draft: Omit<AdminPublication, "id">, id?: string) => Promise<AdminPublication>;
+  /** Enregistre une publication (nouvelle = brouillon de la personne connectée). */
+  savePublication: (draft: PublicationInput, id?: string) => Promise<AdminPublication>;
   /** Supprime une région en chiffres et toutes ses données. */
   removeFigureRegion: (id: string) => Promise<void>;
+  /** Workflow de validation : soumettre (auteur), publier ou renvoyer avec un commentaire (administrateur). */
+  submitPublication: (id: string) => Promise<AdminPublication>;
+  publishPublication: (id: string) => Promise<AdminPublication>;
+  returnPublication: (id: string, comment: string) => Promise<AdminPublication>;
+  /** Historique d'une publication (soumissions, renvois, mise en ligne). */
+  loadReviews: (id: string) => Promise<PublicationReview[]>;
 }
 
 const AdminDataContext = createContext<AdminData | null>(null);
@@ -157,12 +165,36 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         ? await api.patch<AdminPublication>(itemPath("/admin/publications", id), withNulls(draft))
         : await api.post<AdminPublication>("/admin/publications", draft);
       setPublications((previous) => {
-        const base = saved.latestNipc ? previous.map((p) => ({ ...p, latestNipc: false })) : previous;
+        // Une publication en ligne marquée « la plus récente NIPC » retire le marqueur aux autres publications en ligne.
+        const takesMarker = saved.latestNipc && saved.status === "published";
+        const base = takesMarker ? previous.map((p) => (p.status === "published" ? { ...p, latestNipc: false } : p)) : previous;
         return id ? base.map((p) => (p.id === id ? saved : p)) : [...base, saved];
       });
       return saved;
     },
     [setPublications],
+  );
+
+  /** Applique une étape du workflow, puis remplace la publication par celle renvoyée par le service. */
+  const transition = useCallback(
+    async (id: string, step: "submit" | "publish" | "return", body?: object) => {
+      const saved = await api.post<AdminPublication>(`${itemPath("/admin/publications", id)}/${step}`, body);
+      // Une publication mise en ligne avec le marqueur NIPC le retire aux autres publications en ligne.
+      setPublications((previous) =>
+        previous.map((p) =>
+          p.id === id ? saved : saved.status === "published" && saved.latestNipc && p.status === "published" ? { ...p, latestNipc: false } : p,
+        ),
+      );
+      return saved;
+    },
+    [setPublications],
+  );
+  const submitPublication = useCallback((id: string) => transition(id, "submit"), [transition]);
+  const publishPublication = useCallback((id: string) => transition(id, "publish"), [transition]);
+  const returnPublication = useCallback((id: string, comment: string) => transition(id, "return", { comment }), [transition]);
+  const loadReviews = useCallback(
+    (id: string) => api.get<PublicationReview[]>(`${itemPath("/admin/publications", id)}/reviews`),
+    [],
   );
 
   const removeFigureRegionOnly = figureRegions.remove;
@@ -181,8 +213,12 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       state, reload,
       thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, users,
       savePublication, removeFigureRegion,
+      submitPublication, publishPublication, returnPublication, loadReviews,
     }),
-    [state, reload, thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, users, savePublication, removeFigureRegion],
+    [
+      state, reload, thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, users,
+      savePublication, removeFigureRegion, submitPublication, publishPublication, returnPublication, loadReviews,
+    ],
   );
 
   return <AdminDataContext.Provider value={value}>{children}</AdminDataContext.Provider>;

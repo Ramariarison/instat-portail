@@ -20,6 +20,7 @@ import PublicationFormPage from "./pages/publications/PublicationFormPage";
 import PublicationsPage from "./pages/publications/PublicationsPage";
 import RegionsPage from "./pages/publications/RegionsPage";
 import ThematiquesPage from "./pages/publications/ThematiquesPage";
+import AccountPage from "./pages/compte/AccountPage";
 import RolesPage from "./pages/utilisateurs/RolesPage";
 import UsersPage from "./pages/utilisateurs/UsersPage";
 import type { Role } from "../types";
@@ -56,6 +57,8 @@ function renderPage(route: AdminRoute, role: Role): ReactNode {
       return <UsersPage />;
     case "roles":
       return <RolesPage />;
+    case "account":
+      return <AccountPage />;
     default:
       return <NotFoundPanel homeHref={firstAllowedHref(role)} />;
   }

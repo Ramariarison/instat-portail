@@ -25,8 +25,8 @@ export class UsersController {
 
   @Post()
   @RequirePermission("users", "create")
-  create(@Body() dto: CreateUserDto): Promise<AdminUser> {
-    return this.users.create(dto);
+  create(@Body() dto: CreateUserDto, @CurrentUser() actor: TokenPayload): Promise<AdminUser> {
+    return this.users.create(dto, actor);
   }
 
   @Patch(":id")

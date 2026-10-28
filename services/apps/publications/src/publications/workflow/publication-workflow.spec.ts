@@ -19,6 +19,7 @@ describe("workflow de validation des publications", () => {
     it("un éditeur ne modifie pas la publication d'un autre", () => {
       expect(canEdit(ctx("draft", otherEditor))).toEqual({
         allowed: false,
+        kind: "forbidden",
         reason: "Vous ne pouvez modifier que vos propres publications.",
       });
     });
@@ -35,13 +36,17 @@ describe("workflow de validation des publications", () => {
       expect(nextStatus("submit")).toBe("submitted");
     });
 
-    it("on ne soumet pas deux fois", () => {
-      expect(canTransition("submit", ctx("submitted")).allowed).toBe(false);
+    it("on ne soumet pas deux fois (statut)", () => {
+      expect(canTransition("submit", ctx("submitted"))).toMatchObject({ allowed: false, kind: "state" });
     });
 
-    it("un éditeur ne publie pas et ne renvoie pas", () => {
-      expect(canTransition("publish", ctx("submitted")).allowed).toBe(false);
-      expect(canTransition("return", ctx("submitted")).allowed).toBe(false);
+    it("un éditeur ne publie pas et ne renvoie pas (droit insuffisant)", () => {
+      expect(canTransition("publish", ctx("submitted"))).toMatchObject({ allowed: false, kind: "forbidden" });
+      expect(canTransition("return", ctx("submitted"))).toMatchObject({ allowed: false, kind: "forbidden" });
+    });
+
+    it("un éditeur ne soumet pas la publication d'un autre", () => {
+      expect(canTransition("submit", ctx("draft", otherEditor))).toMatchObject({ allowed: false, kind: "forbidden" });
     });
 
     it("l'administrateur publie une publication soumise, ou directement un brouillon", () => {

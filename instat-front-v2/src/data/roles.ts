@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, FileText, UserRound, Users, type LucideIcon } from "lucide-react";
 import type { Role } from "../types";
 
 export const roleLabels: Record<Role, string> = {
@@ -10,8 +10,8 @@ export const roleLabels: Record<Role, string> = {
 /** Ce que chaque rôle peut faire, en une phrase (voir le détail dans admin/permissions.ts). */
 export const roleDescriptions: Record<Role, string> = {
   super_admin: "Contrôle total, y compris la gestion des utilisateurs et des rôles.",
-  admin: "Gère les publications, les thématiques, les régions et « Madagascar en chiffres ».",
-  editor: "Rédige et corrige des publications. Ne peut ni les supprimer, ni gérer le reste.",
+  admin: "Valide les publications ; gère les thématiques, les régions, « Madagascar en chiffres » et les comptes éditeurs.",
+  editor: "Rédige des publications et les soumet à validation ; saisit les données par région. Ne supprime rien.",
 };
 
 export interface RoleAction {
@@ -23,13 +23,19 @@ export interface RoleAction {
 const publications: RoleAction = { label: "Gérer les publications", href: "#/admin/publications", icon: FileText };
 const figures: RoleAction = { label: "Gérer « Madagascar en chiffres »", href: "#/admin/chiffres", icon: BarChart3 };
 const users: RoleAction = { label: "Gérer les utilisateurs et les rôles", href: "#/admin/utilisateurs", icon: Users };
+const editors: RoleAction = { label: "Gérer les comptes éditeurs", href: "#/admin/utilisateurs", icon: Users };
+const account: RoleAction = { label: "Mon compte", href: "#/admin/compte", icon: UserRound };
 
 /**
  * Raccourcis affichés dans le menu du compte, selon le rôle.
  * Ce n'est qu'un reflet visuel : les droits réels sont contrôlés par le service d'authentification.
  */
 export const roleActions: Record<Role, RoleAction[]> = {
-  super_admin: [publications, figures, users],
-  admin: [publications, figures],
-  editor: [{ label: "Rédiger une publication", href: "#/admin/publications/nouvelle", icon: FileText }],
+  super_admin: [publications, figures, users, account],
+  admin: [publications, figures, editors, account],
+  editor: [
+    { label: "Rédiger une publication", href: "#/admin/publications/nouvelle", icon: FileText },
+    { label: "Saisir les données par région", href: "#/admin/chiffres/regions", icon: BarChart3 },
+    account,
+  ],
 };

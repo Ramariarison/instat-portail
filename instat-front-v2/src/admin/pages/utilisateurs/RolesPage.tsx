@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { roleDescriptions, roleLabels } from "../../../data/roles";
 import type { Role } from "../../../types";
 import { useAdminData } from "../../data/AdminDataContext";
-import { actionLabels, actionOrder, permissions, resourceGroups, type Resource } from "../../permissions";
+import { actionLabels, actionOrder, actionsFor, permissions, resourceGroups, type Resource } from "../../permissions";
 import Badge from "../../ui/Badge";
 import PageHeader, { BlockTitle } from "../../ui/PageHeader";
 
@@ -11,7 +11,7 @@ const roles = Object.keys(roleLabels) as Role[];
 function Rights({ role, resource }: { role: Role; resource: Resource }) {
   const granted = permissions[role][resource] ?? [];
   if (granted.length === 0) return <span className="font-mono text-xs text-muted">Aucun accès</span>;
-  if (granted.length === actionOrder.length) return <Badge tone="green">Tous les droits</Badge>;
+  if (actionsFor(resource).every((action) => granted.includes(action))) return <Badge tone="green">Tous les droits</Badge>;
   return <span>{actionOrder.filter((action) => granted.includes(action)).map((action) => actionLabels[action]).join(", ")}</span>;
 }
 

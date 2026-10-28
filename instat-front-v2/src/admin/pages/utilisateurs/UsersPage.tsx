@@ -30,6 +30,7 @@ const roleTone = { super_admin: "green", admin: "neutral", editor: "outline" } a
 function UserForm({
   initial,
   isSelf,
+  restricted,
   others,
   onSave,
   onCancel,
@@ -37,6 +38,8 @@ function UserForm({
   initial?: AdminUser;
   /** Ce compte est celui de la personne connectée : son rôle et son statut ne peuvent pas être modifiés. */
   isSelf: boolean;
+  /** Administrateur (pas super administrateur) : comptes éditeurs seulement, sans changer de rôle ni suspendre. */
+  restricted: boolean;
   /** Les autres comptes, pour refuser une adresse e-mail déjà utilisée. */
   others: AdminUser[];
   onSave: (draft: UserInput) => void;
@@ -137,7 +140,7 @@ function UserForm({
                 name="role"
                 value={candidate}
                 checked={role === candidate}
-                disabled={isSelf}
+                disabled={isSelf || (restricted && candidate !== "editor")}
                 onChange={() => setRole(candidate)}
                 className="mt-1 size-4 shrink-0 accent-paddy"
               />
@@ -154,9 +157,16 @@ function UserForm({
         label="Compte actif"
         hint="Un compte désactivé ne peut plus se connecter, mais il est conservé."
         checked={active}
-        disabled={isSelf}
+        disabled={isSelf || restricted}
         onChange={(event) => setActive(event.target.checked)}
       />
+
+      {restricted && !isSelf && (
+        <p className="text-sm text-muted">
+          En tant qu'administrateur, vous gérez les comptes éditeurs. Changer un rôle ou suspendre un compte relève du
+          super administrateur.
+        </p>
+      )}
 
       {isSelf && (
         <p className="text-sm text-muted">
@@ -189,6 +199,9 @@ export default function UsersPage() {
   const pager = usePagination(rows, 10, `${query}|${roleFilter}`);
 
   const isSelf = (user: AdminUser) => user.id === me?.id;
+  // Le super administrateur gère tous les comptes ; l'administrateur, les comptes éditeurs (et le sien).
+  const superAdmin = me?.role === "super_admin";
+  const manageable = (user: AdminUser) => superAdmin || user.role === "editor" || isSelf(user);
 
   function toggleActive(user: AdminUser) {
     void run(
@@ -239,7 +252,7 @@ export default function UsersPage() {
               <RowActions
                 label={u.name}
                 extra={
-                  canUpdate && !isSelf(u) ? (
+                  canUpdate && superAdmin && !isSelf(u) ? (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -255,7 +268,7 @@ export default function UsersPage() {
                     </Button>
                   ) : undefined
                 }
-                onEdit={canUpdate ? () => setEditing(u) : undefined}
+                onEdit={canUpdate && manageable(u) ? () => setEditing(u) : undefined}
                 onDelete={canDelete && !isSelf(u) ? () => setDeleting(u) : undefined}
               />
             ),
@@ -278,7 +291,11 @@ export default function UsersPage() {
       <PageHeader
         title="Utilisateurs"
         count={users.items.length}
-        description="Les personnes qui peuvent se connecter au back-office, avec leur rôle."
+        description={
+          superAdmin
+            ? "Les personnes qui peuvent se connecter au back-office, avec leur rôle."
+            : "Les personnes qui peuvent se connecter au back-office. Vous gérez les comptes éditeurs."
+        }
         actions={
           canCreate && (
             <Button variant="primary" onClick={() => setEditing("new")}>
@@ -323,6 +340,7 @@ export default function UsersPage() {
           <UserForm
             initial={editing === "new" ? undefined : editing}
             isSelf={editing !== "new" && isSelf(editing)}
+            restricted={!superAdmin}
             others={users.items.filter((user) => editing === "new" || user.id !== editing.id)}
             onSave={save}
             onCancel={() => setEditing(null)}

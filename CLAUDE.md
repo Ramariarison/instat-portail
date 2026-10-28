@@ -100,8 +100,8 @@ Lecture publique sauf mention ; écriture = jeton `Authorization: Bearer …` + 
 
 | Service | Routes |
 |---|---|
-| auth | `POST /auth/login` → `{ token, expiresIn, user }` · `GET /auth/me` · `POST /auth/password` · `GET /auth/permissions` · `/users` (droit `users`) |
-| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&sector=…&limit=&offset=` → `Publication[]` (total dans `X-Total-Count` ; `sector` répétable : au moins un des secteurs) · `GET /publications/:id` · `GET /publications/latest-nipc` · `/admin/publications` (droit `publications`) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
+| auth | `POST /auth/login` → `{ token, expiresIn, user }` · `GET /auth/me` · `PATCH /auth/me` (nom) · `POST /auth/password` · `GET /auth/permissions` · `/users` (droit `users`) |
+| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&sector=…&limit=&offset=` → `Publication[]` (total dans `X-Total-Count` ; `sector` répétable : au moins un des secteurs) · `GET /publications/:id` · `GET /publications/latest-nipc` (site public : publications en ligne seulement) · `/admin/publications` (droit `publications`) + `POST /admin/publications/:id/submit` · `/publish` · `/return` `{ comment }` (droit `validate`) · `GET /admin/publications/:id/reviews` · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
 | chiffres | `/indicators` → `Indicator[]` (chiffres clés de l'accueil) · `/chiffres/types` · `/chiffres/indicators?typeId=` · `/chiffres/regions` · `/chiffres/values?figureRegionId=&indicatorId=` |
 | files | `POST /files` (multipart, champ `file`, tout utilisateur connecté) → `{ id, name, size, type, url }` · `GET /files/:id` · `DELETE /files/:id` |
 
@@ -114,12 +114,30 @@ Correspondance avec le magasin en mémoire du front (`src/admin/data/AdminDataCo
 
 ## Règles métier tenues côté serveur
 
-- RBAC à chaque écriture (`requirePermission(resource, action)`), y compris les cas que le front masque seulement.
-- Comptes : e-mail unique (insensible à la casse), impossible de modifier son propre rôle, de se désactiver ou de se supprimer,
-  et il reste toujours au moins un super administrateur actif. Compte créé sans `password` : ne peut pas se connecter
-  tant qu'un super administrateur ne lui en a pas donné un (`PATCH /users/:id { password }`). Un compte désactivé ne peut plus se connecter
-  et `GET /auth/me` le refuse, mais un jeton déjà émis reste valable jusqu'à son expiration pour les autres services.
-- Publications : région obligatoire si `level = regional` (et effacée si `national`), secteurs dans la liste connue, une seule `latestNipc`.
+Rôles (matrice dans `libs/common/src/contract/permissions.ts`, identique au front) :
+
+| | Super administrateur | Administrateur | Éditeur |
+|---|---|---|---|
+| Publications | tout, dont valider | tout, dont valider | créer, modifier les siennes, soumettre |
+| Thématiques, régions, types, indicateurs | tout | tout | — |
+| Données par régions (`figures`) | tout | tout | consulter, ajouter, modifier |
+| Comptes (`users`) | tout | comptes éditeurs : créer, consulter, modifier | — |
+| Mon compte (nom, mot de passe) | oui | oui | oui |
+
+- **Workflow de validation** (`apps/publications/src/publications/workflow/`, règles pures + tests) :
+  brouillon → soumise → publiée, ou renvoyée avec un commentaire obligatoire. L'éditeur modifie et soumet ses
+  brouillons et ses publications renvoyées ; l'administrateur publie, renvoie, publie directement un brouillon, et
+  il est seul à modifier une publication en ligne. Seules les publications `published` sont visibles sur le site.
+  Refus pour une question de droit : 403 ; pour une question de statut : 409 `INVALID_STATE`.
+  Historique dans `publication_reviews`. Le marqueur « la plus récente NIPC » ne compte qu'en ligne : un brouillon
+  peut le porter, il le prend aux autres au moment de sa publication.
+- **Comptes** (`apps/auth/src/users/account-policy.ts`) : l'administrateur ne crée que des éditeurs et ne change ni
+  rôle ni statut ; seul le super administrateur supprime. Personne ne modifie son propre rôle, ne se suspend ni ne se
+  supprime ; il reste toujours au moins un super administrateur actif. Compte créé sans `password` : pas de connexion
+  possible tant qu'on ne lui en donne pas un. Un compte suspendu ne se connecte plus et `GET /auth/me` le refuse, mais
+  un jeton déjà émis reste valable jusqu'à son expiration pour les autres services ; de même, un nom changé dans
+  « Mon compte » n'apparaît dans les jetons (auteur des publications) qu'à la connexion suivante.
+- Publications : région obligatoire si `level = regional` (et effacée si `national`), secteurs dans la liste connue.
 - Suppression d'une thématique, d'une région, d'un type ou d'un indicateur encore utilisé : 409 `IN_USE`.
 - Une seule valeur par (région en chiffres, indicateur, année) : 409 `ALREADY_EXISTS`.
 - Liens et images affichés sur le site : `http(s)://`, chemin `/…` ou ancre `#…` seulement. Fichiers : pas de SVG ni de HTML.
@@ -138,7 +156,10 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
 « Page en préparation ». Repères :
 - `src/lib/api.ts` : seul point d'accès à `/api` (jeton, erreurs `ApiError` avec le message du service, `uploadFile`).
 - `src/admin/data/AdminDataContext.tsx` : collections du back-office (`add` → POST, `update` → PATCH avec `null`
-  pour un champ vidé, `remove` → DELETE) ; `src/admin/useAction.ts` annonce réussite ou erreur.
+  pour un champ vidé, `remove` → DELETE) et étapes du workflow ; `src/admin/useAction.ts` annonce réussite ou erreur.
+- `src/admin/workflow.ts` : mêmes règles de workflow que le service, pour afficher les bons boutons (« Enregistrer et
+  soumettre », « Enregistrer et publier », « Renvoyer… ») ; une publication non modifiable s'ouvre en consultation.
+- `#/admin/compte` : « Mon compte » (nom, mot de passe), pour tous les rôles, depuis le menu du compte.
 - `npm run dev` relaie `/api` vers la passerelle (`vite.config.ts`) : lancer `docker compose up` d'abord.
 - Images et documents passent par `POST /api/files` ; on enregistre l'`url` (image) ou l'`id` (document) renvoyés.
 

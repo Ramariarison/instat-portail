@@ -1,5 +1,6 @@
 import { useRef, useState, type FormEvent } from "react";
-import { FilePlus, LoaderCircle, X } from "lucide-react";
+import { FilePlus, LoaderCircle, Undo2, X } from "lucide-react";
+import { useAuth } from "../../../context/AuthContext";
 import { errorMessage, fileUrl, uploadFile } from "../../../lib/api";
 import { formatBytes, todayIso } from "../../../lib/format";
 import { navigate } from "../../../lib/route";
@@ -15,8 +16,14 @@ import ImageUpload from "../../ui/ImageUpload";
 import { inputClass, textareaClass } from "../../ui/inputs";
 import PageHeader, { BlockTitle, Breadcrumb } from "../../ui/PageHeader";
 import { useToast } from "../../ui/Toast";
+import { canEditPublication, isReviewer, lockedReason } from "../../workflow";
+import ReturnDialog from "./ReturnDialog";
+import WorkflowPanel from "./WorkflowPanel";
 
 type Errors = Partial<Record<"title" | "regionId" | "thematiqueId" | "date" | "excerpt" | "content", string>>;
+
+/** Bouton d'envoi utilisé : enregistrer seulement, ou enregistrer puis avancer dans le circuit de validation. */
+type Intent = "save" | "submit" | "publish";
 
 const EXCERPT_MAX = 300;
 
@@ -41,8 +48,14 @@ function Section({
 }
 
 function PublicationForm({ initial }: { initial?: AdminPublication }) {
-  const { thematiques, regions, savePublication } = useAdminData();
+  const { thematiques, regions, savePublication, submitPublication, publishPublication, returnPublication } = useAdminData();
   const { notify } = useToast();
+  const { user } = useAuth();
+  const actor = { id: user?.id ?? "", role: user?.role ?? "editor" };
+  const reviewer = isReviewer(actor.role);
+  // Nouvelle publication : toujours modifiable. Existante : selon l'auteur et le statut (voir admin/workflow.ts).
+  const editable = !initial || canEditPublication(initial, actor);
+  const [returning, setReturning] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -88,9 +101,10 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
     setSelectedSectors((previous) => (previous.includes(id) ? previous.filter((s) => s !== id) : [...previous, id]));
   }
 
-  async function submit(event: FormEvent) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (saving) return;
+    if (saving || !editable) return;
+    const intent = ((event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value as Intent | undefined;
     const next: Errors = {};
     if (!title.trim()) next.title = "Saisissez le titre de la publication.";
     if (level === "regional" && !regionId) next.regionId = "Choisissez la région concernée.";
@@ -106,7 +120,7 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
 
     setSaving(true);
     try {
-      await savePublication(
+      const saved = await savePublication(
         {
           title: title.trim(),
           imageUrl,
@@ -122,7 +136,15 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
         },
         initial?.id,
       );
-      notify(initial ? "Publication modifiée." : "Publication créée.");
+      if (intent === "submit") {
+        await submitPublication(saved.id);
+        notify("Publication soumise à validation. Un administrateur va l'examiner.");
+      } else if (intent === "publish") {
+        await publishPublication(saved.id);
+        notify("Publication mise en ligne.");
+      } else {
+        notify(initial ? "Publication enregistrée." : "Brouillon créé. Soumettez-le à validation quand il sera prêt.");
+      }
       navigate("#/admin/publications");
     } catch (error) {
       notify(errorMessage(error), "error");
@@ -130,7 +152,21 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
     }
   }
 
+  async function sendBack(comment: string) {
+    if (!initial) return;
+    setReturning(false);
+    try {
+      await returnPublication(initial.id, comment);
+      notify("Publication renvoyée à son auteur avec votre commentaire.");
+      navigate("#/admin/publications");
+    } catch (error) {
+      notify(errorMessage(error), "error");
+    }
+  }
+
   const errorCount = Object.keys(errors).length;
+  const busy = saving || uploading > 0;
+  const pageTitle = !initial ? "Nouvelle publication" : editable ? "Modifier la publication" : "Consulter la publication";
 
   return (
     <>
@@ -139,13 +175,19 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
           <Breadcrumb
             items={[
               { label: "Publications", href: "#/admin/publications" },
-              { label: initial ? "Modifier" : "Nouvelle publication" },
+              { label: !initial ? "Nouvelle publication" : editable ? "Modifier" : "Consulter" },
             ]}
           />
         }
-        title={initial ? "Modifier la publication" : "Nouvelle publication"}
-        description="Les champs marqués d'une étoile sont obligatoires."
+        title={pageTitle}
+        description={
+          editable
+            ? "Les champs marqués d'une étoile sont obligatoires."
+            : "Vous pouvez consulter cette publication, mais pas la modifier."
+        }
       />
+
+      {initial && <WorkflowPanel publication={initial} lockedReason={editable ? undefined : lockedReason(initial, actor)} />}
 
       <form ref={formRef} onSubmit={submit} noValidate className="max-w-4xl space-y-6">
         {errorCount > 0 && (
@@ -154,222 +196,250 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
           </p>
         )}
 
-        <Section number="01" title="Informations générales">
-          <Field label="Titre" required error={errors.title}>
-            {(aria) => <input {...aria} className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} />}
-          </Field>
-
-          <fieldset>
-            <legend className="text-sm font-medium">
-              Niveau <span aria-hidden="true" className="text-laterite">*</span>
-            </legend>
-            <div className="mt-1.5 flex gap-6">
-              {(
-                [
-                  ["national", "National"],
-                  ["regional", "Régional"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className="flex cursor-pointer items-center gap-2 text-[0.95rem]">
-                  <input
-                    type="radio"
-                    name="level"
-                    value={value}
-                    checked={level === value}
-                    onChange={() => setLevel(value)}
-                    className="size-4 accent-paddy"
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              label="Région"
-              required={level === "regional"}
-              hint={level === "national" ? "Réservé aux publications régionales." : undefined}
-              error={errors.regionId}
-            >
-              {(aria) => (
-                <select
-                  {...aria}
-                  className={inputClass}
-                  value={level === "regional" ? regionId : ""}
-                  disabled={level === "national"}
-                  onChange={(e) => setRegionId(e.target.value)}
-                >
-                  <option value="">Choisir une région</option>
-                  {sortedRegions.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name}
-                    </option>
-                  ))}
-                </select>
-              )}
+        {/* En consultation, tous les champs et boutons des sections sont désactivés d'un coup. */}
+        <fieldset disabled={!editable} className="m-0 min-w-0 space-y-6 border-0 p-0">
+          <Section number="01" title="Informations générales">
+            <Field label="Titre" required error={errors.title}>
+              {(aria) => <input {...aria} className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} />}
             </Field>
 
-            <Field label="Thématique" required error={errors.thematiqueId}>
-              {(aria) => (
-                <select {...aria} className={inputClass} value={thematiqueId} onChange={(e) => setThematiqueId(e.target.value)}>
-                  <option value="">Choisir une thématique</option>
-                  {sortedThematiques.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </Field>
-          </div>
-
-          <div className="sm:max-w-xs">
-            <Field label="Date de publication" required error={errors.date}>
-              {(aria) => <input {...aria} type="date" className={inputClass} value={date} onChange={(e) => setDate(e.target.value)} />}
-            </Field>
-          </div>
-        </Section>
-
-        <Section number="02" title="Image du titre">
-          <ImageUpload
-            label="Image"
-            hint="Seule une image de 900 × 600 pixels est acceptée."
-            value={imageUrl}
-            onChange={setImageUrl}
-            exact={{ width: 900, height: 600 }}
-          />
-        </Section>
-
-        <Section number="03" title="Contenu">
-          <Field label="Extrait" required error={errors.excerpt} hint="Résumé affiché dans les listes de publications.">
-            {(aria) => (
-              <>
-                <textarea
-                  {...aria}
-                  rows={3}
-                  maxLength={EXCERPT_MAX}
-                  className={textareaClass}
-                  value={excerpt}
-                  onChange={(e) => setExcerpt(e.target.value)}
-                />
-                <p className="mt-1 text-right text-xs text-muted tabular-nums">
-                  {excerpt.length} / {EXCERPT_MAX}
-                </p>
-              </>
-            )}
-          </Field>
-          <Field label="Contenu" required error={errors.content}>
-            {(aria) => (
-              <textarea {...aria} rows={12} className={textareaClass} value={content} onChange={(e) => setContent(e.target.value)} />
-            )}
-          </Field>
-        </Section>
-
-        <Section number="04" title="Documents à télécharger" description="Fichiers que les visiteurs pourront télécharger depuis la publication.">
-          <div>
-            <input
-              ref={fileRef}
-              type="file"
-              multiple
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.zip"
-              className="sr-only"
-              tabIndex={-1}
-              aria-hidden="true"
-              onChange={(e) => {
-                void addFiles(e.target.files);
-                e.target.value = "";
-              }}
-            />
-            <Button variant="secondary" onClick={() => fileRef.current?.click()}>
-              <FilePlus className="size-4" aria-hidden="true" />
-              Cliquer ici pour charger les documents
-            </Button>
-            {uploading > 0 && (
-              <p role="status" className="mt-2 flex items-center gap-2 text-sm text-muted">
-                <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-                Envoi en cours ({uploading} fichier{uploading > 1 ? "s" : ""})…
-              </p>
-            )}
-          </div>
-
-          {documents.length > 0 ? (
-            <ul className="divide-y divide-line border border-line">
-              {documents.map((doc) => (
-                <li key={doc.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-[0.95rem]">
-                  <span className="min-w-0">
-                    <a
-                      href={fileUrl(doc.id)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block truncate font-medium text-paddy underline decoration-paddy/30 underline-offset-4 hover:decoration-paddy"
-                    >
-                      {doc.name}
-                    </a>
-                    <span className="font-mono text-xs text-muted">{formatBytes(doc.size)}</span>
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label={`Retirer le document ${doc.name}`}
-                    onClick={() => setDocuments((previous) => previous.filter((d) => d.id !== doc.id))}
-                  >
-                    <X className="size-4" aria-hidden="true" />
-                    Retirer
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted">Aucun document chargé.</p>
-          )}
-        </Section>
-
-        <Section number="05" title="Classement">
-          <Checkbox
-            label="La plus récente publication NIPC"
-            hint="Une seule publication peut porter ce marqueur : en cochant cette case, vous le retirez de la précédente."
-            checked={latestNipc}
-            onChange={(e) => setLatestNipc(e.target.checked)}
-          />
-
-          <fieldset>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <legend className="text-sm font-medium">Secteurs concernés</legend>
-              <div className="flex items-center gap-1 text-sm">
-                <span className="mr-2 font-mono text-xs text-muted tabular-nums">
-                  {selectedSectors.length} sur {sectors.length}
-                </span>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedSectors(sectors.map((s) => s.id))}>
-                  Tout cocher
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedSectors([])}>
-                  Tout décocher
-                </Button>
+            <fieldset>
+              <legend className="text-sm font-medium">
+                Niveau <span aria-hidden="true" className="text-laterite">*</span>
+              </legend>
+              <div className="mt-1.5 flex gap-6">
+                {(
+                  [
+                    ["national", "National"],
+                    ["regional", "Régional"],
+                  ] as const
+                ).map(([value, label]) => (
+                  <label key={value} className="flex cursor-pointer items-center gap-2 text-[0.95rem]">
+                    <input
+                      type="radio"
+                      name="level"
+                      value={value}
+                      checked={level === value}
+                      onChange={() => setLevel(value)}
+                      className="size-4 accent-paddy"
+                    />
+                    {label}
+                  </label>
+                ))}
               </div>
+            </fieldset>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field
+                label="Région"
+                required={level === "regional"}
+                hint={level === "national" ? "Réservé aux publications régionales." : undefined}
+                error={errors.regionId}
+              >
+                {(aria) => (
+                  <select
+                    {...aria}
+                    className={inputClass}
+                    value={level === "regional" ? regionId : ""}
+                    disabled={level === "national"}
+                    onChange={(e) => setRegionId(e.target.value)}
+                  >
+                    <option value="">Choisir une région</option>
+                    {sortedRegions.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </Field>
+
+              <Field label="Thématique" required error={errors.thematiqueId}>
+                {(aria) => (
+                  <select {...aria} className={inputClass} value={thematiqueId} onChange={(e) => setThematiqueId(e.target.value)}>
+                    <option value="">Choisir une thématique</option>
+                    {sortedThematiques.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </Field>
             </div>
-            <div className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
-              {sectors.map((sector) => (
-                <Checkbox
-                  key={sector.id}
-                  label={sector.label}
-                  checked={selectedSectors.includes(sector.id)}
-                  onChange={() => toggleSector(sector.id)}
-                />
-              ))}
+
+            <div className="sm:max-w-xs">
+              <Field label="Date de publication" required error={errors.date}>
+                {(aria) => <input {...aria} type="date" className={inputClass} value={date} onChange={(e) => setDate(e.target.value)} />}
+              </Field>
             </div>
-          </fieldset>
-        </Section>
+          </Section>
+
+          <Section number="02" title="Image du titre">
+            <ImageUpload
+              label="Image"
+              hint="Seule une image de 900 × 600 pixels est acceptée."
+              value={imageUrl}
+              onChange={setImageUrl}
+              exact={{ width: 900, height: 600 }}
+            />
+          </Section>
+
+          <Section number="03" title="Contenu">
+            <Field label="Extrait" required error={errors.excerpt} hint="Résumé affiché dans les listes de publications.">
+              {(aria) => (
+                <>
+                  <textarea
+                    {...aria}
+                    rows={3}
+                    maxLength={EXCERPT_MAX}
+                    className={textareaClass}
+                    value={excerpt}
+                    onChange={(e) => setExcerpt(e.target.value)}
+                  />
+                  <p className="mt-1 text-right text-xs text-muted tabular-nums">
+                    {excerpt.length} / {EXCERPT_MAX}
+                  </p>
+                </>
+              )}
+            </Field>
+            <Field label="Contenu" required error={errors.content}>
+              {(aria) => (
+                <textarea {...aria} rows={12} className={textareaClass} value={content} onChange={(e) => setContent(e.target.value)} />
+              )}
+            </Field>
+          </Section>
+
+          <Section number="04" title="Documents à télécharger" description="Fichiers que les visiteurs pourront télécharger depuis la publication.">
+            <div>
+              <input
+                ref={fileRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.zip"
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+                onChange={(e) => {
+                  void addFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+              <Button variant="secondary" onClick={() => fileRef.current?.click()}>
+                <FilePlus className="size-4" aria-hidden="true" />
+                Cliquer ici pour charger les documents
+              </Button>
+              {uploading > 0 && (
+                <p role="status" className="mt-2 flex items-center gap-2 text-sm text-muted">
+                  <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+                  Envoi en cours ({uploading} fichier{uploading > 1 ? "s" : ""})…
+                </p>
+              )}
+            </div>
+
+            {documents.length > 0 ? (
+              <ul className="divide-y divide-line border border-line">
+                {documents.map((doc) => (
+                  <li key={doc.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-[0.95rem]">
+                    <span className="min-w-0">
+                      <a
+                        href={fileUrl(doc.id)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block truncate font-medium text-paddy underline decoration-paddy/30 underline-offset-4 hover:decoration-paddy"
+                      >
+                        {doc.name}
+                      </a>
+                      <span className="font-mono text-xs text-muted">{formatBytes(doc.size)}</span>
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-label={`Retirer le document ${doc.name}`}
+                      onClick={() => setDocuments((previous) => previous.filter((d) => d.id !== doc.id))}
+                    >
+                      <X className="size-4" aria-hidden="true" />
+                      Retirer
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted">Aucun document chargé.</p>
+            )}
+          </Section>
+
+          <Section number="05" title="Classement">
+            <Checkbox
+              label="La plus récente publication NIPC"
+              hint="Une seule publication peut porter ce marqueur : en cochant cette case, vous le retirez de la précédente."
+              checked={latestNipc}
+              onChange={(e) => setLatestNipc(e.target.checked)}
+            />
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-medium">Secteurs concernés</legend>
+                <div className="flex items-center gap-1 text-sm">
+                  <span className="mr-2 font-mono text-xs text-muted tabular-nums">
+                    {selectedSectors.length} sur {sectors.length}
+                  </span>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedSectors(sectors.map((s) => s.id))}>
+                    Tout cocher
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedSectors([])}>
+                    Tout décocher
+                  </Button>
+                </div>
+              </div>
+              <div className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+                {sectors.map((sector) => (
+                  <Checkbox
+                    key={sector.id}
+                    label={sector.label}
+                    checked={selectedSectors.includes(sector.id)}
+                    onChange={() => toggleSector(sector.id)}
+                  />
+                ))}
+              </div>
+            </fieldset>
+          </Section>
+        </fieldset>
 
         <div className="sticky bottom-0 z-10 -mx-4 flex justify-end gap-2 border-t-2 border-ink bg-paper/95 px-4 py-3 backdrop-blur sm:mx-0 sm:px-0">
-          <a href="#/admin/publications" className={buttonClass("secondary")}>
-            Annuler
+          <a href="#/admin/publications" className={`${buttonClass("secondary")} mr-auto`}>
+            {editable ? "Annuler" : "Retour à la liste"}
           </a>
-          <Button type="submit" variant="primary" disabled={saving || uploading > 0}>
-            {saving ? "Enregistrement…" : uploading > 0 ? "Envoi des fichiers…" : "Enregistrer la publication"}
-          </Button>
+          {reviewer && initial?.status === "submitted" && (
+            <Button variant="secondary" onClick={() => setReturning(true)} disabled={saving}>
+              <Undo2 className="size-4" aria-hidden="true" />
+              Renvoyer…
+            </Button>
+          )}
+          {editable && (
+            <>
+              <Button type="submit" name="intent" value="save" variant="secondary" disabled={busy}>
+                {saving ? "Enregistrement…" : uploading > 0 ? "Envoi des fichiers…" : reviewer ? "Enregistrer" : "Enregistrer le brouillon"}
+              </Button>
+              {reviewer
+                ? initial?.status !== "published" && (
+                    <Button type="submit" name="intent" value="publish" variant="primary" disabled={busy}>
+                      Enregistrer et publier
+                    </Button>
+                  )
+                : (
+                    <Button type="submit" name="intent" value="submit" variant="primary" disabled={busy}>
+                      Enregistrer et soumettre
+                    </Button>
+                  )}
+            </>
+          )}
         </div>
       </form>
+
+      {initial && (
+        <ReturnDialog open={returning} title={initial.title} onCancel={() => setReturning(false)} onConfirm={sendBack} />
+      )}
     </>
   );
 }

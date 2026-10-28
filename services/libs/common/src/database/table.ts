@@ -13,5 +13,7 @@ export interface TableDefinition {
   json?: string[];
   /** Champs écrits mais jamais relus (mot de passe…). */
   writeOnly?: string[];
+  /** Champs calculés, lus mais jamais écrits : champ JSON → expression SQL (peut citer `<table>.colonne`). */
+  computed?: Record<string, string>;
   orderBy: string;
 }

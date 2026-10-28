@@ -14,31 +14,41 @@ export type Resource =
   | "figures"
   | "users";
 
-export type Action = "view" | "create" | "update" | "delete";
+/** « validate » : publier ou renvoyer une publication soumise (workflow de validation). */
+export type Action = "view" | "create" | "update" | "delete" | "validate";
 
 const all: Action[] = ["view", "create", "update", "delete"];
+
+/** Actions qui ont un sens pour une ressource : « validate » ne concerne que les publications. */
+export function actionsFor(resource: Resource): Action[] {
+  return resource === "publications" ? [...all, "validate"] : all;
+}
 
 export const permissions: Record<Role, Partial<Record<Resource, Action[]>>> = {
   super_admin: {
     thematiques: all,
     regions: all,
-    publications: all,
+    publications: [...all, "validate"],
     types: all,
     indicateurs: all,
     figures: all,
     users: all,
   },
+  // L'administrateur valide les publications et gère les comptes éditeurs (pas les rôles ni les suspensions).
   admin: {
     thematiques: all,
     regions: all,
-    publications: all,
+    publications: [...all, "validate"],
     types: all,
     indicateurs: all,
     figures: all,
+    users: ["view", "create", "update"],
   },
-  // L'éditeur rédige et corrige des publications, sans pouvoir les supprimer ni toucher au reste.
+  // L'éditeur rédige ses publications et les soumet à validation ; il saisit aussi les données par région.
+  // Il ne supprime rien et ne touche pas au reste.
   editor: {
     publications: ["view", "create", "update"],
+    figures: ["view", "create", "update"],
   },
 };
 
@@ -51,9 +61,10 @@ export const actionLabels: Record<Action, string> = {
   create: "Créer",
   update: "Modifier",
   delete: "Supprimer",
+  validate: "Valider",
 };
 
-export const actionOrder: Action[] = ["view", "create", "update", "delete"];
+export const actionOrder: Action[] = ["view", "create", "update", "delete", "validate"];
 
 export const resourceGroups: { title: string; items: { resource: Resource; label: string }[] }[] = [
   {

@@ -72,7 +72,8 @@ export abstract class SqlRepository<T extends { id: string }> {
   protected selectList(alias = ""): string {
     const prefix = alias ? `${alias}.` : "";
     const fields = Object.entries(this.table.columns).filter(([field]) => !this.table.writeOnly?.includes(field));
-    return [`${prefix}id AS "id"`, ...fields.map(([field, column]) => `${prefix}${column} AS "${field}"`)].join(", ");
+    const computed = Object.entries(this.table.computed ?? {}).map(([field, sql]) => `${sql} AS "${field}"`);
+    return [`${prefix}id AS "id"`, ...fields.map(([field, column]) => `${prefix}${column} AS "${field}"`), ...computed].join(", ");
   }
 
   /** Garde les champs connus de la table (les autres sont ignorés) et encode le jsonb. */
