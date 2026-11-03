@@ -3,10 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { news as sampleNews } from "../../data/news";
 import { useApiData } from "../../hooks/useApiData";
 import type { NewsItem } from "../../types";
-
-/** Hauteurs (en %) des barres de l'histogramme décoratif. */
-const bars = [18, 24, 30, 22, 36, 44, 38, 52, 60, 48, 66, 72, 58, 82, 70, 64, 56, 48, 52, 40, 44, 34, 30, 36, 26, 22, 28, 20, 16, 22, 14, 18];
-const HIGHLIGHT = 13;
+import DecorativeBars from "../layout/DecorativeBars";
 
 /** Distance (px) d'un glissement du doigt pour changer d'actualité. */
 const SWIPE = 50;
@@ -180,16 +177,8 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Histogramme décoratif : il se dessine au chargement et fait la transition avec la page. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 flex h-24 items-end gap-[3px] px-[3px] sm:h-32">
-        {bars.map((height, i) => (
-          <span
-            key={i}
-            className={`bar-grow flex-1 ${i === HIGHLIGHT ? "bg-laterite" : "bg-paper"}`}
-            style={{ height: `${height}%`, animationDelay: `${i * 22}ms` }}
-          />
-        ))}
-      </div>
+      {/* Histogramme décoratif : il fait la transition avec la page. */}
+      <DecorativeBars />
     </section>
   );
 }

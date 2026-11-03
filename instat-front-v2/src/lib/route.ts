@@ -71,3 +71,12 @@ export function useHashQuery(): [URLSearchParams, (next: Record<string, string |
 export function navigate(href: string): void {
   window.location.hash = href.startsWith("#") ? href : `#${href}`;
 }
+
+/** Adresse de la page de connexion, avec la page du back-office à rouvrir ensuite et, au besoin, « session expirée ». */
+export function loginHref(returnTo?: string, expired = false): string {
+  const params = new URLSearchParams();
+  if (returnTo && returnTo !== "#/admin") params.set("retour", returnTo);
+  if (expired) params.set("expiree", "1");
+  const search = params.toString();
+  return search ? `#/connexion?${search}` : "#/connexion";
+}

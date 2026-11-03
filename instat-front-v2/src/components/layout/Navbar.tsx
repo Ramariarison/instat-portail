@@ -1,20 +1,16 @@
 import { useCallback, useRef, useState } from "react";
-import { ChevronDown, LogIn, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { mainNav } from "../../data/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { useDismiss } from "../../hooks/useDismiss";
 import UserMenu from "../auth/UserMenu";
 import logoInstat from "../../assets/logo-instat.png";
 
-interface NavbarProps {
-  onLoginClick: () => void;
-}
-
 // Survol et menu ouvert : un filet laterite sous l'intitulé plutôt qu'un fond coloré.
 const linkClass =
   "relative inline-flex h-10 items-center whitespace-nowrap px-3 text-[0.95rem] font-medium text-ink after:absolute after:inset-x-3 after:bottom-1 after:h-[2px] after:scale-x-0 after:bg-laterite after:transition-transform hover:text-paddy hover:after:scale-x-100";
 
-export default function Navbar({ onLoginClick }: NavbarProps) {
+export default function Navbar() {
   const { user } = useAuth();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -102,18 +98,8 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
         </nav>
 
         <div className="flex items-center gap-2">
-          {user ? (
-            <UserMenu />
-          ) : (
-            <button
-              type="button"
-              onClick={onLoginClick}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-paddy px-4 text-[0.95rem] font-medium text-white hover:bg-paddy-deep"
-            >
-              <LogIn className="size-4" aria-hidden="true" />
-              Connexion
-            </button>
-          )}
+          {/* Le site public n'a pas de bouton de connexion : l'accès des agents est dans la barre du haut. */}
+          {user && <UserMenu />}
           <button
             type="button"
             aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}

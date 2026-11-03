@@ -1,10 +1,10 @@
-import { ExternalLink, LogIn } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import logoInstat from "../../assets/logo-instat.png";
 import UserMenu from "../../components/auth/UserMenu";
 import { useAuth } from "../../context/AuthContext";
-import Button, { buttonClass } from "../ui/Button";
+import { buttonClass } from "../ui/Button";
 
-export default function AdminHeader({ onLoginClick }: { onLoginClick: () => void }) {
+export default function AdminHeader() {
   const { user } = useAuth();
 
   return (
@@ -26,14 +26,7 @@ export default function AdminHeader({ onLoginClick }: { onLoginClick: () => void
             <span className="hidden sm:inline">Voir le site</span>
             <span className="sr-only sm:hidden">Voir le site</span>
           </a>
-          {user ? (
-            <UserMenu />
-          ) : (
-            <Button variant="primary" onClick={onLoginClick}>
-              <LogIn className="size-4" aria-hidden="true" />
-              Connexion
-            </Button>
-          )}
+          {user && <UserMenu />}
         </div>
       </div>
     </header>

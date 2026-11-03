@@ -159,6 +159,8 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
   pour un champ vidé, `remove` → DELETE) et étapes du workflow ; `src/admin/useAction.ts` annonce réussite ou erreur.
 - `src/admin/workflow.ts` : mêmes règles de workflow que le service, pour afficher les bons boutons (« Enregistrer et
   soumettre », « Enregistrer et publier », « Renvoyer… ») ; une publication non modifiable s'ouvre en consultation.
+- `#/connexion` : page de connexion à part (`src/pages/LoginPage.tsx`), avec `retour=` et `expiree=1` ; le site public n'y
+  mène que par le lien « Espace agents » de la barre du haut, `#/admin` sans session y redirige.
 - `#/admin/compte` : « Mon compte » (nom, mot de passe), pour tous les rôles, depuis le menu du compte.
 - `#/admin` : tableau de bord selon le rôle (`src/admin/pages/tableau-de-bord/`) — éditeur : ses publications à
   corriger, en attente, en brouillon ; administrateur : file « À valider », activité récente, publications en ligne par

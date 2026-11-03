@@ -45,7 +45,7 @@ export default function UserMenu() {
           id="user-menu"
           className="fade-in absolute top-full right-0 z-50 mt-2 w-[min(21rem,calc(100vw-2rem))] bg-white shadow-[0_24px_48px_-20px_rgba(9,42,31,0.5)] ring-1 ring-white/30"
         >
-          {/* Fiche du compte : même bandeau que la fenêtre de connexion. */}
+          {/* Fiche du compte : même bandeau que la page de connexion. */}
           <div className="on-dark graph-paper relative bg-paddy-night px-5 pt-5 pb-5 text-white">
             <span aria-hidden="true" className="absolute top-0 left-5 h-[3px] w-12 bg-laterite" />
             <p className="text-xs text-white/60">Connecté en tant que</p>

@@ -1,12 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
-import LoginModal from "../components/auth/LoginModal";
 import { useAuth } from "../context/AuthContext";
 import { roleLabels } from "../data/roles";
+import { loginHref } from "../lib/route";
 import { AdminDataProvider, useAdminData } from "./data/AdminDataContext";
 import AdminHeader from "./layout/AdminHeader";
 import AdminNav from "./layout/AdminNav";
-import { AccessDenied, NotFoundPanel, SignInRequired } from "./layout/Panels";
+import { AccessDenied, NotFoundPanel } from "./layout/Panels";
 import { can } from "./permissions";
 import { adminNav, matchAdmin, requirement, type AdminRoute } from "./routes";
 import Button from "./ui/Button";
@@ -144,8 +144,7 @@ function Shell({ route, role }: { route: AdminRoute; role: Role }) {
 }
 
 export default function AdminApp({ segments }: { segments: string[] }) {
-  const { user, ready } = useAuth();
-  const [loginOpen, setLoginOpen] = useState(false);
+  const { user, ready, expired } = useAuth();
   const route = matchAdmin(segments.slice(1));
   const routeKey = JSON.stringify(route);
 
@@ -161,24 +160,24 @@ export default function AdminApp({ segments }: { segments: string[] }) {
     window.scrollTo(0, 0);
   }, [routeKey]);
 
+  // Pas (ou plus) connecté : page de connexion, qui ramènera ici ensuite.
+  useEffect(() => {
+    if (ready && !user) window.location.replace(loginHref(window.location.hash, expired));
+  }, [ready, user, expired]);
+
   return (
     <AdminDataProvider>
       <ToastProvider>
-        <AdminHeader onLoginClick={() => setLoginOpen(true)} />
+        <AdminHeader />
         {user ? (
           <Shell route={route} role={user.role} />
-        ) : !ready ? (
-          <main className="px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
-            <p role="status" className="mx-auto max-w-2xl text-sm text-muted">
-              Vérification de la session…
-            </p>
-          </main>
         ) : (
           <main className="px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
-            <SignInRequired onLoginClick={() => setLoginOpen(true)} />
+            <p role="status" className="mx-auto max-w-2xl text-sm text-muted">
+              {ready ? "Redirection vers la page de connexion…" : "Vérification de la session…"}
+            </p>
           </main>
         )}
-        <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
       </ToastProvider>
     </AdminDataProvider>
   );

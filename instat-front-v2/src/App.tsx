@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { useRoute } from "./lib/route";
 import AdminApp from "./admin/AdminApp";
 import TopBar from "./components/layout/TopBar";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-import LoginModal from "./components/auth/LoginModal";
 import Hero from "./components/home/Hero";
 import KeyFigures from "./components/home/KeyFigures";
 import Publications from "./components/home/Publications";
 import Themes from "./components/home/Themes";
 import DataAndServices from "./components/home/DataAndServices";
 import CollectionPage from "./pages/CollectionPage";
+import LoginPage from "./pages/LoginPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import NewsPage from "./pages/NewsPage";
 import PublicationPage from "./pages/PublicationPage";
@@ -40,7 +40,6 @@ function PublicPage({ segments }: { segments: string[] }) {
 }
 
 function PublicSite({ segments }: { segments: string[] }) {
-  const [loginOpen, setLoginOpen] = useState(false);
   const routeKey = segments.join("/");
 
   // À chaque changement de page (et au retour du back-office) : ancre de l'accueil (#chiffres…) ou haut de page.
@@ -79,12 +78,11 @@ function PublicSite({ segments }: { segments: string[] }) {
         Aller au contenu
       </a>
       <TopBar />
-      <Navbar onLoginClick={() => setLoginOpen(true)} />
+      <Navbar />
       <main id="contenu">
         <PublicPage segments={segments} />
       </main>
       <Footer />
-      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
   );
 }
@@ -93,6 +91,14 @@ export default function App() {
   const segments = useRoute();
 
   return (
-    <AuthProvider>{segments[0] === "admin" ? <AdminApp segments={segments} /> : <PublicSite segments={segments} />}</AuthProvider>
+    <AuthProvider>
+      {segments[0] === "admin" ? (
+        <AdminApp segments={segments} />
+      ) : segments[0] === "connexion" ? (
+        <LoginPage />
+      ) : (
+        <PublicSite segments={segments} />
+      )}
+    </AuthProvider>
   );
 }

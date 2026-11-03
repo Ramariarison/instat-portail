@@ -62,7 +62,10 @@ src/
 
 ## Connexion des trois rôles
 
-- Le bouton **Connexion** de la barre de navigation ouvre une fenêtre modale (`<dialog>` natif : focus piégé, fermeture avec Échap).
+- Page de connexion à part, `#/connexion` (`src/pages/LoginPage.tsx`), comme dans la plupart des applications. Le site public
+  n'a pas de bouton de connexion : un lien discret « Espace agents » dans la barre du haut y mène.
+- `#/admin/…` sans session ouvre cette page avec `retour=` (page à rouvrir après connexion) ; si le serveur refuse le jeton
+  en cours de route, `expiree=1` affiche « Votre session a expiré ».
 - Il n'y a **qu'un seul formulaire** : le rôle n'est pas choisi par l'utilisateur, il vient du compte.
   Trois rôles : `super_admin`, `admin`, `editor` (`src/types.ts`, libellés dans `src/data/roles.ts`).
 - Une fois connecté, la barre affiche le menu du compte avec des raccourcis **selon le rôle**
@@ -71,7 +74,7 @@ src/
 - Ces raccourcis ne sont qu'un reflet visuel. Les droits réels doivent être contrôlés côté serveur (RBAC dans le service d'authentification).
 
 Comptes de démonstration (mot de passe `demo1234`) : `superadmin@instat.demo`, `admin@instat.demo`, `editeur@instat.demo`.
-Ils sont créés par le service Auth quand `SEED_DEMO=true`, et proposés dans la fenêtre de connexion selon
+Ils sont créés par le service Auth quand `SEED_DEMO=true`, et proposés (repliés) sur la page de connexion selon
 `VITE_SHOW_DEMO_ACCOUNTS` (oui par défaut en développement ; dans l'image Docker, il suit `SEED_DEMO`).
 
 ## Microservices
