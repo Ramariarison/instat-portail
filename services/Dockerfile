@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Image commune aux services NestJS : docker build --build-arg SERVICE=auth services/
 #
 # Les dépendances ne sont téléchargées qu'une fois (étape « deps », identique pour les 4 services) ;
