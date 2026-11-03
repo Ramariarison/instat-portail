@@ -292,8 +292,8 @@ export default function FigureRegionPage({ id, edit }: { id: string; edit: boole
   const columns: Column<Row>[] = [
     { key: "type", header: "Type", cell: (r) => <div className="max-w-[15rem]">{r.typeName}</div> },
     { key: "indicator", header: "Indicateur", cell: (r) => <div className={`max-w-[26rem] ${cellTitleClass}`}>{r.indicatorName}</div> },
-    { key: "year", header: "Année", cell: (r) => <span className="font-mono text-[0.85rem] tabular-nums">{r.value.year}</span> },
-    { key: "value", header: "Valeur", align: "right", cell: (r) => <span className="font-mono text-[0.85rem] tabular-nums">{formatValue(r.value.value)}</span> },
+    { key: "year", header: "Année", cell: (r) => <span className="text-[0.85rem] tabular-nums">{r.value.year}</span> },
+    { key: "value", header: "Valeur", align: "right", cell: (r) => <span className="text-[0.85rem] tabular-nums">{formatValue(r.value.value)}</span> },
     { key: "unit", header: "Unité", cell: (r) => r.value.unit },
     { key: "source", header: "Source", cell: (r) => <div className="max-w-[14rem]">{r.value.source}</div> },
     {

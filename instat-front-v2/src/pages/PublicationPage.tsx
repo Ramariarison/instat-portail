@@ -31,7 +31,7 @@ export default function PublicationPage({ id }: { id: string }) {
     return (
       <>
         <PageBanner kicker="Publication" title="Chargement…" crumbs={[{ label: "Publications", href: "#/publications" }]} />
-        <p role="status" className="mx-auto max-w-7xl px-4 py-12 font-mono text-sm text-muted sm:px-6 lg:px-8">
+        <p role="status" className="mx-auto max-w-7xl px-4 py-12 text-sm text-muted sm:px-6 lg:px-8">
           Chargement de la publication…
         </p>
       </>
@@ -82,7 +82,7 @@ export default function PublicationPage({ id }: { id: string }) {
         kicker={thematique ?? "Publication"}
         title={publication.title}
         description={
-          <p className="font-mono text-sm text-white/70">
+          <p className="text-sm text-white/70">
             <time dateTime={publication.date}>{formatDate(publication.date)}</time>
             {" · "}
             {publication.level === "regional" ? `Région ${region ?? ""}`.trim() : "National"}
@@ -102,7 +102,7 @@ export default function PublicationPage({ id }: { id: string }) {
               className="mb-10 aspect-[3/2] w-full border border-line object-cover"
             />
           )}
-          <p className="border-l-[3px] border-laterite pl-5 font-display text-[1.45rem] leading-snug">{publication.excerpt}</p>
+          <p className="border-l-[3px] border-laterite pl-5 text-[1.45rem] leading-snug font-semibold">{publication.excerpt}</p>
           <div className="mt-8 space-y-5 text-[1.05rem] leading-relaxed">
             {paragraphs.map((paragraph, index) => (
               <p key={index} className="whitespace-pre-line">
@@ -118,7 +118,7 @@ export default function PublicationPage({ id }: { id: string }) {
 
         <aside className="space-y-10 lg:col-span-4">
           <section aria-labelledby="documents-title">
-            <h2 id="documents-title" className="flex items-baseline justify-between border-b-2 border-ink pb-2 font-mono text-xs">
+            <h2 id="documents-title" className="flex items-baseline justify-between border-b-2 border-ink pb-2 text-xs">
               <span>Documents à télécharger</span>
               <span className="text-muted tabular-nums">{String(publication.documents.length).padStart(2, "0")}</span>
             </h2>
@@ -134,7 +134,7 @@ export default function PublicationPage({ id }: { id: string }) {
                       <FileText className="size-5 shrink-0 text-paddy" strokeWidth={1.5} aria-hidden="true" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium group-hover:text-paddy">{doc.name}</span>
-                        <span className="font-mono text-xs text-muted">{formatBytes(doc.size)}</span>
+                        <span className="text-xs text-muted">{formatBytes(doc.size)}</span>
                       </span>
                       <ArrowDownToLine className="size-4 shrink-0 text-paddy" aria-hidden="true" />
                       <span className="sr-only">Télécharger</span>
@@ -148,7 +148,7 @@ export default function PublicationPage({ id }: { id: string }) {
           </section>
 
           <section aria-labelledby="fiche-title">
-            <h2 id="fiche-title" className="border-b-2 border-ink pb-2 font-mono text-xs">
+            <h2 id="fiche-title" className="border-b-2 border-ink pb-2 text-xs">
               Fiche
             </h2>
             <dl className="text-[0.95rem]">
@@ -167,7 +167,7 @@ export default function PublicationPage({ id }: { id: string }) {
             </dl>
             {sectorLabels.length > 0 && (
               <>
-                <h3 className="mt-6 font-mono text-xs text-muted">Secteurs concernés</h3>
+                <h3 className="mt-6 text-xs text-muted">Secteurs concernés</h3>
                 <ul className="mt-2 flex flex-wrap gap-2">
                   {sectorLabels.map((label) => (
                     <li key={label} className="border border-line bg-white px-2.5 py-1 text-sm">

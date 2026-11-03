@@ -31,7 +31,7 @@ export function Pagination({ page, pageCount, total, pageSize, onChange }: Pagin
   const to = Math.min(page * pageSize, total);
 
   return (
-    <nav aria-label="Pagination" className="mt-4 flex items-center justify-between gap-4 font-mono text-xs text-muted">
+    <nav aria-label="Pagination" className="mt-4 flex items-center justify-between gap-4 text-xs text-muted">
       <p>
         {from}–{to} sur {total}
       </p>

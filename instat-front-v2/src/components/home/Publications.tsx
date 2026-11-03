@@ -67,7 +67,7 @@ export default function Publications() {
                 }`}
               >
                 {tab.label}
-                <span className="font-mono text-xs text-muted tabular-nums">({count})</span>
+                <span className="text-xs text-muted tabular-nums">({count})</span>
                 <span
                   aria-hidden="true"
                   className={`absolute inset-x-0 bottom-0 h-[3px] ${selected ? "bg-laterite" : "bg-transparent"}`}
@@ -94,13 +94,13 @@ export default function Publications() {
               key={publication.id}
               className="group relative grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] lg:grid-cols-[2.5rem_minmax(0,1fr)_11rem_auto]"
             >
-              <span aria-hidden="true" className="hidden pt-1 font-mono text-xs text-muted tabular-nums sm:block">
+              <span aria-hidden="true" className="hidden pt-1 text-xs text-muted tabular-nums sm:block">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <div>
                 <a
                   href={publication.href}
-                  className="font-display text-xl leading-snug decoration-paddy/40 underline-offset-4 group-hover:text-paddy hover:underline"
+                  className="text-xl leading-snug decoration-paddy/40 underline-offset-4 group-hover:text-paddy hover:underline font-semibold"
                 >
                   {publication.title}
                 </a>
@@ -112,13 +112,13 @@ export default function Publications() {
                   </span>
                 </p>
               </div>
-              <time dateTime={publication.date} className="hidden pt-1.5 font-mono text-xs text-muted tabular-nums lg:block">
+              <time dateTime={publication.date} className="hidden pt-1.5 text-xs text-muted tabular-nums lg:block">
                 {formatDate(publication.date)}
               </time>
               <a
                 href={publication.href}
                 aria-label={`Documents à télécharger : ${publication.title}`}
-                className="inline-flex h-9 w-fit items-center gap-2 border border-line px-3 font-mono text-xs text-paddy hover:border-paddy hover:bg-paddy-soft"
+                className="inline-flex h-9 w-fit items-center gap-2 border border-line px-3 text-xs text-paddy hover:border-paddy hover:bg-paddy-soft"
               >
                 <ArrowDownToLine className="size-3.5" aria-hidden="true" />
                 PDF

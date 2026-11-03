@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef, useState, type FormEvent } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { news as sampleNews } from "../../data/news";
 import { useApiData } from "../../hooks/useApiData";
 import type { NewsItem } from "../../types";
@@ -7,8 +7,6 @@ import type { NewsItem } from "../../types";
 /** Hauteurs (en %) des barres de l'histogramme décoratif. */
 const bars = [18, 24, 30, 22, 36, 44, 38, 52, 60, 48, 66, 72, 58, 82, 70, 64, 56, 48, 52, 40, 44, 34, 30, 36, 26, 22, 28, 20, 16, 22, 14, 18];
 const HIGHLIGHT = 13;
-
-const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Distance (px) d'un glissement du doigt pour changer d'actualité. */
 const SWIPE = 50;
@@ -20,21 +18,15 @@ function NewsCarousel({ news }: { news: NewsItem[] }) {
   const go = (step: number) => setIndex((current) => (current + step + news.length) % news.length);
 
   return (
-    <section aria-label="Actualités" className="relative border border-white/15 bg-paddy-night/70 backdrop-blur-[2px]">
-      {/* Onglet laterite : repère de la rubrique, comme un signet dans un rapport. */}
-      <span aria-hidden="true" className="absolute -top-px left-6 h-[3px] w-14 bg-laterite" />
-
-      <div className="flex items-center justify-between border-b border-white/15 px-5 py-3 sm:px-6">
-        <h2 className="font-mono text-xs tracking-[0.02em] text-white/70">Fil d'actualités</h2>
+    <section aria-label="Actualités" className="bg-white text-ink [&_:focus-visible]:outline-laterite">
+      <div className="flex items-center justify-between border-b border-line px-5 py-3">
+        <h2 className="text-sm font-semibold">Actualités</h2>
         <div className="flex items-center gap-1">
-          <span className="mr-2 font-mono text-xs text-white/70 tabular-nums" aria-hidden="true">
-            <span className="text-white">{pad(index + 1)}</span> / {pad(news.length)}
-          </span>
           <button
             type="button"
             onClick={() => go(-1)}
             aria-label="Actualité précédente"
-            className="inline-flex size-8 items-center justify-center border border-white/20 hover:border-white/60 hover:bg-white/10"
+            className="inline-flex size-8 items-center justify-center text-muted hover:bg-paddy-soft hover:text-ink"
           >
             <ChevronLeft className="size-4" aria-hidden="true" />
           </button>
@@ -42,7 +34,7 @@ function NewsCarousel({ news }: { news: NewsItem[] }) {
             type="button"
             onClick={() => go(1)}
             aria-label="Actualité suivante"
-            className="inline-flex size-8 items-center justify-center border border-white/20 hover:border-white/60 hover:bg-white/10"
+            className="inline-flex size-8 items-center justify-center text-muted hover:bg-paddy-soft hover:text-ink"
           >
             <ChevronRight className="size-4" aria-hidden="true" />
           </button>
@@ -77,18 +69,14 @@ function NewsCarousel({ news }: { news: NewsItem[] }) {
                 key={entry.id}
                 aria-hidden={!current}
                 inert={!current}
-                className="flex min-h-64 w-full shrink-0 flex-col px-5 py-6 sm:px-6"
+                className="flex min-h-48 w-full shrink-0 flex-col px-5 py-5"
               >
-                <p className="font-mono text-xs text-white/60">
-                  {[entry.dateLabel, entry.context].filter(Boolean).join("  ·  ")}
+                <p className="text-sm text-muted">
+                  {[entry.dateLabel, entry.context].filter(Boolean).join(" · ")}
                 </p>
-                <h3 className="mt-3 font-display text-[1.6rem] leading-[1.2] font-normal sm:text-[1.8rem]">{entry.title}</h3>
-                <a
-                  href={entry.href}
-                  className="group mt-auto inline-flex w-fit items-center gap-2 pt-6 text-[0.95rem] font-medium text-white underline decoration-white/30 underline-offset-[6px] hover:decoration-white"
-                >
+                <h3 className="mt-2 text-lg leading-snug font-semibold">{entry.title}</h3>
+                <a href={entry.href} className="mt-auto pt-4 text-sm font-medium text-paddy underline underline-offset-4 hover:text-paddy-deep">
                   Lire l'actualité
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                 </a>
               </article>
             );
@@ -99,23 +87,56 @@ function NewsCarousel({ news }: { news: NewsItem[] }) {
         {`Actualité ${index + 1} sur ${news.length} : ${item.title}`}
       </p>
 
-      <div className="flex gap-1 px-5 pb-4 sm:px-6">
-        {news.map((entry, entryIndex) => (
-          <button
-            key={entry.id}
-            type="button"
-            onClick={() => setIndex(entryIndex)}
-            aria-label={`Actualité ${entryIndex + 1} sur ${news.length}`}
-            aria-current={entryIndex === index}
-            className="group flex h-5 flex-1 items-center"
-          >
-            <span
-              className={`h-[3px] w-full ${entryIndex === index ? "bg-laterite" : "bg-white/20 group-hover:bg-white/50"}`}
+      <div className="flex items-center justify-between border-t border-line px-5 py-3 text-sm">
+        <div className="flex gap-1.5">
+          {news.map((entry, entryIndex) => (
+            <button
+              key={entry.id}
+              type="button"
+              onClick={() => setIndex(entryIndex)}
+              aria-label={`Actualité ${entryIndex + 1} sur ${news.length}`}
+              aria-current={entryIndex === index}
+              className={`size-2 rounded-full ${entryIndex === index ? "bg-paddy" : "bg-line hover:bg-rule"}`}
             />
-          </button>
-        ))}
+          ))}
+        </div>
+        <a href="#/actualites" className="font-medium text-paddy hover:underline">
+          Toutes les actualités
+        </a>
       </div>
     </section>
+  );
+}
+
+
+/** Recherche dans les publications : ouvre la liste filtrée (#/publications?q=…). */
+function PublicationSearch() {
+  const [text, setText] = useState("");
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const q = text.trim();
+    window.location.hash = q ? `#/publications?${new URLSearchParams({ q })}` : "#/publications";
+  };
+
+  return (
+    <form role="search" onSubmit={submit} className="mt-7 flex max-w-xl">
+      <label htmlFor="hero-search" className="sr-only">
+        Rechercher une publication
+      </label>
+      <input
+        id="hero-search"
+        type="search"
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        placeholder="Rechercher une publication, un indicateur…"
+        className="h-12 min-w-0 flex-1 bg-white px-4 text-ink placeholder:text-muted focus-visible:outline-offset-0"
+      />
+      <button type="submit" className="inline-flex h-12 items-center gap-2 bg-laterite px-5 font-medium text-white hover:bg-[#9a2f23]">
+        <Search className="size-4" aria-hidden="true" />
+        <span className="hidden sm:inline">Rechercher</span>
+      </button>
+    </form>
   );
 }
 
@@ -124,55 +145,38 @@ export default function Hero() {
 
   return (
     <section id="accueil" className="on-dark graph-paper relative overflow-hidden bg-paddy-deep text-white">
-      <div className="mx-auto max-w-7xl px-4 pt-10 pb-36 sm:px-6 sm:pb-44 lg:px-8 lg:pt-14">
-        <p className="running-head">
-          <span className="text-white">INSTAT</span>
-          <span>
-            <span className="hidden sm:inline">Institut national de la statistique · </span>Madagascar
-          </span>
-        </p>
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 pt-12 sm:px-6 lg:grid-cols-12 lg:items-center lg:gap-12 lg:px-8 pb-36 sm:pb-44 lg:pt-14">
+        <div className="lg:col-span-7">
+          <h1 className="text-3xl leading-tight font-bold tracking-[-0.01em] sm:text-4xl">Les statistiques officielles de Madagascar</h1>
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
+            Publications, bases de données et indicateurs produits par l'Institut national de la statistique.
+          </p>
+          <PublicationSearch />
+          <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <a href="#/publications" className="inline-flex items-center gap-1.5 font-medium underline underline-offset-4 hover:text-paddy-soft">
+              Toutes les publications
+              <ArrowRight className="size-3.5" aria-hidden="true" />
+            </a>
+            <a href="#chiffres" className="font-medium underline underline-offset-4 hover:text-paddy-soft">
+              Madagascar en chiffres
+            </a>
+          </p>
+        </div>
 
-        <div className="mt-10 grid gap-12 lg:mt-14 lg:grid-cols-12 lg:gap-14">
-          <div className="lg:col-span-7">
-            <h1 className="font-display text-[2.6rem] leading-[1.02] font-normal tracking-[-0.02em] sm:text-6xl lg:text-[4.4rem]">
-              La statistique, <em className="text-[#f2d7cf] italic">un outil de gouvernance</em> au service du développement
-            </h1>
-            <p className="mt-7 max-w-lg text-lg leading-relaxed text-white/75">
-              Publications, bases de données et indicateurs produits par l'Institut national de la statistique de
-              Madagascar.
+        {/* min-w-0 : sans lui, la colonne prendrait la largeur cumulée de toutes les actualités du carrousel. */}
+        <div className="min-w-0 lg:col-span-5">
+          {result.status === "ready" && result.data.length > 0 ? (
+            <NewsCarousel news={result.data} />
+          ) : (
+            // Même hauteur que le carrousel : la page ne « saute » pas quand les actualités arrivent.
+            <p role="status" className="flex min-h-[18rem] items-center bg-white px-5 py-8 text-sm text-muted">
+              {result.status === "loading"
+                ? "Chargement des actualités…"
+                : result.status === "error"
+                  ? `Actualités indisponibles. ${result.message}`
+                  : "Aucune actualité pour le moment."}
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
-              <a
-                href="#publications"
-                className="group inline-flex h-12 items-center gap-3 bg-white pr-5 pl-6 font-medium text-paddy-deep hover:bg-paddy-soft"
-              >
-                Consulter les publications
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-              </a>
-              <a
-                href="#chiffres"
-                className="font-medium text-white underline decoration-white/35 underline-offset-[6px] hover:decoration-white"
-              >
-                Madagascar en chiffres
-              </a>
-            </div>
-          </div>
-
-          {/* min-w-0 : sans lui, la colonne prendrait la largeur cumulée de toutes les actualités du carrousel. */}
-          <div className="min-w-0 lg:col-span-5 lg:pt-2">
-            {result.status === "ready" && result.data.length > 0 ? (
-              <NewsCarousel news={result.data} />
-            ) : (
-              // Même hauteur que le carrousel : la page ne « saute » pas quand les actualités arrivent.
-              <p role="status" className="flex min-h-[22rem] items-center border border-white/15 bg-paddy-night/70 px-6 py-8 font-mono text-xs text-white/70">
-                {result.status === "loading"
-                  ? "Chargement des actualités…"
-                  : result.status === "error"
-                    ? `Actualités indisponibles. ${result.message}`
-                    : "Aucune actualité pour le moment."}
-              </p>
-            )}
-          </div>
+          )}
         </div>
       </div>
 

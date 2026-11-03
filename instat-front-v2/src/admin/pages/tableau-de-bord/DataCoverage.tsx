@@ -12,14 +12,14 @@ export default function DataCoverage() {
       <dl className="grid grid-cols-2 gap-4">
         <div>
           <dt className="text-sm text-muted">Fiches renseignées</dt>
-          <dd className="mt-1 font-display text-[2rem] leading-none font-light tabular-nums">
+          <dd className="mt-1 text-[2rem] leading-none font-semibold tabular-nums">
             {formatNumber(figureRegions.items.length - missing.length)}
-            <span className="ml-1 font-mono text-xs text-muted">/ {formatNumber(figureRegions.items.length)}</span>
+            <span className="ml-1 text-xs text-muted">/ {formatNumber(figureRegions.items.length)}</span>
           </dd>
         </div>
         <div>
           <dt className="text-sm text-muted">Valeurs saisies</dt>
-          <dd className="mt-1 font-display text-[2rem] leading-none font-light tabular-nums">{formatNumber(figureValues.items.length)}</dd>
+          <dd className="mt-1 text-[2rem] leading-none font-semibold tabular-nums">{formatNumber(figureValues.items.length)}</dd>
         </div>
       </dl>
       {missing.length > 0 ? (

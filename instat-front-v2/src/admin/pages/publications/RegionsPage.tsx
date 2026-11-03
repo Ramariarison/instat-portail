@@ -108,7 +108,7 @@ export default function RegionsPage() {
   const columns: Column<Region>[] = [
     { key: "name", header: "Nom", cell: (r) => <span className={cellTitleClass}>{r.name}</span> },
     { key: "picto", header: "Fichier picto", cell: (r) => <code className="text-sm text-muted">{r.picto}</code> },
-    { key: "count", header: "Publications", align: "right", cell: (r) => <span className="font-mono text-[0.85rem] tabular-nums">{usage(r.id)}</span> },
+    { key: "count", header: "Publications", align: "right", cell: (r) => <span className="text-[0.85rem] tabular-nums">{usage(r.id)}</span> },
     ...(canUpdate || canDelete
       ? [
           {

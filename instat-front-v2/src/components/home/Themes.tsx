@@ -18,11 +18,11 @@ export default function Themes() {
           {themes.map(({ id, label, icon: Icon }, index) => (
             <li key={id} className="border-b border-line">
               <a href={`#/themes/${id}`} className="group flex items-center gap-4 py-4">
-                <span className="w-6 shrink-0 font-mono text-xs text-laterite tabular-nums">
+                <span className="w-6 shrink-0 text-xs text-laterite tabular-nums">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <Icon className="size-[1.1rem] shrink-0 text-paddy/70 group-hover:text-paddy" strokeWidth={1.5} aria-hidden="true" />
-                <span className="font-display text-lg leading-snug group-hover:text-paddy">{label}</span>
+                <span className="text-lg leading-snug group-hover:text-paddy font-semibold">{label}</span>
                 <span aria-hidden="true" className="leader group-hover:border-paddy/50" />
                 <ArrowRight
                   className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-paddy"

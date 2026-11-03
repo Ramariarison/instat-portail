@@ -29,7 +29,7 @@ export default function AdminNav({ route, role }: AdminNavProps) {
           home ? "border-l-laterite bg-white text-paddy" : "border-l-transparent text-ink hover:bg-white"
         }`}
       >
-        <span className={`flex-1 font-display text-[1.07rem] leading-tight ${home ? "" : "group-hover:text-paddy"}`}>
+        <span className={`flex-1 text-[1.07rem] leading-tight font-semibold ${home ? "" : "group-hover:text-paddy"}`}>
           Tableau de bord
         </span>
         <LayoutDashboard
@@ -40,7 +40,7 @@ export default function AdminNav({ route, role }: AdminNavProps) {
       </a>
       {groups.map((group, groupIndex) => (
         <div key={group.title} className="mb-7 last:mb-0">
-          <p className="mb-1 flex items-baseline gap-2 border-b-2 border-ink pb-2 font-mono text-xs text-ink">
+          <p className="mb-1 flex items-baseline gap-2 border-b-2 border-ink pb-2 text-xs text-ink">
             <span className="text-laterite tabular-nums">{groupIndex + 1}</span>
             {group.title}
           </p>
@@ -57,11 +57,11 @@ export default function AdminNav({ route, role }: AdminNavProps) {
                     }`}
                   >
                     <span
-                      className={`w-6 shrink-0 font-mono text-[0.7rem] tabular-nums ${active ? "text-laterite" : "text-muted"}`}
+                      className={`w-6 shrink-0 text-[0.7rem] tabular-nums ${active ? "text-laterite" : "text-muted"}`}
                     >
                       {groupIndex + 1}.{itemIndex + 1}
                     </span>
-                    <span className={`flex-1 font-display text-[1.07rem] leading-tight ${active ? "" : "group-hover:text-paddy"}`}>
+                    <span className={`flex-1 text-[1.07rem] leading-tight font-semibold ${active ? "" : "group-hover:text-paddy"}`}>
                       {label}
                     </span>
                     <Icon

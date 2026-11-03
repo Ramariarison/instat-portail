@@ -6,7 +6,7 @@ import SectionHead from "./SectionHead";
 function LinkList({ title, items }: { title: string; items: ServiceLink[] }) {
   return (
     <div>
-      <h3 className="flex items-baseline justify-between border-b-2 border-ink pb-3 font-mono text-xs text-muted">
+      <h3 className="flex items-baseline justify-between border-b-2 border-ink pb-3 text-xs text-muted">
         <span className="text-ink">{title}</span>
         <span className="tabular-nums">{String(items.length).padStart(2, "0")}</span>
       </h3>
@@ -18,7 +18,7 @@ function LinkList({ title, items }: { title: string; items: ServiceLink[] }) {
                 <Icon className="size-4" strokeWidth={1.75} aria-hidden="true" />
               </span>
               <span className="flex-1">
-                <span className="block font-display text-xl leading-snug group-hover:text-paddy">{label}</span>
+                <span className="block text-xl leading-snug group-hover:text-paddy font-semibold">{label}</span>
                 <span className="mt-0.5 block text-[0.95rem] text-muted">{description}</span>
               </span>
               <ArrowRight
@@ -47,9 +47,9 @@ export default function DataAndServices() {
         <div className="on-dark graph-paper relative mt-16 grid gap-8 bg-paddy-deep p-6 text-white sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <span aria-hidden="true" className="absolute top-0 left-0 h-full w-[3px] bg-laterite" />
           <div>
-            <p className="font-mono text-xs text-white/60">Demande sur mesure</p>
-            <h2 className="mt-3 font-display text-3xl leading-tight font-normal sm:text-4xl">
-              Vous cherchez des données <em className="italic">précises</em> ?
+            <p className="text-xs text-white/60">Demande sur mesure</p>
+            <h2 className="mt-3 text-3xl leading-tight font-bold sm:text-4xl">
+              Vous cherchez des données précises ?
             </h2>
             <p className="mt-3 max-w-xl text-white/75">
               Faites une demande de données ou consultez les microdonnées disponibles.

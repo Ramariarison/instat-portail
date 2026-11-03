@@ -51,7 +51,7 @@ export default function Footer() {
         </div>
 
         <nav aria-label="Pied de page">
-          <h2 className="border-b border-white/20 pb-3 font-mono text-xs text-white/60">Liens</h2>
+          <h2 className="border-b border-white/20 pb-3 text-xs text-white/60">Liens</h2>
           <ul className="mt-4 space-y-2.5 text-[0.95rem] text-white/80">
             {footerLinks.map((link) => (
               <li key={link.href}>
@@ -64,8 +64,8 @@ export default function Footer() {
         </nav>
 
         <div>
-          <h2 className="border-b border-white/20 pb-3 font-mono text-xs text-white/60">Lettre d'information</h2>
-          <p className="mt-4 font-display text-2xl leading-snug">Recevez les nouvelles publications de l'INSTAT.</p>
+          <h2 className="border-b border-white/20 pb-3 text-xs text-white/60">Lettre d'information</h2>
+          <p className="mt-4 text-2xl leading-snug font-semibold">Recevez les nouvelles publications de l'INSTAT.</p>
           {subscribed ? (
             <p role="status" className="mt-4 text-sm font-medium">
               Merci, votre abonnement est pris en compte.
@@ -93,7 +93,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-white/15">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-4 py-5 font-mono text-xs text-white/60 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-4 py-5 text-xs text-white/60 sm:px-6 lg:px-8">
           <p>© INSTAT 2026. Tous droits réservés.</p>
           <p>Institut national de la statistique · Antananarivo, Madagascar</p>
         </div>

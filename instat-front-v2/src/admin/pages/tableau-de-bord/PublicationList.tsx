@@ -22,11 +22,11 @@ export default function PublicationList({
         <li key={publication.id} className="border-b border-line py-2.5 first:pt-0 last:border-b-0">
           <a
             href={`#/admin/publications/modifier/${publication.id}`}
-            className="font-display text-[1.05rem] leading-snug decoration-paddy/40 underline-offset-4 hover:text-paddy hover:underline"
+            className="text-[1.05rem] leading-snug decoration-paddy/40 underline-offset-4 hover:text-paddy hover:underline font-semibold"
           >
             {publication.title}
           </a>
-          <p className="mt-0.5 font-mono text-xs text-muted">
+          <p className="mt-0.5 text-xs text-muted">
             {formatDate(publication.date)}
             {publication.createdByName && ` · ${publication.createdByName}`}
           </p>
@@ -34,7 +34,7 @@ export default function PublicationList({
         </li>
       ))}
       {items.length > limit && (
-        <li className="pt-2.5 font-mono text-xs text-muted">et {items.length - limit} autre{items.length - limit > 1 ? "s" : ""}…</li>
+        <li className="pt-2.5 text-xs text-muted">et {items.length - limit} autre{items.length - limit > 1 ? "s" : ""}…</li>
       )}
     </ul>
   );

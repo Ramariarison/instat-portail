@@ -26,4 +26,4 @@ export default function Panel({
   );
 }
 
-export const panelLinkClass = "font-mono text-xs text-paddy underline decoration-paddy/30 underline-offset-4 hover:decoration-paddy";
+export const panelLinkClass = "text-xs text-paddy underline decoration-paddy/30 underline-offset-4 hover:decoration-paddy";

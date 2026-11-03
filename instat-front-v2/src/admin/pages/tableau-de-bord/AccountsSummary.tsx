@@ -17,18 +17,18 @@ export default function AccountsSummary() {
         <div key={role} className="flex items-baseline gap-3 border-b border-line py-2">
           <dt>{roleLabels[role]}</dt>
           <span aria-hidden="true" className="leader" />
-          <dd className="font-mono text-xs tabular-nums">{formatNumber(users.items.filter((user) => user.role === role).length)}</dd>
+          <dd className="text-xs tabular-nums">{formatNumber(users.items.filter((user) => user.role === role).length)}</dd>
         </div>
       ))}
       <div className="flex items-baseline gap-3 border-b border-line py-2">
         <dt className="text-muted">Comptes suspendus</dt>
         <span aria-hidden="true" className="leader" />
-        <dd className="font-mono text-xs tabular-nums">{formatNumber(suspended)}</dd>
+        <dd className="text-xs tabular-nums">{formatNumber(suspended)}</dd>
       </div>
       <div className="flex items-baseline gap-3 py-2">
         <dt className="text-muted">Jamais connectés</dt>
         <span aria-hidden="true" className="leader" />
-        <dd className="font-mono text-xs tabular-nums">{formatNumber(neverLoggedIn)}</dd>
+        <dd className="text-xs tabular-nums">{formatNumber(neverLoggedIn)}</dd>
       </div>
     </dl>
   );

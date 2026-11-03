@@ -25,7 +25,7 @@ export default function DataTable<T extends { id: string }>({ caption, columns, 
     <div className="overflow-x-auto border border-t-2 border-line border-t-ink bg-white">
       <table className="w-full min-w-max text-left text-[0.95rem]">
         <caption className="sr-only">{caption}</caption>
-        <thead className="border-b border-rule bg-white font-mono text-xs text-muted">
+        <thead className="border-b border-rule bg-white text-xs text-muted">
           <tr>
             {columns.map((column) => (
               <th
@@ -99,4 +99,4 @@ export function RowActions({ label, onEdit, editHref, onDelete, extra }: RowActi
 }
 
 /** Intitulé principal d'une ligne (nom, titre) : en serif, comme les titres du site. */
-export const cellTitleClass = "font-display text-[1.07rem] leading-snug";
+export const cellTitleClass = "text-[1.07rem] leading-snug font-semibold";

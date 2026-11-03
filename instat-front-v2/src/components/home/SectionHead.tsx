@@ -19,7 +19,7 @@ export default function SectionHead({ number, kicker, title, description, action
       </p>
       <div className="mt-5 grid gap-x-12 gap-y-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
         <div>
-          <h2 className="font-display text-[2rem] leading-[1.1] font-medium tracking-[-0.01em] sm:text-[2.6rem]">{title}</h2>
+          <h2 className="text-[1.75rem] leading-tight font-bold tracking-[-0.01em] sm:text-[2.1rem]">{title}</h2>
           {description && <p className="mt-3 max-w-xl text-[1.05rem] leading-relaxed text-muted">{description}</p>}
         </div>
         {action}
@@ -35,7 +35,7 @@ export const sectionLinkClass =
 /** Ligne d'état d'une section (chargement, données indisponibles), annoncée aux lecteurs d'écran. */
 export function StatusLine({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <p role="status" className={`py-8 font-mono text-sm text-muted ${className}`}>
+    <p role="status" className={`py-8 text-sm text-muted ${className}`}>
       {children}
     </p>
   );

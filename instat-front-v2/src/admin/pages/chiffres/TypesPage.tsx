@@ -106,7 +106,7 @@ export default function TypesPage() {
   const columns: Column<DataType>[] = [
     { key: "name", header: "Nom", cell: (t) => <span className={cellTitleClass}>{t.name}</span> },
     { key: "picto", header: "Fichier picto", cell: (t) => <code className="text-sm text-muted">{t.picto}</code> },
-    { key: "count", header: "Indicateurs", align: "right", cell: (t) => <span className="font-mono text-[0.85rem] tabular-nums">{usage(t.id)}</span> },
+    { key: "count", header: "Indicateurs", align: "right", cell: (t) => <span className="text-[0.85rem] tabular-nums">{usage(t.id)}</span> },
     ...(canUpdate || canDelete
       ? [
           {

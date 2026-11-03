@@ -145,7 +145,7 @@ function UserForm({
                 className="mt-1 size-4 shrink-0 accent-paddy"
               />
               <span>
-                <span className="block font-display text-[1.07rem] leading-snug">{roleLabels[candidate]}</span>
+                <span className="block text-[1.07rem] leading-snug font-semibold">{roleLabels[candidate]}</span>
                 <span className="block text-sm text-muted">{roleDescriptions[candidate]}</span>
               </span>
             </label>
@@ -222,7 +222,7 @@ export default function UsersPage() {
               <Badge tone="outline">Vous</Badge>
             </span>
           )}
-          <span className="block font-mono text-xs text-muted">{u.email}</span>
+          <span className="block text-xs text-muted">{u.email}</span>
         </div>
       ),
     },
@@ -237,7 +237,7 @@ export default function UsersPage() {
       header: "Dernière connexion",
       cell: (u) =>
         u.lastLogin ? (
-          <span className="font-mono text-xs whitespace-nowrap text-muted">{formatDateTime(u.lastLogin)}</span>
+          <span className="text-xs whitespace-nowrap text-muted">{formatDateTime(u.lastLogin)}</span>
         ) : (
           <span className="text-sm text-muted">Jamais</span>
         ),

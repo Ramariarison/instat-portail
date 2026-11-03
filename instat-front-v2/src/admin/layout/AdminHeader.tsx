@@ -15,8 +15,8 @@ export default function AdminHeader({ onLoginClick }: { onLoginClick: () => void
             <img src={logoInstat} alt="" className="h-12 w-auto" />
           </a>
           <div className="hidden border-l border-line pl-4 sm:block">
-            <p className="font-display text-lg leading-tight">Espace d'administration</p>
-            <p className="font-mono text-[0.7rem] text-muted">Portail INSTAT Madagascar</p>
+            <p className="text-lg leading-tight font-semibold">Espace d'administration</p>
+            <p className="text-[0.7rem] text-muted">Portail INSTAT Madagascar</p>
           </div>
         </div>
 

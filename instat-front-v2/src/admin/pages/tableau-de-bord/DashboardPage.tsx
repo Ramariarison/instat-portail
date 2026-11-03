@@ -106,7 +106,7 @@ export default function DashboardPage() {
                 items={[...withStatus(mine, "submitted"), ...withStatus(mine, "draft")]}
                 empty="Aucun brouillon ni publication en attente."
                 detail={(p) => (
-                  <p className="font-mono text-xs text-muted">{p.status === "submitted" ? "En attente de validation" : "Brouillon"}</p>
+                  <p className="text-xs text-muted">{p.status === "submitted" ? "En attente de validation" : "Brouillon"}</p>
                 )}
               />
             </Panel>
@@ -122,7 +122,7 @@ export default function DashboardPage() {
           title="Publications en ligne par thématique"
           action={
             ready && (
-              <span className="font-mono text-xs text-muted">
+              <span className="text-xs text-muted">
                 National {formatNumber(ready.publishedByLevel.national)} · Régional {formatNumber(ready.publishedByLevel.regional)}
               </span>
             )

@@ -30,7 +30,7 @@ function Panel({ code, title, children, actions, aside }: PanelProps) {
           <span className="text-white tabular-nums">{code}</span>
           <span>Espace d'administration</span>
         </p>
-        <h1 className="mt-10 font-display text-[2.6rem] leading-[1.02] font-normal tracking-[-0.02em] sm:text-[3.4rem]">
+        <h1 className="mt-10 text-3xl leading-tight font-bold tracking-[-0.01em] sm:text-4xl">
           {title}
         </h1>
         <div className="mt-4 max-w-md text-[1.05rem] leading-relaxed text-white/75">{children}</div>
@@ -53,18 +53,18 @@ function BackToSite() {
 function AllowedRoles() {
   return (
     <>
-      <h2 className="flex items-baseline justify-between border-b-2 border-ink pb-2 font-mono text-xs">
+      <h2 className="flex items-baseline justify-between border-b-2 border-ink pb-2 text-xs">
         <span>Qui peut se connecter ?</span>
         <span className="text-muted tabular-nums">03</span>
       </h2>
       <ol>
         {roles.map((role, index) => (
           <li key={role} className="flex gap-4 border-b border-line py-4">
-            <span className="w-5 shrink-0 pt-1 font-mono text-xs text-laterite tabular-nums">
+            <span className="w-5 shrink-0 pt-1 text-xs text-laterite tabular-nums">
               {String(index + 1).padStart(2, "0")}
             </span>
             <span>
-              <span className="block font-display text-xl leading-snug">{roleLabels[role]}</span>
+              <span className="block text-xl leading-snug font-semibold">{roleLabels[role]}</span>
               <span className="mt-0.5 block text-[0.95rem] leading-relaxed text-muted">{roleDescriptions[role]}</span>
             </span>
           </li>

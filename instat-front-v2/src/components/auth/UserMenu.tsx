@@ -28,14 +28,14 @@ export default function UserMenu() {
         }`}
       >
         <span
-          className="flex size-8 items-center justify-center bg-paddy-deep font-display text-[0.95rem] text-white"
+          className="flex size-8 items-center justify-center bg-paddy-deep text-[0.95rem] text-white font-semibold"
           aria-hidden="true"
         >
           {initials(user.name)}
         </span>
         <span className="hidden text-left leading-tight whitespace-nowrap 2xl:block">
-          <span className="block font-display text-[1rem]">{user.name}</span>
-          <span className="block font-mono text-[0.68rem] text-muted">{roleLabels[user.role]}</span>
+          <span className="block text-[1rem] font-semibold">{user.name}</span>
+          <span className="block text-[0.68rem] text-muted">{roleLabels[user.role]}</span>
         </span>
         <ChevronDown className={`size-4 text-muted transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
@@ -48,27 +48,27 @@ export default function UserMenu() {
           {/* Fiche du compte : même bandeau que la fenêtre de connexion. */}
           <div className="on-dark graph-paper relative bg-paddy-night px-5 pt-5 pb-5 text-white">
             <span aria-hidden="true" className="absolute top-0 left-5 h-[3px] w-12 bg-laterite" />
-            <p className="font-mono text-xs text-white/60">Connecté en tant que</p>
+            <p className="text-xs text-white/60">Connecté en tant que</p>
             <div className="mt-3 flex items-center gap-3.5">
               <span
                 aria-hidden="true"
-                className="flex size-12 shrink-0 items-center justify-center border border-white/25 font-display text-xl"
+                className="flex size-12 shrink-0 items-center justify-center border border-white/25 text-xl font-semibold"
               >
                 {initials(user.name)}
               </span>
               <div className="min-w-0">
-                <p className="truncate font-display text-[1.35rem] leading-tight">{user.name}</p>
-                <p className="truncate font-mono text-xs text-white/65">{user.email}</p>
+                <p className="truncate text-[1.35rem] leading-tight font-semibold">{user.name}</p>
+                <p className="truncate text-xs text-white/65">{user.email}</p>
               </div>
             </div>
-            <p className="mt-4 inline-flex items-center gap-2 border border-white/25 px-2 py-0.5 font-mono text-[0.7rem] text-white/90">
+            <p className="mt-4 inline-flex items-center gap-2 border border-white/25 px-2 py-0.5 text-[0.7rem] text-white/90">
               <span aria-hidden="true" className="size-1.5 bg-laterite" />
               {roleLabels[user.role]}
             </p>
           </div>
 
           <div className="px-5 pt-4 pb-1">
-            <p className="flex items-baseline justify-between border-b-2 border-ink pb-2 font-mono text-xs">
+            <p className="flex items-baseline justify-between border-b-2 border-ink pb-2 text-xs">
               <span>Raccourcis</span>
               <span className="text-muted tabular-nums">{String(actions.length).padStart(2, "0")}</span>
             </p>
@@ -76,11 +76,11 @@ export default function UserMenu() {
               {actions.map(({ label, href, icon: Icon }, index) => (
                 <li key={href} className="border-b border-line last:border-b-0">
                   <a href={href} onClick={close} className="group flex items-center gap-3 py-3">
-                    <span className="w-5 shrink-0 font-mono text-xs text-laterite tabular-nums">
+                    <span className="w-5 shrink-0 text-xs text-laterite tabular-nums">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <Icon className="size-4 shrink-0 text-paddy/70 group-hover:text-paddy" strokeWidth={1.5} aria-hidden="true" />
-                    <span className="flex-1 font-display text-[1.05rem] leading-snug group-hover:text-paddy">{label}</span>
+                    <span className="flex-1 text-[1.05rem] leading-snug group-hover:text-paddy font-semibold">{label}</span>
                     <ArrowRight
                       className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-paddy"
                       aria-hidden="true"

@@ -34,7 +34,7 @@ export default function ProfileForm() {
       <dl className="grid gap-4 text-[0.95rem] sm:grid-cols-2">
         <div>
           <dt className="text-sm font-medium">Adresse e-mail</dt>
-          <dd className="mt-1.5 font-mono text-sm text-muted">{user.email}</dd>
+          <dd className="mt-1.5 text-sm text-muted">{user.email}</dd>
         </div>
         <div>
           <dt className="text-sm font-medium">Rôle</dt>

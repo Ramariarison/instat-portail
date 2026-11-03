@@ -42,10 +42,10 @@ export default function Modal({ open, onClose, title, description, wide = false,
           <span aria-hidden="true" className="absolute top-0 left-6 h-[3px] w-14 bg-laterite sm:left-8" />
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 id={titleId} className="font-display text-[1.9rem] leading-tight font-normal tracking-[-0.01em]">
+              <h2 id={titleId} className="text-[1.9rem] leading-tight font-semibold tracking-[-0.01em]">
                 {title}
               </h2>
-              {description && <p className="mt-1.5 font-mono text-xs text-muted">{description}</p>}
+              {description && <p className="mt-1.5 text-xs text-muted">{description}</p>}
             </div>
             <button
               type="button"

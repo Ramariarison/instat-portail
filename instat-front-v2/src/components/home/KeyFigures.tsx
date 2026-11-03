@@ -36,14 +36,14 @@ export default function KeyFigures() {
           {lead && (
             <div className="flex flex-col justify-between gap-8 border-b border-line py-8 lg:col-span-5 lg:border-r lg:border-b-0 lg:pr-10">
               <dt className="flex items-baseline gap-3 text-[0.95rem] text-muted">
-                <span className="font-mono text-xs text-laterite">1.0</span>
+                <span className="text-xs text-laterite">1.0</span>
                 {lead.label}
               </dt>
               <dd>
-                <span className="block font-display text-[clamp(3.5rem,8vw,6.5rem)] leading-[0.9] font-light tracking-[-0.03em] tabular-nums">
+                <span className="block text-[clamp(3rem,6vw,4.75rem)] leading-[0.95] font-bold tracking-[-0.02em] tabular-nums">
                   {formatNumber(lead.value, lead.decimals)}
                 </span>
-                <span className="mt-4 flex items-baseline justify-between gap-4 border-t border-line pt-3 font-mono text-xs text-muted">
+                <span className="mt-4 flex items-baseline justify-between gap-4 border-t border-line pt-3 text-xs text-muted">
                   <span>{lead.unit}</span>
                   <span>{lead.period}</span>
                 </span>
@@ -58,24 +58,24 @@ export default function KeyFigures() {
                 className="border-b border-line py-6 last:border-b-0 sm:odd:pr-8 sm:even:border-l sm:even:pl-8 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
               >
                 <dt className="flex items-baseline gap-3 text-[0.95rem] text-muted">
-                  <span className="font-mono text-xs text-laterite">{`2.${i + 1}`}</span>
+                  <span className="text-xs text-laterite">{`2.${i + 1}`}</span>
                   {indicator.label}
                 </dt>
                 <dd className="mt-3 flex items-baseline justify-between gap-4">
                   <span>
-                    <span className="font-display text-[2.75rem] leading-none font-light tracking-[-0.02em] tabular-nums">
+                    <span className="text-[2.75rem] leading-none font-semibold tracking-[-0.02em] tabular-nums">
                       {formatNumber(indicator.value, indicator.decimals)}
                     </span>
                     <span className="ml-1.5 text-lg text-muted">{indicator.unit}</span>
                   </span>
-                  <span className="font-mono text-xs whitespace-nowrap text-muted">{indicator.period}</span>
+                  <span className="text-xs whitespace-nowrap text-muted">{indicator.period}</span>
                 </dd>
               </div>
             ))}
           </div>
         </dl>
 
-        <p className="mt-4 border-t border-line pt-3 font-mono text-xs text-muted">
+        <p className="mt-4 border-t border-line pt-3 text-xs text-muted">
           Source : INSTAT, service « Madagascar en chiffres ».
           {SAMPLE_DATA && " Valeurs d'exemple, à remplacer par les données du service."}
         </p>

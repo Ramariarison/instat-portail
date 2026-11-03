@@ -139,7 +139,7 @@ export default function FiguresPage() {
       key: "count",
       header: "Données",
       align: "right",
-      cell: (f) => <span className="font-mono text-[0.85rem] tabular-nums">{stats.get(f.id)?.count ?? 0}</span>,
+      cell: (f) => <span className="text-[0.85rem] tabular-nums">{stats.get(f.id)?.count ?? 0}</span>,
     },
     {
       key: "years",
@@ -147,7 +147,7 @@ export default function FiguresPage() {
       cell: (f) => {
         const s = stats.get(f.id);
         if (!s) return <span className="text-muted">—</span>;
-        return <span className="font-mono text-[0.85rem] tabular-nums">{s.min === s.max ? s.min : `${s.min} – ${s.max}`}</span>;
+        return <span className="text-[0.85rem] tabular-nums">{s.min === s.max ? s.min : `${s.min} – ${s.max}`}</span>;
       },
     },
     {

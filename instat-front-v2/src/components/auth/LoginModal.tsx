@@ -83,7 +83,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
       <div className="on-dark graph-paper relative bg-paddy-deep px-6 pt-5 pb-7 text-white sm:px-8">
         <span aria-hidden="true" className="absolute top-0 left-6 h-[3px] w-14 bg-laterite sm:left-8" />
         <div className="flex items-center justify-between gap-4">
-          <p className="font-mono text-xs text-white/65">Espace réservé · INSTAT</p>
+          <p className="text-xs text-white/65">Espace réservé · INSTAT</p>
           <button
             type="button"
             onClick={onClose}
@@ -93,7 +93,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
             <X className="size-5" aria-hidden="true" />
           </button>
         </div>
-        <h2 id={titleId} className="mt-4 font-display text-[2.4rem] leading-none font-normal tracking-[-0.01em]">
+        <h2 id={titleId} className="mt-4 text-[2.4rem] leading-none font-semibold tracking-[-0.01em]">
           Connexion
         </h2>
         <p id={descriptionId} className="mt-3 max-w-sm text-[0.95rem] leading-relaxed text-white/75">
@@ -152,7 +152,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                 onClick={() => setShowPassword((value) => !value)}
                 aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                 aria-pressed={showPassword}
-                className="absolute top-2 right-1.5 inline-flex h-10 items-center gap-1.5 px-2.5 font-mono text-xs text-muted hover:bg-paddy-soft hover:text-ink"
+                className="absolute top-2 right-1.5 inline-flex h-10 items-center gap-1.5 px-2.5 text-xs text-muted hover:bg-paddy-soft hover:text-ink"
               >
                 {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
                 <span aria-hidden="true">{showPassword ? "Masquer" : "Afficher"}</span>
@@ -191,7 +191,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
 
         {SHOW_DEMO_ACCOUNTS && (
           <div className="mt-7">
-            <p className="flex items-baseline justify-between border-b-2 border-ink pb-2 font-mono text-xs">
+            <p className="flex items-baseline justify-between border-b-2 border-ink pb-2 text-xs">
               <span>Comptes de démonstration</span>
               <span className="text-muted">données d'exemple</span>
             </p>
@@ -214,9 +214,9 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                     >
                       <span className="flex-1">
                         <span className="block text-[0.95rem] font-medium">{roleLabels[account.role]}</span>
-                        <span className="block font-mono text-xs text-muted">{account.email}</span>
+                        <span className="block text-xs text-muted">{account.email}</span>
                       </span>
-                      <span className={`font-mono text-xs ${selected ? "text-laterite" : "text-paddy group-hover:underline"}`}>
+                      <span className={`text-xs ${selected ? "text-laterite" : "text-paddy group-hover:underline"}`}>
                         {selected ? "Rempli" : "Remplir"}
                       </span>
                     </button>

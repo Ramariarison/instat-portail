@@ -129,7 +129,7 @@ export default function IndicateursPage() {
     },
     { key: "type", header: "Type de données", cell: (i) => <Badge tone="neutral">{typeName(i.typeId)}</Badge> },
     { key: "picto", header: "Fichier picto", cell: (i) => <code className="text-sm text-muted">{i.picto}</code> },
-    { key: "count", header: "Valeurs", align: "right", cell: (i) => <span className="font-mono text-[0.85rem] tabular-nums">{usage(i.id)}</span> },
+    { key: "count", header: "Valeurs", align: "right", cell: (i) => <span className="text-[0.85rem] tabular-nums">{usage(i.id)}</span> },
     ...(canUpdate || canDelete
       ? [
           {

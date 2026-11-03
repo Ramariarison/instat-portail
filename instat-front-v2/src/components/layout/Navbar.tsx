@@ -73,7 +73,7 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
                       {item.groups.map((group, groupIndex) => (
                         <div key={group.title ?? groupIndex}>
                           {group.title && (
-                            <p className="mb-3 flex items-baseline gap-2 border-b border-line pb-2 font-mono text-xs text-muted">
+                            <p className="mb-3 flex items-baseline gap-2 border-b border-line pb-2 text-xs text-muted">
                               <span className="text-laterite">{String(groupIndex + 1).padStart(2, "0")}</span>
                               {group.title}
                             </p>
@@ -141,7 +141,7 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
                     <div className="space-y-4 pb-4">
                       {item.groups.map((group, groupIndex) => (
                         <div key={group.title ?? groupIndex}>
-                          {group.title && <p className="mb-1 font-mono text-xs text-muted">{group.title}</p>}
+                          {group.title && <p className="mb-1 text-xs text-muted">{group.title}</p>}
                           <ul>
                             {group.links.map((link) => (
                               <li key={link.href}>

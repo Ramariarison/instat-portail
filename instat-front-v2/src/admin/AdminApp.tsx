@@ -74,7 +74,7 @@ function DataStatus() {
   const { state, reload } = useAdminData();
   if (state.status === "loading") {
     return (
-      <p role="status" className="border-t-2 border-ink py-8 font-mono text-sm text-muted">
+      <p role="status" className="border-t-2 border-ink py-8 text-sm text-muted">
         Chargement des données…
       </p>
     );
@@ -115,8 +115,8 @@ function Shell({ route, role }: { route: AdminRoute; role: Role }) {
         >
           <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 [&::-webkit-details-marker]:hidden">
             <span className="flex items-baseline gap-2">
-              <span className="font-mono text-xs text-muted">Menu</span>
-              <span className="font-display text-[1.07rem]">{currentLabel}</span>
+              <span className="text-xs text-muted">Menu</span>
+              <span className="text-[1.07rem] font-semibold">{currentLabel}</span>
             </span>
             <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden="true" />
           </summary>
@@ -169,7 +169,7 @@ export default function AdminApp({ segments }: { segments: string[] }) {
           <Shell route={route} role={user.role} />
         ) : !ready ? (
           <main className="px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
-            <p role="status" className="mx-auto max-w-2xl font-mono text-sm text-muted">
+            <p role="status" className="mx-auto max-w-2xl text-sm text-muted">
               Vérification de la session…
             </p>
           </main>

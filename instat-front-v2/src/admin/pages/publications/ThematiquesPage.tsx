@@ -159,7 +159,7 @@ export default function ThematiquesPage() {
         </div>
       ),
     },
-    { key: "count", header: "Publications", align: "right", cell: (t) => <span className="font-mono text-[0.85rem] tabular-nums">{usage(t.id)}</span> },
+    { key: "count", header: "Publications", align: "right", cell: (t) => <span className="text-[0.85rem] tabular-nums">{usage(t.id)}</span> },
     ...(canUpdate || canDelete
       ? [
           {

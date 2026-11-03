@@ -222,7 +222,7 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
               );
             })}
           </div>
-          <p role="status" className="pb-3 font-mono text-xs text-muted tabular-nums">
+          <p role="status" className="pb-3 text-xs text-muted tabular-nums">
             {state.status === "loading"
               ? "Chargement…"
               : state.status === "error"
@@ -232,7 +232,7 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
         </div>
 
         {state.status === "error" && (
-          <p role="alert" className="py-8 font-mono text-sm text-muted">
+          <p role="alert" className="py-8 text-sm text-muted">
             Publications indisponibles. {state.message}
           </p>
         )}
@@ -266,13 +266,13 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
                 key={publication.id}
                 className="group relative grid gap-x-8 gap-y-1 border-b border-line py-5 sm:grid-cols-[3rem_minmax(0,1fr)_11rem]"
               >
-                <span aria-hidden="true" className="hidden pt-1 font-mono text-xs text-muted tabular-nums sm:block">
+                <span aria-hidden="true" className="hidden pt-1 text-xs text-muted tabular-nums sm:block">
                   {String(first + index + 1).padStart(2, "0")}
                 </span>
                 <div>
                   <a
                     href={publication.href}
-                    className="font-display text-xl leading-snug decoration-paddy/40 underline-offset-4 group-hover:text-paddy hover:underline"
+                    className="text-xl leading-snug decoration-paddy/40 underline-offset-4 group-hover:text-paddy hover:underline font-semibold"
                   >
                     {publication.title}
                   </a>
@@ -286,7 +286,7 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
                     </span>
                   </p>
                 </div>
-                <time dateTime={publication.date} className="hidden pt-1.5 font-mono text-xs text-muted tabular-nums sm:block">
+                <time dateTime={publication.date} className="hidden pt-1.5 text-xs text-muted tabular-nums sm:block">
                   {formatDate(publication.date)}
                 </time>
               </li>
@@ -305,7 +305,7 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
               <ArrowLeft className="size-4" aria-hidden="true" />
               Précédentes
             </button>
-            <p className="font-mono text-xs text-muted tabular-nums">
+            <p className="text-xs text-muted tabular-nums">
               Page {page} / {pages}
             </p>
             <button

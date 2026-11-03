@@ -60,7 +60,7 @@ export default function PublicationsPage() {
           >
             {p.title}
           </a>
-          {p.createdByName && <span className="block font-mono text-xs text-muted">par {p.createdByName}</span>}
+          {p.createdByName && <span className="block text-xs text-muted">par {p.createdByName}</span>}
           {p.latestNipc && (
             <div className="mt-1">
               <Badge tone="green">Dernière publication NIPC</Badge>
@@ -81,7 +81,7 @@ export default function PublicationsPage() {
     },
     { key: "region", header: "Région", cell: (p) => regionName(p.regionId) },
     { key: "thematique", header: "Thématique", cell: (p) => thematiqueName(p.thematiqueId) },
-    { key: "date", header: "Publiée le", cell: (p) => <span className="font-mono text-xs whitespace-nowrap text-muted tabular-nums">{formatDate(p.date)}</span> },
+    { key: "date", header: "Publiée le", cell: (p) => <span className="text-xs whitespace-nowrap text-muted tabular-nums">{formatDate(p.date)}</span> },
     ...(canUpdate || canDelete
       ? [
           {

@@ -33,12 +33,12 @@ export default function NewsPage() {
                 key={item.id}
                 className="grid gap-x-8 gap-y-1 border-b border-line py-6 sm:grid-cols-[3rem_13rem_minmax(0,1fr)]"
               >
-                <span aria-hidden="true" className="hidden pt-1 font-mono text-xs text-laterite tabular-nums sm:block">
+                <span aria-hidden="true" className="hidden pt-1 text-xs text-laterite tabular-nums sm:block">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <p className="pt-1 font-mono text-xs text-muted">{item.dateLabel ?? "Date non précisée"}</p>
+                <p className="pt-1 text-xs text-muted">{item.dateLabel ?? "Date non précisée"}</p>
                 <div>
-                  <h2 className="font-display text-xl leading-snug">{item.title}</h2>
+                  <h2 className="text-xl leading-snug font-semibold">{item.title}</h2>
                   {item.context && <p className="mt-1 text-sm text-muted">{item.context}</p>}
                 </div>
               </li>

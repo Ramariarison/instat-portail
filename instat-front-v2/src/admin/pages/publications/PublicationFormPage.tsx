@@ -350,7 +350,7 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
                       >
                         {doc.name}
                       </a>
-                      <span className="font-mono text-xs text-muted">{formatBytes(doc.size)}</span>
+                      <span className="text-xs text-muted">{formatBytes(doc.size)}</span>
                     </span>
                     <Button
                       variant="ghost"
@@ -381,7 +381,7 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <legend className="text-sm font-medium">Secteurs concernés</legend>
                 <div className="flex items-center gap-1 text-sm">
-                  <span className="mr-2 font-mono text-xs text-muted tabular-nums">
+                  <span className="mr-2 text-xs text-muted tabular-nums">
                     {selectedSectors.length} sur {sectors.length}
                   </span>
                   <Button variant="ghost" size="sm" onClick={() => setSelectedSectors(sectors.map((s) => s.id))}>

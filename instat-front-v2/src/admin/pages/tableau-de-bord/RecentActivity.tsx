@@ -15,7 +15,7 @@ export default function RecentActivity({ items }: { items: PublicationActivity[]
     <ol>
       {items.map((item) => (
         <li key={item.id} className="border-b border-line py-2.5 text-[0.95rem] first:pt-0 last:border-b-0">
-          <p className="font-mono text-xs text-muted">{formatDateTime(item.createdAt)}</p>
+          <p className="text-xs text-muted">{formatDateTime(item.createdAt)}</p>
           <p className="mt-0.5">
             {item.authorName} {actionLabels[item.action]}{" "}
             <a

@@ -36,7 +36,7 @@ export default function ThematiqueCoverage({ rows }: { rows: PublicationStats["b
                       />
                     )}
                   </div>
-                  <span className={`w-8 text-right font-mono text-xs tabular-nums ${row.published === 0 ? "text-laterite" : ""}`}>
+                  <span className={`w-8 text-right text-xs tabular-nums ${row.published === 0 ? "text-laterite" : ""}`}>
                     {formatNumber(row.published)}
                   </span>
                 </div>

@@ -54,7 +54,7 @@ export default function WorkflowPanel({ publication, lockedReason }: { publicati
 
       {lockedReason && <p className="mt-5 border-l-[3px] border-rule bg-paper px-4 py-3 text-sm">{lockedReason}</p>}
 
-      <h3 className="mt-6 font-mono text-xs text-muted">Historique</h3>
+      <h3 className="mt-6 text-xs text-muted">Historique</h3>
       {error ? (
         <p className="mt-2 text-sm text-muted">{error}</p>
       ) : reviews === null ? (
@@ -65,7 +65,7 @@ export default function WorkflowPanel({ publication, lockedReason }: { publicati
         <ol className="mt-2 border-t border-line">
           {reviews.map((review) => (
             <li key={review.id} className="grid gap-x-4 gap-y-0.5 border-b border-line py-2.5 text-sm sm:grid-cols-[11rem_minmax(0,1fr)]">
-              <span className="font-mono text-xs text-muted">{formatDateTime(review.createdAt)}</span>
+              <span className="text-xs text-muted">{formatDateTime(review.createdAt)}</span>
               <span>
                 <span className="font-medium">{reviewLabels[review.action]}</span> · {review.authorName}
                 {review.comment && <span className="mt-0.5 block whitespace-pre-line text-muted">« {review.comment} »</span>}

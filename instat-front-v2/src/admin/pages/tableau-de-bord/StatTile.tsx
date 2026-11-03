@@ -20,10 +20,10 @@ export default function StatTile({ label, value, detail, href, emphasis = false 
         {label}
       </dt>
       <dd className="mt-3">
-        <span className="block font-display text-[2.9rem] leading-none font-light tracking-[-0.02em] tabular-nums group-hover:text-paddy">
+        <span className="block text-[2.9rem] leading-none font-semibold tracking-[-0.02em] tabular-nums group-hover:text-paddy">
           {formatNumber(value)}
         </span>
-        {detail && <span className="mt-2 block font-mono text-xs text-muted">{detail}</span>}
+        {detail && <span className="mt-2 block text-xs text-muted">{detail}</span>}
       </dd>
     </>
   );
