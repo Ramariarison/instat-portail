@@ -1,5 +1,6 @@
 import { Fragment } from "react";
-import { roleDescriptions, roleLabels } from "../../../data/roles";
+import { PenLine, ShieldCheck, UserCog, type LucideIcon } from "lucide-react";
+import { roleLabels } from "../../../data/roles";
 import type { Role } from "../../../types";
 import { useAdminData } from "../../data/AdminDataContext";
 import { actionLabels, actionOrder, actionsFor, permissions, resourceGroups, type Resource } from "../../permissions";
@@ -7,6 +8,13 @@ import Badge from "../../ui/Badge";
 import PageHeader, { BlockTitle } from "../../ui/PageHeader";
 
 const roles = Object.keys(roleLabels) as Role[];
+
+/** Cartes du haut : une icône et une ligne par rôle (le détail est dans le tableau « Droits par section »). */
+const roleCards: Record<Role, { icon: LucideIcon; summary: string }> = {
+  super_admin: { icon: ShieldCheck, summary: "Tous les droits, comptes et rôles compris." },
+  admin: { icon: UserCog, summary: "Valide les publications et gère les référentiels." },
+  editor: { icon: PenLine, summary: "Rédige les publications et saisit les données." },
+};
 
 function Rights({ role, resource }: { role: Role; resource: Resource }) {
   const granted = permissions[role][resource] ?? [];
@@ -27,21 +35,26 @@ export default function RolesPage() {
         description="Ce que chaque rôle peut faire dans le back-office. Le rôle d'une personne se choisit dans « Utilisateurs »."
       />
 
-      <ol className="grid border-t-2 border-ink md:grid-cols-3">
-        {roles.map((role, index) => (
-          <li
-            key={role}
-            className="flex flex-col border-b border-line bg-white p-5 sm:p-6 md:border-b-0 md:border-l md:first:border-l-0"
-          >
-            <BlockTitle number={String(index + 1).padStart(2, "0")}>{roleLabels[role]}</BlockTitle>
-            <p className="mt-2 text-[0.95rem] leading-relaxed text-muted">{roleDescriptions[role]}</p>
-            <p className="mt-auto flex items-baseline gap-2 border-t border-line pt-4">
-              <span className="text-[2.6rem] leading-none font-semibold tabular-nums">{countOf(role)}</span>
-              <span className="text-xs text-muted">utilisateur{countOf(role) > 1 ? "s" : ""}</span>
-            </p>
-          </li>
-        ))}
-      </ol>
+      <ul className="grid gap-4 md:grid-cols-3">
+        {roles.map((role) => {
+          const { icon: Icon, summary } = roleCards[role];
+          const count = countOf(role);
+          return (
+            <li key={role} className="flex flex-col border border-line bg-white p-5">
+              <div className="flex items-center gap-3">
+                <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center bg-paddy-soft text-paddy">
+                  <Icon className="size-5" />
+                </span>
+                <h2 className="text-lg leading-tight font-semibold">{roleLabels[role]}</h2>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{summary}</p>
+              <p className="mt-4 border-t border-line pt-3 text-sm">
+                <strong className="font-semibold tabular-nums">{count}</strong> utilisateur{count > 1 ? "s" : ""}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
 
       <div className="mt-12">
         <BlockTitle>Droits par section</BlockTitle>
