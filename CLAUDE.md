@@ -179,5 +179,4 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
 - `figure_regions.region_id` désigne une région du service Publications sans clé étrangère (bases séparées) :
   supprimer une région ne touche pas « Madagascar en chiffres ».
 - JWT HS256 avec un secret partagé : passer en RS256 (clé privée dans Auth seulement) si d'autres équipes ajoutent des services.
-- Image de titre 900 × 600 : vérifiée par le front seulement.
 - Carte interactive : l'image PostgreSQL est déjà PostGIS (base modèle `template_postgis`), aucun service ne l'utilise encore.

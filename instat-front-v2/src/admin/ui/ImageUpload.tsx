@@ -9,20 +9,11 @@ interface ImageUploadProps {
   /** Adresse de l'image enregistrée (renvoyée par le service Fichiers). */
   value?: string;
   onChange: (url?: string) => void;
-  /** Si renseigné, seule une image de cette dimension exacte est acceptée. */
-  exact?: { width: number; height: number };
+  /** Aperçu large (image de titre) plutôt qu'une vignette carrée (picto). Toutes les tailles sont acceptées. */
+  wide?: boolean;
 }
 
-function readSize(url: string): Promise<{ width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
-    image.onerror = reject;
-    image.src = url;
-  });
-}
-
-export default function ImageUpload({ label, hint, value, onChange, exact }: ImageUploadProps) {
+export default function ImageUpload({ label, hint, value, onChange, wide = false }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -35,24 +26,6 @@ export default function ImageUpload({ label, hint, value, onChange, exact }: Ima
     if (!file.type.startsWith("image/")) {
       setError("Le fichier choisi n'est pas une image.");
       return;
-    }
-    if (exact) {
-      // Les dimensions sont lues sur une copie locale, avant tout envoi.
-      const local = URL.createObjectURL(file);
-      try {
-        const size = await readSize(local);
-        if (size.width !== exact.width || size.height !== exact.height) {
-          setError(
-            `L'image doit mesurer exactement ${exact.width} × ${exact.height} pixels (la vôtre : ${size.width} × ${size.height}).`,
-          );
-          return;
-        }
-      } catch {
-        setError("Impossible de lire cette image.");
-        return;
-      } finally {
-        URL.revokeObjectURL(local);
-      }
     }
     setUploading(true);
     try {
@@ -80,11 +53,11 @@ export default function ImageUpload({ label, hint, value, onChange, exact }: Ima
       <div className="mt-1.5 flex flex-wrap items-center gap-4">
         <div
           className={`flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-paper ${
-            exact ? "aspect-[3/2] w-60" : "size-20"
+            wide ? "aspect-[3/2] w-60" : "size-20"
           }`}
         >
           {value ? (
-            <img src={value} alt="Aperçu de l'image choisie" className="size-full object-cover" />
+            <img src={value} alt="Aperçu de l'image choisie" className={`size-full ${wide ? "object-contain" : "object-cover"}`} />
           ) : (
             <ImageIcon className="size-7 text-muted" strokeWidth={1.5} aria-hidden="true" />
           )}

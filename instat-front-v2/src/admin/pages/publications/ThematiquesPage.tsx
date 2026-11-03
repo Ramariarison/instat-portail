@@ -97,7 +97,7 @@ function ThematiqueForm({
         )}
       </Field>
 
-      <ImageUpload label="Picto" hint="Image affichée à côté de la thématique (PNG, JPG, WebP ou SVG)." value={pictoUrl} onChange={setPictoUrl} />
+      <ImageUpload label="Picto" hint="Image affichée à côté de la thématique (PNG, JPG ou WebP)." value={pictoUrl} onChange={setPictoUrl} />
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">Affichage</legend>

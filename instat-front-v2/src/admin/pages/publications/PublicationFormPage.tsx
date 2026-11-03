@@ -278,10 +278,10 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
           <Section number="02" title="Image du titre">
             <ImageUpload
               label="Image"
-              hint="Seule une image de 900 × 600 pixels est acceptée."
+              hint="PNG, JPG ou WebP, de préférence au format paysage."
               value={imageUrl}
               onChange={setImageUrl}
-              exact={{ width: 900, height: 600 }}
+              wide
             />
           </Section>
 

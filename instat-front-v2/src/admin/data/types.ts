@@ -28,7 +28,7 @@ export interface PublicationDoc {
 export interface AdminPublication {
   id: string;
   title: string;
-  /** Image du titre, exactement 900 × 600 px. */
+  /** Image du titre (toutes dimensions). */
   imageUrl?: string;
   level: "national" | "regional";
   regionId?: string;

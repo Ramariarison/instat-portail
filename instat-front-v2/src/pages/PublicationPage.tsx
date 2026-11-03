@@ -97,9 +97,7 @@ export default function PublicationPage({ id }: { id: string }) {
             <img
               src={publication.imageUrl}
               alt=""
-              width={900}
-              height={600}
-              className="mb-10 aspect-[3/2] w-full border border-line object-cover"
+              className="mb-10 max-h-[36rem] w-full border border-line bg-paper object-contain"
             />
           )}
           <p className="border-l-[3px] border-laterite pl-5 text-[1.45rem] leading-snug font-semibold">{publication.excerpt}</p>

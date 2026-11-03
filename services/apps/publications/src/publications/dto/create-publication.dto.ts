@@ -22,7 +22,7 @@ export class CreatePublicationDto {
   @Length(1, 500)
   title!: string;
 
-  /** Image du titre (900 × 600), adresse renvoyée par le service Fichiers. */
+  /** Image du titre (toutes dimensions), adresse renvoyée par le service Fichiers. */
   @IsOptional()
   @Matches(IMAGE_URL)
   @MaxLength(2048)
