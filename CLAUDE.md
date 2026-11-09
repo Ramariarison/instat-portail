@@ -151,7 +151,8 @@ Fichier `services/<service>/migrations/NNN_description.sql`, appliqué au démar
 
 Relié à l'API (voir « Microservices » dans `instat-front-v2/README.md`). Pages publiques (`src/pages/`, routées dans `App.tsx`) :
 `#/publications` (liste filtrable, filtres gardés dans l'adresse), `#/publications/:id` (fiche et documents),
-`#/actualites`, `#/themes/<slug>` (rubriques du menu « Thèmes et données » : `slug` = alias d'une thématique
+`#/actualites`, `#/madagascar-en-chiffres` (carte des 23 régions colorée selon un indicateur, fiche de la région ;
+choix gardés dans l'adresse), `#/themes/<slug>` (rubriques du menu « Thèmes et données » : `slug` = alias d'une thématique
 du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; toute autre route `#/…` affiche
 « Page en préparation ». Repères :
 - `src/lib/api.ts` : seul point d'accès à `/api` (jeton, erreurs `ApiError` avec le message du service, `uploadFile`).
@@ -179,4 +180,7 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
 - `figure_regions.region_id` désigne une région du service Publications sans clé étrangère (bases séparées) :
   supprimer une région ne touche pas « Madagascar en chiffres ».
 - JWT HS256 avec un secret partagé : passer en RS256 (clé privée dans Auth seulement) si d'autres équipes ajoutent des services.
-- Carte interactive : l'image PostgreSQL est déjà PostGIS (base modèle `template_postgis`), aucun service ne l'utilise encore.
+- Carte « Madagascar en chiffres » : contours figés dans le front (`src/data/regionMap.ts`, régénérés par
+  `scripts/build-region-map.mjs`) et rattachés aux régions par leur nom ; une région renommée dans le back-office sort
+  de la carte et perd sa silhouette (`RegionSilhouette.tsx`, pas d'image stockée), sauf alias dans
+  `src/components/chiffres/choropleth.ts`. L'écran « Régions » signale un nom inconnu de la carte. L'image PostgreSQL est PostGIS, inutilisée.

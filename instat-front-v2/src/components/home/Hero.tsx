@@ -154,7 +154,7 @@ export default function Hero() {
               Toutes les publications
               <ArrowRight className="size-3.5" aria-hidden="true" />
             </a>
-            <a href="#chiffres" className="font-medium underline underline-offset-4 hover:text-paddy-soft">
+            <a href="#/madagascar-en-chiffres" className="font-medium underline underline-offset-4 hover:text-paddy-soft">
               Madagascar en chiffres
             </a>
           </p>

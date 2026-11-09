@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, type OnApplicationBootstrap } from "@nestjs/common";
 import type { Pool, PoolClient } from "pg";
 import { PG_POOL, runInTransaction, slug } from "@app/common";
-import { indicatorSeeds, keyFigureSeeds, regionNames, typeSeeds, valueSeeds } from "./demo-data";
+import { indicatorSeeds, keyFigureSeeds, regionSeeds, typeSeeds, valueSeeds } from "./demo-data";
 
 // Même identifiant que la région du service Publications.
 const regionId = (name: string) => `reg-${slug(name)}`;
@@ -31,7 +31,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
       ]);
     }
     await client.query("INSERT INTO figure_regions (id, name) VALUES ('fr-madagascar', 'Madagascar')");
-    for (const name of regionNames) {
+    for (const [name] of regionSeeds) {
       await client.query("INSERT INTO figure_regions (id, name, region_id) VALUES ($1, $2, $3)", [
         `fr-${regionId(name)}`, name, regionId(name),
       ]);
@@ -41,7 +41,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
         `INSERT INTO figure_values (id, figure_region_id, indicator_id, year, value, unit, source)
          VALUES ($1, $2, $3, $4, $5, $6, 'Exemple (à remplacer)')`,
         [
-          `val-${figure}-${indicator}`,
+          `val-${slug(figure)}-${indicator}`,
           figure === "madagascar" ? "fr-madagascar" : `fr-${regionId(figure)}`,
           `ind-${indicator}`,
           year,

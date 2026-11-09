@@ -1,12 +1,8 @@
-import { IsString, Length, MaxLength } from "class-validator";
+import { IsString, Length } from "class-validator";
 
 export class CreateRegionDto {
+  /** Nom de la région ; c'est aussi lui qui la place sur la carte du site (silhouette, « Madagascar en chiffres »). */
   @IsString()
   @Length(1, 200)
   name!: string;
-
-  /** Nom du fichier picto déjà présent sur le serveur, ex. « analamanga.png » (peut être vide). */
-  @IsString()
-  @MaxLength(255)
-  picto!: string;
 }

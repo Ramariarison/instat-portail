@@ -54,7 +54,7 @@ export const mainNav: NavItem[] = [
           { label: "Comptes nationaux", href: "#/themes/comptes-nationaux" },
           { label: "Impact de la COVID-19", href: "#/themes/impact-de-la-covid-19" },
           { label: "RGPH-3", href: "#/themes/rgph-3" },
-          { label: "Madagascar en chiffres", href: "#chiffres" },
+          { label: "Madagascar en chiffres", href: "#/madagascar-en-chiffres" },
         ],
       },
     ],

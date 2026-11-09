@@ -8,7 +8,7 @@ export class RegionsRepository extends SqlRepository<Region> {
     name: "regions",
     label: "Région",
     idPrefix: "reg",
-    columns: { name: "name", picto: "picto" },
+    columns: { name: "name" },
     orderBy: "name",
   };
 

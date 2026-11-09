@@ -3,11 +3,34 @@
  * Valeurs arrondies : ce ne sont pas des statistiques officielles.
  */
 
-export const regionNames = [
-  "Alaotra-Mangoro", "Amoron'i Mania", "Analamanga", "Analanjirofo", "Androy", "Anosy",
-  "Atsimo-Andrefana", "Atsimo-Atsinanana", "Atsinanana", "Betsiboka", "Boeny", "Bongolava",
-  "Diana", "Haute Matsiatra", "Ihorombe", "Itasy", "Melaky", "Menabe", "Sava", "Sofia",
-  "Vakinankaratra", "Vatovavy-Fitovinany",
+/**
+ * Les 23 régions (découpage de 2021), avec une superficie (km², d'après le fond de carte du site) et une population
+ * (habitants, ordre de grandeur du RGPH-3) arrondies : la carte du site public a ainsi une valeur pour chaque région.
+ */
+export const regionSeeds: [name: string, area: number, population: number][] = [
+  ["Alaotra-Mangoro", 27_900, 1_260_000],
+  ["Amoron'i Mania", 16_500, 830_000],
+  ["Analamanga", 17_400, 3_620_000],
+  ["Analanjirofo", 21_700, 1_150_000],
+  ["Androy", 19_000, 900_000],
+  ["Anosy", 29_600, 810_000],
+  ["Atsimo-Andrefana", 66_800, 1_800_000],
+  ["Atsimo-Atsinanana", 16_700, 1_030_000],
+  ["Atsinanana", 22_100, 1_480_000],
+  ["Betsiboka", 29_100, 390_000],
+  ["Boeny", 31_400, 930_000],
+  ["Bongolava", 18_200, 670_000],
+  ["Diana", 20_100, 890_000],
+  ["Fitovinany", 7_500, 700_000],
+  ["Ihorombe", 26_100, 410_000],
+  ["Itasy", 6_600, 900_000],
+  ["Matsiatra Ambony", 20_900, 1_450_000],
+  ["Melaky", 41_000, 310_000],
+  ["Menabe", 49_000, 700_000],
+  ["Sava", 23_900, 1_120_000],
+  ["Sofia", 51_200, 1_500_000],
+  ["Vakinankaratra", 18_000, 2_080_000],
+  ["Vatovavy", 13_300, 740_000],
 ];
 
 export const typeSeeds: [key: string, name: string][] = [
@@ -56,13 +79,11 @@ export const valueSeeds: [figure: string, indicator: string, year: number, value
   ["madagascar", "inflation", 2021, 6, "%"],
   ["madagascar", "chomage", 2018, 2, "%"],
   ["madagascar", "foret", 2018, 8_500_000, "ha"],
-  ["Analamanga", "superficie", 2018, 17_000, "km²"],
-  ["Analamanga", "population", 2018, 4_000_000, "habitants"],
-  ["Analamanga", "densite", 2018, 235, "hab/km²"],
-  ["Atsinanana", "superficie", 2018, 22_000, "km²"],
-  ["Atsinanana", "population", 2018, 1_500_000, "habitants"],
-  ["Diana", "superficie", 2018, 19_000, "km²"],
-  ["Diana", "population", 2018, 800_000, "habitants"],
+  ...regionSeeds.flatMap(([name, area, population]): [string, string, number, number, string][] => [
+    [name, "superficie", 2018, area, "km²"],
+    [name, "population", 2018, population, "habitants"],
+    [name, "densite", 2018, Math.round((population / area) * 10) / 10, "hab/km²"],
+  ]),
 ];
 
 export const keyFigureSeeds: [id: string, label: string, value: number, decimals: number, unit: string, period: string][] = [

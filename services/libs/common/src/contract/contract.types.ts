@@ -59,7 +59,6 @@ export interface Thematique {
 export interface Region {
   id: string;
   name: string;
-  picto: string;
 }
 
 export interface PublicationDoc {

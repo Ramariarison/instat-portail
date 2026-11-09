@@ -12,11 +12,10 @@ export interface Thematique {
   inMenuServices: boolean;
 }
 
+/** Région ; sa silhouette vient du fond de carte, retrouvée par le nom (components/chiffres/RegionSilhouette.tsx). */
 export interface Region {
   id: string;
   name: string;
-  /** Nom du fichier picto, ex. « analamanga.png ». */
-  picto: string;
 }
 
 export interface PublicationDoc {

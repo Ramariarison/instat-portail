@@ -84,7 +84,8 @@ Le front ne parle qu'à la passerelle d'API (`/api`), par `src/lib/api.ts`.
 | Élément du front | Service |
 |---|---|
 | `services/authService.ts`, `context/AuthContext.tsx` | Auth : `POST /auth/login`, `GET /auth/me` (session restaurée au rechargement) |
-| `components/home/KeyFigures.tsx` | « Madagascar en chiffres » : `GET /indicators` |
+| `components/home/KeyFigures.tsx` | Chiffres clés de l'accueil : `GET /indicators` |
+| `pages/ChiffresPage.tsx` (`#/madagascar-en-chiffres`) | Chiffres : `GET /chiffres/types`, `/chiffres/indicators`, `/chiffres/regions`, `/chiffres/values` ; Publications : `GET /regions` |
 | `components/home/Publications.tsx` | Publications : `GET /publications?scope=…&limit=6` |
 | `components/home/Hero.tsx` (actualités) | Publications : `GET /news` |
 | `admin/data/AdminDataContext.tsx` | tout le back-office : chargé à la connexion, chaque écriture attend la réponse du serveur |
@@ -95,6 +96,10 @@ Le front ne parle qu'à la passerelle d'API (`/api`), par `src/lib/api.ts`.
 - Publications : circuit de validation (brouillon, à valider, renvoyée, en ligne) ; règles dans `admin/workflow.ts`,
   écrans dans `admin/pages/publications/` (`WorkflowPanel`, `ReturnDialog`).
 - « Mon compte » (`admin/pages/compte/`) : nom et mot de passe, pour tous les rôles.
+- Carte « Madagascar en chiffres » (`components/chiffres/`) : 23 régions (découpage de 2021) dessinées en SVG à partir de
+  `data/regionMap.ts`, produit par `scripts/build-region-map.mjs` (contours geoBoundaries). Une région en chiffres est
+  rattachée à la carte par le nom de sa région (alias dans `choropleth.ts` pour les anciens noms) ; la silhouette
+  d'une région (`RegionSilhouette.tsx`) est tirée du même tracé.
 - Tableau de bord (`admin/pages/tableau-de-bord/`) : page d'accueil du back-office, adaptée au rôle.
 - Une écriture refusée (doublon, élément utilisé ailleurs, droits) affiche le message du service ; la fenêtre reste ouverte.
 - Réglages au build (`.env.example`) : `VITE_API_URL`, `VITE_API_PROXY`, `VITE_SAMPLE_DATA`, `VITE_SHOW_DEMO_ACCOUNTS`.

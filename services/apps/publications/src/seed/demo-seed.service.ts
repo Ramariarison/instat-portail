@@ -49,7 +49,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
       );
     }
     for (const name of regionNames) {
-      await client.query("INSERT INTO regions (id, name, picto) VALUES ($1, $2, $3)", [regionId(name), name, `${slug(name)}.png`]);
+      await client.query("INSERT INTO regions (id, name) VALUES ($1, $2)", [regionId(name), name]);
     }
     for (const p of basePublicationSeeds) {
       await client.query(

@@ -10,6 +10,7 @@ import KeyFigures from "./components/home/KeyFigures";
 import Publications from "./components/home/Publications";
 import Themes from "./components/home/Themes";
 import DataAndServices from "./components/home/DataAndServices";
+import ChiffresPage from "./pages/ChiffresPage";
 import CollectionPage from "./pages/CollectionPage";
 import LoginPage from "./pages/LoginPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
@@ -35,6 +36,7 @@ function PublicPage({ segments }: { segments: string[] }) {
   if (!section) return <Home />;
   if (section === "publications" && !extra) return id ? <PublicationPage key={id} id={id} /> : <PublicationsPage />;
   if (section === "actualites" && !id) return <NewsPage />;
+  if (section === "madagascar-en-chiffres" && !id) return <ChiffresPage />;
   if (section === "themes" && id && !extra) return <CollectionPage key={id} slug={id} />;
   return <ComingSoonPage />;
 }

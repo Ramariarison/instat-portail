@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, type FormEvent } from "react";
 import { Plus } from "lucide-react";
-import { byName, matches, slug } from "../../../lib/format";
+import RegionSilhouette, { isOnMap } from "../../../components/chiffres/RegionSilhouette";
+import { byName, matches } from "../../../lib/format";
 import { useAdminData } from "../../data/AdminDataContext";
 import type { Region } from "../../data/types";
 import { usePermissions } from "../../usePermissions";
@@ -16,8 +17,6 @@ import { Pagination, usePagination } from "../../ui/Pagination";
 import SearchInput from "../../ui/SearchInput";
 import { useAction } from "../../useAction";
 
-const PICTO_FILE = /^[\w\-. ]+\.(png|jpe?g|svg|webp)$/i;
-
 function RegionForm({
   initial,
   onSave,
@@ -29,60 +28,52 @@ function RegionForm({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [name, setName] = useState(initial?.name ?? "");
-  const [picto, setPicto] = useState(initial?.picto ?? "");
-  const [pictoTouched, setPictoTouched] = useState(Boolean(initial));
-  const [errors, setErrors] = useState<{ name?: string; picto?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string }>({});
 
   function submit(event: FormEvent) {
     event.preventDefault();
     const next: typeof errors = {};
     if (name.trim().length < 2) next.name = "Saisissez le nom de la région.";
-    if (!picto.trim()) next.picto = "Saisissez le nom du fichier picto.";
-    else if (!PICTO_FILE.test(picto.trim()))
-      next.picto = "Indiquez un nom de fichier image, par exemple : analamanga.png";
     setErrors(next);
     if (Object.keys(next).length > 0) {
       focusFirstInvalid(formRef.current);
       return;
     }
-    onSave({ name: name.trim(), picto: picto.trim() });
+    onSave({ name: name.trim() });
   }
 
   return (
     <form ref={formRef} onSubmit={submit} noValidate className="space-y-5">
-      <Field label="Nom" required error={errors.name}>
+      <Field
+        label="Nom"
+        required
+        hint="Nom officiel de la région : il la place sur la carte du site et donne sa silhouette."
+        error={errors.name}
+      >
         {(aria) => (
           <input
             {...aria}
             className={inputClass}
             value={name}
             autoComplete="off"
-            onChange={(event) => {
-              setName(event.target.value);
-              if (!pictoTouched) setPicto(event.target.value.trim() ? `${slug(event.target.value)}.png` : "");
-            }}
+            onChange={(event) => setName(event.target.value)}
           />
         )}
       </Field>
-      <Field
-        label="Nom du fichier picto"
-        required
-        hint="Nom du fichier image déjà présent sur le serveur, par exemple « analamanga.png »."
-        error={errors.picto}
-      >
-        {(aria) => (
-          <input
-            {...aria}
-            className={inputClass}
-            value={picto}
-            autoComplete="off"
-            onChange={(event) => {
-              setPictoTouched(true);
-              setPicto(event.target.value);
-            }}
-          />
+      <div className="flex items-center gap-4 border border-line bg-paper px-4 py-3 text-sm">
+        {isOnMap(name) ? (
+          <>
+            <RegionSilhouette name={name} className="size-14 text-paddy" />
+            <span>Région reconnue sur la carte.</span>
+          </>
+        ) : (
+          <span className="text-muted">
+            {name.trim()
+              ? "Ce nom ne correspond à aucune des 23 régions de la carte : pas de silhouette, et la région n'apparaîtra pas sur la carte de « Madagascar en chiffres »."
+              : "La silhouette s'affiche dès que le nom correspond à une région de la carte."}
+          </span>
         )}
-      </Field>
+      </div>
       <FormActions onCancel={onCancel} />
     </form>
   );
@@ -100,14 +91,36 @@ export default function RegionsPage() {
   const hasFigures = (id: string) => figureRegions.items.some((f) => f.regionId === id);
 
   const rows = useMemo(
-    () => regions.items.filter((r) => matches(query, r.name, r.picto)).sort(byName),
+    () => regions.items.filter((r) => matches(query, r.name)).sort(byName),
     [regions.items, query],
   );
   const pager = usePagination(rows, 10, query);
 
   const columns: Column<Region>[] = [
-    { key: "name", header: "Nom", cell: (r) => <span className={cellTitleClass}>{r.name}</span> },
-    { key: "picto", header: "Fichier picto", cell: (r) => <code className="text-sm text-muted">{r.picto}</code> },
+    {
+      key: "name",
+      header: "Nom",
+      cell: (r) => (
+        <span className="flex items-center gap-3">
+          {isOnMap(r.name) ? (
+            <RegionSilhouette name={r.name} className="size-8 text-paddy" />
+          ) : (
+            <span aria-hidden="true" className="size-8 shrink-0 border border-dashed border-rule" />
+          )}
+          <span className={cellTitleClass}>{r.name}</span>
+        </span>
+      ),
+    },
+    {
+      key: "map",
+      header: "Carte",
+      cell: (r) =>
+        isOnMap(r.name) ? (
+          <span className="text-[0.85rem] text-muted">Sur la carte</span>
+        ) : (
+          <span className="text-[0.85rem] text-laterite">Nom inconnu de la carte</span>
+        ),
+    },
     { key: "count", header: "Publications", align: "right", cell: (r) => <span className="text-[0.85rem] tabular-nums">{usage(r.id)}</span> },
     ...(canUpdate || canDelete
       ? [
