@@ -84,7 +84,7 @@ Le front ne parle qu'à la passerelle d'API (`/api`), par `src/lib/api.ts`.
 | Élément du front | Service |
 |---|---|
 | `services/authService.ts`, `context/AuthContext.tsx` | Auth : `POST /auth/login`, `GET /auth/me` (session restaurée au rechargement) |
-| `components/home/KeyFigures.tsx` | Chiffres clés de l'accueil : `GET /indicators` |
+| `components/home/KeyFigures.tsx` | Chiffres clés de l'accueil : `GET /indicators` (valeurs de la fiche nationale) |
 | `pages/ChiffresPage.tsx` (`#/madagascar-en-chiffres`) | Chiffres : `GET /chiffres/types`, `/chiffres/indicators`, `/chiffres/regions`, `/chiffres/values` ; Publications : `GET /regions` |
 | `components/home/Publications.tsx` | Publications : `GET /publications?scope=…&limit=6` |
 | `components/home/Hero.tsx` (actualités) | Publications : `GET /news` |

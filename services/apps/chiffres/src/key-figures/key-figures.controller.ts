@@ -1,14 +1,16 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { Public, RequirePermission } from "@app/common";
+import { type KeyFigure, Public, RequirePermission } from "@app/common";
 import { CreateKeyFigureDto } from "./dto/create-key-figure.dto";
 import { UpdateKeyFigureDto } from "./dto/update-key-figure.dto";
-import type { KeyFigure } from "./key-figure";
 import { KeyFiguresService } from "./key-figures.service";
 
-/** Chiffres clés de la page d'accueil (contrat Indicator). Lecture publique ; écriture avec le droit « figures ». */
+/**
+ * Choix des chiffres clés de l'accueil (indicateur, libellé, décimales, ordre).
+ * Lecture publique ; écriture avec le droit « indicateurs » (administrateurs).
+ */
 @ApiTags("Chiffres clés (accueil)")
-@Controller("indicators")
+@Controller("chiffres/key-figures")
 export class KeyFiguresController {
   constructor(private readonly service: KeyFiguresService) {}
 
@@ -26,14 +28,14 @@ export class KeyFiguresController {
 
   @ApiBearerAuth()
   @Post()
-  @RequirePermission("figures", "create")
+  @RequirePermission("indicateurs", "create")
   create(@Body() dto: CreateKeyFigureDto): Promise<KeyFigure> {
     return this.service.create(dto);
   }
 
   @ApiBearerAuth()
   @Patch(":id")
-  @RequirePermission("figures", "update")
+  @RequirePermission("indicateurs", "update")
   update(@Param("id") id: string, @Body() dto: UpdateKeyFigureDto): Promise<KeyFigure> {
     return this.service.update(id, dto);
   }
@@ -41,7 +43,7 @@ export class KeyFiguresController {
   @ApiBearerAuth()
   @Delete(":id")
   @HttpCode(204)
-  @RequirePermission("figures", "delete")
+  @RequirePermission("indicateurs", "delete")
   remove(@Param("id") id: string): Promise<void> {
     return this.service.remove(id);
   }

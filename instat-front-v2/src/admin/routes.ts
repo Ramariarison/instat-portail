@@ -1,6 +1,7 @@
 import {
   ChartColumn,
   FileText,
+  Gauge,
   Layers,
   Map,
   MapPin,
@@ -20,6 +21,7 @@ export type AdminRoute =
   | { page: "types" }
   | { page: "indicateurs" }
   | { page: "figures" }
+  | { page: "key-figures" }
   | { page: "figure-region"; id: string; edit: boolean }
   | { page: "users" }
   | { page: "roles" }
@@ -42,6 +44,7 @@ export function matchAdmin(seg: string[]): AdminRoute {
   if (a === "chiffres") {
     if (!b || (b === "types" && !c)) return { page: "types" };
     if (b === "indicateurs" && !c) return { page: "indicateurs" };
+    if (b === "chiffres-cles" && !c) return { page: "key-figures" };
     if (b === "regions") {
       if (!c) return { page: "figures" };
       if (!d) return { page: "figure-region", id: c, edit: false };
@@ -73,6 +76,7 @@ export function requirement(route: AdminRoute): { resource: Resource; action: Ac
     case "types":
       return { resource: "types", action: "view" };
     case "indicateurs":
+    case "key-figures":
       return { resource: "indicateurs", action: "view" };
     case "figures":
       return { resource: "figures", action: "view" };
@@ -114,6 +118,7 @@ export const adminNav: AdminNavGroup[] = [
       { label: "Types de données", href: "#/admin/chiffres/types", resource: "types", pages: ["types"], icon: Layers },
       { label: "Indicateurs", href: "#/admin/chiffres/indicateurs", resource: "indicateurs", pages: ["indicateurs"], icon: ChartColumn },
       { label: "Données par régions", href: "#/admin/chiffres/regions", resource: "figures", pages: ["figures", "figure-region"], icon: Map },
+      { label: "Chiffres clés de l'accueil", href: "#/admin/chiffres/chiffres-cles", resource: "indicateurs", pages: ["key-figures"], icon: Gauge },
     ],
   },
   {

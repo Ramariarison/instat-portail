@@ -1,6 +1,6 @@
 import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { ExternalLink, Pencil, Plus } from "lucide-react";
-import { formatValue, matches, parseNumber } from "../../../lib/format";
+import { byPeriodDesc, formatValue, matches, MONTHS, parseNumber, periodLabel } from "../../../lib/format";
 import { useAdminData } from "../../data/AdminDataContext";
 import type { FigureValue } from "../../data/types";
 import { NotFoundPanel } from "../../layout/Panels";
@@ -36,7 +36,7 @@ interface Row {
   indicatorName: string;
 }
 
-type FormErrors = Partial<Record<"typeId" | "indicatorId" | "year" | "value" | "unit" | "source" | "link", string>>;
+type FormErrors = Partial<Record<"typeId" | "indicatorId" | "year" | "month" | "value" | "unit" | "source" | "link", string>>;
 
 function ValueForm({
   initial,
@@ -47,7 +47,7 @@ function ValueForm({
 }: {
   initial?: FigureValue;
   figureRegionId: string;
-  /** Valeurs déjà saisies pour cette région, pour refuser un doublon (même indicateur, même année). */
+  /** Valeurs déjà saisies pour cette région, pour refuser un doublon (même indicateur, même période). */
   existing: FigureValue[];
   onSave: (draft: Omit<FigureValue, "id">) => void;
   onCancel: () => void;
@@ -62,6 +62,7 @@ function ValueForm({
   );
   const [indicatorId, setIndicatorId] = useState(initial?.indicatorId ?? "");
   const [year, setYear] = useState(initial ? String(initial.year) : "");
+  const [month, setMonth] = useState(initial?.month ? String(initial.month) : "");
   const [value, setValue] = useState(initial ? String(initial.value).replace(".", ",") : "");
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [source, setSource] = useState(initial?.source ?? "");
@@ -74,6 +75,7 @@ function ValueForm({
     event.preventDefault();
     const next: FormErrors = {};
     const yearNumber = Number(year);
+    const monthNumber = month ? Number(month) : undefined;
     const parsed = parseNumber(value);
 
     if (!typeId) next.typeId = "Choisissez un type de données.";
@@ -82,9 +84,11 @@ function ValueForm({
       next.year = "Saisissez une année à 4 chiffres, par exemple 2018.";
     else if (
       indicatorId &&
-      existing.some((v) => v.id !== initial?.id && v.indicatorId === indicatorId && v.year === yearNumber)
+      existing.some(
+        (v) => v.id !== initial?.id && v.indicatorId === indicatorId && v.year === yearNumber && v.month === monthNumber,
+      )
     )
-      next.year = "Une valeur existe déjà pour cet indicateur et cette année. Modifiez-la plutôt.";
+      next.year = "Une valeur existe déjà pour cet indicateur et cette période. Modifiez-la plutôt.";
     if (parsed === null) next.value = "Saisissez un nombre, par exemple 4,5 ou 25 000.";
     if (!unit.trim()) next.unit = "Indiquez l'unité (km², habitants, %…).";
     if (!source.trim()) next.source = "Indiquez la source de la donnée.";
@@ -99,6 +103,7 @@ function ValueForm({
       figureRegionId,
       indicatorId,
       year: yearNumber,
+      month: monthNumber,
       value: parsed,
       unit: unit.trim(),
       source: source.trim(),
@@ -149,7 +154,7 @@ function ValueForm({
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-4">
         <Field label="Année" required error={errors.year}>
           {(aria) => (
             <input
@@ -161,6 +166,18 @@ function ValueForm({
               autoComplete="off"
               onChange={(event) => setYear(event.target.value)}
             />
+          )}
+        </Field>
+        <Field label="Mois" hint="Valeur mensuelle (NIPC) seulement." error={errors.month}>
+          {(aria) => (
+            <select {...aria} className={inputClass} value={month} onChange={(event) => setMonth(event.target.value)}>
+              <option value="">Aucun</option>
+              {MONTHS.map((name, index) => (
+                <option key={name} value={index + 1}>
+                  {name}
+                </option>
+              ))}
+            </select>
           )}
         </Field>
         <Field label="Valeur" required error={errors.value}>
@@ -266,13 +283,13 @@ export default function FigureRegionPage({ id, edit }: { id: string; edit: boole
       .filter(
         (row) =>
           (!typeFilter || row.typeId === typeFilter) &&
-          matches(query, row.typeName, row.indicatorName, row.value.source, String(row.value.year)),
+          matches(query, row.typeName, row.indicatorName, row.value.source, periodLabel(row.value.year, row.value.month)),
       )
       .sort(
         (a, b) =>
           (typeOrder.get(a.typeId) ?? 99) - (typeOrder.get(b.typeId) ?? 99) ||
           (indicatorOrder.get(a.value.indicatorId) ?? 0) - (indicatorOrder.get(b.value.indicatorId) ?? 0) ||
-          b.value.year - a.value.year,
+          byPeriodDesc(a.value, b.value),
       );
   }, [own, indicators.items, dataTypes.items, query, typeFilter]);
   const pager = usePagination(rows, 15, `${query}|${typeFilter}`);
@@ -292,7 +309,11 @@ export default function FigureRegionPage({ id, edit }: { id: string; edit: boole
   const columns: Column<Row>[] = [
     { key: "type", header: "Type", cell: (r) => <div className="max-w-[15rem]">{r.typeName}</div> },
     { key: "indicator", header: "Indicateur", cell: (r) => <div className={`max-w-[26rem] ${cellTitleClass}`}>{r.indicatorName}</div> },
-    { key: "year", header: "Année", cell: (r) => <span className="text-[0.85rem] tabular-nums">{r.value.year}</span> },
+    {
+      key: "year",
+      header: "Période",
+      cell: (r) => <span className="text-[0.85rem] whitespace-nowrap tabular-nums">{periodLabel(r.value.year, r.value.month)}</span>,
+    },
     { key: "value", header: "Valeur", align: "right", cell: (r) => <span className="text-[0.85rem] tabular-nums">{formatValue(r.value.value)}</span> },
     { key: "unit", header: "Unité", cell: (r) => r.value.unit },
     { key: "source", header: "Source", cell: (r) => <div className="max-w-[14rem]">{r.value.source}</div> },
@@ -323,7 +344,7 @@ export default function FigureRegionPage({ id, edit }: { id: string; edit: boole
             align: "right" as const,
             cell: (r: Row) => (
               <RowActions
-                label={`${r.indicatorName} (${r.value.year})`}
+                label={`${r.indicatorName} (${periodLabel(r.value.year, r.value.month)})`}
                 onEdit={canUpdate ? () => setEditing(r.value) : undefined}
                 onDelete={canDelete ? () => setDeleting(r) : undefined}
               />
@@ -443,7 +464,7 @@ export default function FigureRegionPage({ id, edit }: { id: string; edit: boole
       <ConfirmDialog
         open={deleting !== null}
         title="Supprimer la donnée"
-        message={`Supprimer « ${deleting?.indicatorName ?? ""} » (${deleting?.value.year ?? ""}) pour ${figure.name} ? Cette action est définitive.`}
+        message={`Supprimer « ${deleting?.indicatorName ?? ""} » (${deleting ? periodLabel(deleting.value.year, deleting.value.month) : ""}) pour ${figure.name} ? Cette action est définitive.`}
         onCancel={() => setDeleting(null)}
         onConfirm={async () => {
           if (deleting) await run(() => figureValues.remove(deleting.id), "Donnée supprimée.");

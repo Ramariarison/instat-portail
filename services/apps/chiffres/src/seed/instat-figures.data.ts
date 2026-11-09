@@ -8,6 +8,8 @@
  *   répartition approchée (51,5 % / 48,5 %), taux et pourcentages repris, densité recalculée.
  * - Anomalies du portail laissées telles quelles : population 2021 de Vakinankaratra inférieure à celle de 2018, même
  *   couverture forestière pour Vakinankaratra et Vatovavy-Fitovinany, taux net de scolarisation d'Alaotra-Mangoro (13,2 %).
+ * - Niveau national : en plus, les séries des graphiques « Chiffres clés » de l'accueil du portail (population,
+ *   croissance du PIB, inflation) et le NIPC de mars 2026 ; l'accueil du site affiche la valeur la plus récente.
  */
 
 /** Sources citées (texte, lien vers le document), désignées par leur rang dans les valeurs ci-dessous. */
@@ -56,10 +58,17 @@ export const figureSources: { text: string; link?: string }[] = [
   { text: "Résultats définitifs du RGPH-3", link: "http://www.instat.mg/p/resultats-definitifs-du-rgph-3-2018-troisieme-recensement-general-de-la-population-et-de-lhabitation" },
   { text: "Rapport thématique RGPH 3 - Thème 01 - Etat et structure de la population à Madagascar (p.38)", link: "http://www.instat.mg/p/resultats-definitifs-du-rgph-3-2018-troisieme-recensement-general-de-la-population-et-de-lhabitation" },
   { text: "Source : Projection démographique des résultats définitifs du RGPH-3" },
+  { text: "INSTAT, accueil du portail : graphique « Population de Madagascar » (recensements de 1975 et 1993, projections du RGPH-3 à partir de 2019)", link: "https://www.instat.mg/" },
+  { text: "INSTAT, accueil du portail : graphique « Taux de croissance du PIB »", link: "https://www.instat.mg/" },
+  { text: "INSTAT, accueil du portail : graphique « Taux d'inflation »", link: "https://www.instat.mg/" },
+  { text: "NIPC mars 2026, ensemble du pays", link: "https://www.instat.mg/statistiques/bases-de-donnees/nipc" },
 ];
 
-/** Par région (nom du fond de carte, « Madagascar » pour le niveau national) : [indicateur, année, valeur, unité, source]. */
-export const figureValues: Record<string, [indicator: string, year: number, value: number, unit: string, source: number][]> = {
+/**
+ * Par région (nom du fond de carte, « Madagascar » pour le niveau national) :
+ * [indicateur, année, valeur, unité, source, mois d'une valeur mensuelle].
+ */
+export const figureValues: Record<string, [indicator: string, year: number, value: number, unit: string, source: number, month?: number][]> = {
   "Madagascar": [
     ["superficie", 2018, 591_896, "km²", 0],
     ["population", 2018, 25_674_196, "habitants", 1],
@@ -85,6 +94,43 @@ export const figureValues: Record<string, [indicator: string, year: number, valu
     ["scolarisation", 2018, 67.5, "%", 15],
     ["acte-naissance", 2018, 79.2, "%", 16],
     ["fecondite", 2018, 4.3, "enfants par femme", 17],
+    // Séries des graphiques de l'accueil du portail (2020 et 2021 : valeurs de la fiche nationale, ci-dessus).
+    ["population", 1975, 7_603_790, "habitants", 44],
+    ["population", 1993, 12_238_914, "habitants", 44],
+    ["population", 2019, 26_419_228, "habitants", 44],
+    ["population", 2020, 27_190_927, "habitants", 44],
+    ["population", 2021, 28_177_762, "habitants", 44],
+    ["population", 2022, 29_036_222, "habitants", 44],
+    ["population", 2023, 29_914_679, "habitants", 44],
+    ["population", 2024, 30_811_969, "habitants", 44],
+    ["croissance-pib", 2008, 6.71, "%", 45],
+    ["croissance-pib", 2009, -3.98, "%", 45],
+    ["croissance-pib", 2010, 0.62, "%", 45],
+    ["croissance-pib", 2011, 1.58, "%", 45],
+    ["croissance-pib", 2012, 3.01, "%", 45],
+    ["croissance-pib", 2013, 2.3, "%", 45],
+    ["croissance-pib", 2014, 3.34, "%", 45],
+    ["croissance-pib", 2015, 3.13, "%", 45],
+    ["croissance-pib", 2016, 3.99, "%", 45],
+    ["croissance-pib", 2017, 3.93, "%", 45],
+    ["croissance-pib", 2018, 3.19, "%", 45],
+    ["croissance-pib", 2019, 4.41, "%", 45],
+    ["croissance-pib", 2021, 4.65, "%", 45],
+    ["croissance-pib", 2022, 4.14, "%", 45],
+    ["croissance-pib", 2023, 4.23, "%", 45],
+    ["croissance-pib", 2024, 4.32, "%", 45],
+    ["inflation", 2017, 8.59, "%", 46],
+    ["inflation", 2018, 8.6, "%", 46],
+    ["inflation", 2019, 5.63, "%", 46],
+    ["inflation", 2020, 4.19, "%", 46],
+    ["inflation", 2022, 8.16, "%", 46],
+    ["inflation", 2023, 9.86, "%", 46],
+    ["inflation", 2024, 7.64, "%", 46],
+    ["inflation", 2025, 8, "%", 46],
+    // NIPC : valeurs mensuelles (6e champ : mois).
+    ["nipc-glissement-annuel", 2026, 6.77, "%", 47, 3],
+    ["nipc-variation-mensuelle", 2026, 0.67, "%", 47, 3],
+    ["nipc-variation-trimestrielle", 2026, 2.7, "%", 47, 3],
   ],
   "Alaotra-Mangoro": [
     ["superficie", 2018, 27_846, "km²", 0],

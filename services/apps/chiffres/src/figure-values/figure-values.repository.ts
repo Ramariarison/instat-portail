@@ -12,12 +12,13 @@ export class FigureValuesRepository extends SqlRepository<FigureValue> {
       figureRegionId: "figure_region_id",
       indicatorId: "indicator_id",
       year: "year",
+      month: "month",
       value: "value",
       unit: "unit",
       source: "source",
       link: "link",
     },
-    orderBy: "year DESC, indicator_id",
+    orderBy: "year DESC, month DESC NULLS LAST, indicator_id",
   };
 
   constructor(@Inject(PG_POOL) pool: Pool) {

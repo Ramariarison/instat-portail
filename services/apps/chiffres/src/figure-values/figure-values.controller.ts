@@ -6,7 +6,7 @@ import { ListFigureValuesQuery } from "./dto/list-figure-values.query";
 import { UpdateFigureValueDto } from "./dto/update-figure-value.dto";
 import { FigureValuesService } from "./figure-values.service";
 
-/** Valeurs : une par (région, indicateur, année), sinon 409 ALREADY_EXISTS. Lecture publique ; écriture avec le droit « figures ». */
+/** Valeurs : une par (région, indicateur, année, mois), sinon 409 ALREADY_EXISTS. Lecture publique ; écriture avec le droit « figures ». */
 @ApiTags("Valeurs par région")
 @Controller("chiffres/values")
 export class FigureValuesController {

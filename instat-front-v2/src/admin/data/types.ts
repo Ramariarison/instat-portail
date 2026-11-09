@@ -103,11 +103,23 @@ export interface FigureRegion {
   regionId?: string;
 }
 
+/** Chiffre clé de l'accueil : un indicateur mis en avant ; sa valeur est la plus récente de la fiche nationale. */
+export interface KeyFigure {
+  id: string;
+  indicatorId: string;
+  /** Libellé à l'accueil, s'il diffère du nom de l'indicateur. */
+  label?: string;
+  decimals: number;
+  position: number;
+}
+
 export interface FigureValue {
   id: string;
   figureRegionId: string;
   indicatorId: string;
   year: number;
+  /** Mois (1 à 12) d'une valeur mensuelle (NIPC) ; absent pour une valeur annuelle. */
+  month?: number;
   value: number;
   unit: string;
   source: string;

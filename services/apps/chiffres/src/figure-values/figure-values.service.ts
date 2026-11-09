@@ -5,7 +5,7 @@ import type { ListFigureValuesQuery } from "./dto/list-figure-values.query";
 import type { UpdateFigureValueDto } from "./dto/update-figure-value.dto";
 import { FigureValuesRepository } from "./figure-values.repository";
 
-/** Valeurs : une par (région, indicateur, année), sinon 409 ALREADY_EXISTS. */
+/** Valeurs : une par (région, indicateur, année, mois), sinon 409 ALREADY_EXISTS. */
 @Injectable()
 export class FigureValuesService {
   constructor(private readonly repository: FigureValuesRepository) {}

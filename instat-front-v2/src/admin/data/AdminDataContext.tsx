@@ -21,6 +21,7 @@ import type {
   FigureRegion,
   FigureValue,
   IndicatorDef,
+  KeyFigure,
   Region,
   Thematique,
 } from "./types";
@@ -87,6 +88,7 @@ interface AdminData {
   indicators: Collection<IndicatorDef>;
   figureRegions: Collection<FigureRegion>;
   figureValues: Collection<FigureValue>;
+  keyFigures: Collection<KeyFigure>;
   users: Collection<AdminUser, UserInput>;
   /** Enregistre une publication (nouvelle = brouillon de la personne connectée). */
   savePublication: (draft: PublicationInput, id?: string) => Promise<AdminPublication>;
@@ -111,6 +113,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const indicators = useCollection<IndicatorDef>("/chiffres/indicators");
   const figureRegions = useCollection<FigureRegion>("/chiffres/regions");
   const figureValues = useCollection<FigureValue>("/chiffres/values");
+  const keyFigures = useCollection<KeyFigure>("/chiffres/key-figures");
   const users = useCollection<AdminUser, UserInput>("/users");
 
   const [state, setState] = useState<LoadState>({ status: "loading" });
@@ -134,10 +137,11 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       api.get<IndicatorDef[]>("/chiffres/indicators"),
       api.get<FigureRegion[]>("/chiffres/regions"),
       api.get<FigureValue[]>("/chiffres/values"),
+      api.get<KeyFigure[]>("/chiffres/key-figures"),
       // Seul le super administrateur a le droit de lister les comptes.
       can(role, "users", "view") ? api.get<AdminUser[]>("/users") : Promise.resolve([]),
     ]).then(
-      ([t, r, p, d, i, fr, fv, u]) => {
+      ([t, r, p, d, i, fr, fv, kf, u]) => {
         if (cancelled) return;
         thematiques.setAll(t);
         regions.setAll(r);
@@ -146,6 +150,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         indicators.setAll(i);
         figureRegions.setAll(fr);
         figureValues.setAll(fv);
+        keyFigures.setAll(kf);
         users.setAll(u);
         setState({ status: "ready" });
       },
@@ -211,12 +216,12 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       state, reload,
-      thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, users,
+      thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, keyFigures, users,
       savePublication, removeFigureRegion,
       submitPublication, publishPublication, returnPublication, loadReviews,
     }),
     [
-      state, reload, thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, users,
+      state, reload, thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, keyFigures, users,
       savePublication, removeFigureRegion, submitPublication, publishPublication, returnPublication, loadReviews,
     ],
   );

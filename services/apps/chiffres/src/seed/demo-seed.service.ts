@@ -39,20 +39,22 @@ export class DemoSeedService implements OnApplicationBootstrap {
     }
     for (const [figure, rows] of Object.entries(figureValues)) {
       const figureId = figure === "Madagascar" ? "fr-madagascar" : `fr-${regionId(figure)}`;
-      for (const [indicator, year, value, unit, source] of rows) {
+      for (const [indicator, year, value, unit, source, month] of rows) {
         const { text, link } = figureSources[source]!;
         await client.query(
-          `INSERT INTO figure_values (id, figure_region_id, indicator_id, year, value, unit, source, link)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [`val-${slug(figure)}-${indicator}`, figureId, `ind-${indicator}`, year, value, unit, text, link ?? null],
+          `INSERT INTO figure_values (id, figure_region_id, indicator_id, year, month, value, unit, source, link)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [
+            `val-${slug(figure)}-${indicator}-${year}${month ? `-${month}` : ""}`,
+            figureId, `ind-${indicator}`, year, month ?? null, value, unit, text, link ?? null,
+          ],
         );
       }
     }
-    for (const [index, [id, label, value, decimals, unit, period]] of keyFigureSeeds.entries()) {
-      await client.query(
-        "INSERT INTO key_figures (id, label, value, decimals, unit, period, position) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-        [id, label, value, decimals, unit, period, index],
-      );
+    for (const [index, [indicator, label, decimals]] of keyFigureSeeds.entries()) {
+      await client.query("INSERT INTO key_figures (id, indicator_id, label, decimals, position) VALUES ($1, $2, $3, $4, $5)", [
+        `kf-${indicator}`, `ind-${indicator}`, label, decimals, index,
+      ]);
     }
   }
 }

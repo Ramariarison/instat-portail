@@ -168,6 +168,8 @@ check "suppression de l'actualité" 204 "$(req DELETE "/news/$NEW_NEWS" "$AD")"
 
 echo "== Madagascar en chiffres"
 check "chiffres clés" 200 "$(req GET /indicators)"
+check "six chiffres clés" 6 "$(json "len(d)")"
+check "valeur la plus récente de la fiche nationale" "mars 2026" "$(json "d[3]['period']")"
 check "types" 200 "$(req GET /chiffres/types)"
 check "indicateurs d'un type" 200 "$(req GET '/chiffres/indicators?typeId=type-geo')"
 check "valeurs d'une région" 200 "$(req GET '/chiffres/values?figureRegionId=fr-madagascar')"
@@ -178,6 +180,14 @@ check "valeur corrigée par l'éditeur" 200 "$(req PATCH "/chiffres/values/$EDIT
 check "l'éditeur ne supprime pas" 403 "$(req DELETE "/chiffres/values/$EDITOR_VALUE" "$ED")"
 check "l'éditeur ne gère pas les indicateurs" 403 "$(req POST /chiffres/indicators "$ED" '{"typeId":"type-geo","name":"X","picto":""}')"
 check "valeur en double" 409 "$(req POST /chiffres/values "$AD" '{"figureRegionId":"fr-madagascar","indicatorId":"ind-superficie","year":2018,"value":1,"unit":"km²","source":"s"}')"
+NIPC='{"figureRegionId":"fr-madagascar","indicatorId":"ind-nipc-glissement-annuel","year":2026,"month":4,"value":7.1,"unit":"%","source":"Test"}'
+check "valeur mensuelle de la même année" 201 "$(req POST /chiffres/values "$AD" "$NIPC")"
+NIPC_VALUE=$(json "d['id']")
+check "même mois en double" 409 "$(req POST /chiffres/values "$AD" "$NIPC")"
+check "l'accueil prend le mois le plus récent" "avril 2026" "$(req GET /indicators >/dev/null; json "d[3]['period']")"
+check "suppression de la valeur mensuelle" 204 "$(req DELETE "/chiffres/values/$NIPC_VALUE" "$AD")"
+check "l'éditeur ne choisit pas les chiffres clés" 403 "$(req POST /chiffres/key-figures "$ED" '{"indicatorId":"ind-chomage","decimals":1}')"
+check "indicateur déjà chiffre clé" 409 "$(req POST /chiffres/key-figures "$AD" '{"indicatorId":"ind-population","decimals":0}')"
 check "lien javascript:" 400 "$(req POST /chiffres/values "$AD" "${VALUE%\}},\"link\":\"javascript:x\"}")"
 check "ajout d'une valeur" 201 "$(req POST /chiffres/values "$AD" "${VALUE%\}},\"link\":\"https://instat.mg\"}")"
 check "type utilisé" 409 "$(req DELETE /chiffres/types/type-geo "$AD")"

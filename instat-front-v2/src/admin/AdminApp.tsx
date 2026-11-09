@@ -15,6 +15,7 @@ import { AdminSectionContext, type AdminSection } from "./ui/SectionContext";
 import FiguresPage from "./pages/chiffres/FiguresPage";
 import FigureRegionPage from "./pages/chiffres/FigureRegionPage";
 import IndicateursPage from "./pages/chiffres/IndicateursPage";
+import KeyFiguresPage from "./pages/chiffres/KeyFiguresPage";
 import TypesPage from "./pages/chiffres/TypesPage";
 import PublicationFormPage from "./pages/publications/PublicationFormPage";
 import PublicationsPage from "./pages/publications/PublicationsPage";
@@ -42,6 +43,8 @@ function renderPage(route: AdminRoute): ReactNode {
       return <IndicateursPage />;
     case "figures":
       return <FiguresPage />;
+    case "key-figures":
+      return <KeyFiguresPage />;
     case "figure-region":
       return <FigureRegionPage id={route.id} edit={route.edit} />;
     case "users":

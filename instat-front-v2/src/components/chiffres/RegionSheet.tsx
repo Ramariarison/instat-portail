@@ -1,6 +1,6 @@
 import { ArrowUpRight, ExternalLink } from "lucide-react";
 import type { DataType, FigureValue, IndicatorDef } from "../../admin/data/types";
-import { formatValue } from "../../lib/format";
+import { byPeriodDesc, formatValue, periodLabel } from "../../lib/format";
 import RegionSilhouette from "./RegionSilhouette";
 
 interface RegionSheetProps {
@@ -22,7 +22,7 @@ function ordinal(n: number): string {
   return n === 1 ? "1re" : `${n}e`;
 }
 
-/** Fiche d'une région : indicateurs groupés par type, dernière valeur en avant, années précédentes en dessous. */
+/** Fiche d'une région : indicateurs groupés par type, dernière valeur en avant, valeurs précédentes en dessous. */
 export default function RegionSheet({ name, national, values, types, indicators, rank, publicationsHref }: RegionSheetProps) {
   const groups = types
     .map((type) => ({
@@ -31,7 +31,7 @@ export default function RegionSheet({ name, national, values, types, indicators,
         .filter((indicator) => indicator.typeId === type.id)
         .map((indicator) => ({
           indicator,
-          series: values.filter((v) => v.indicatorId === indicator.id).sort((a, b) => b.year - a.year),
+          series: values.filter((v) => v.indicatorId === indicator.id).sort(byPeriodDesc),
         }))
         .filter((row) => row.series.length > 0),
     }))
@@ -88,7 +88,7 @@ export default function RegionSheet({ name, national, values, types, indicators,
                         {formatValue(latest!.value)} <span className="text-sm font-normal text-muted">{latest!.unit}</span>
                       </dd>
                       <dd className="text-xs text-muted sm:col-span-2">
-                        {latest!.year} · Source :{" "}
+                        {periodLabel(latest!.year, latest!.month)} · Source :{" "}
                         {latest!.link && SAFE_LINK.test(latest!.link) ? (
                           <a
                             href={latest!.link}
@@ -104,8 +104,8 @@ export default function RegionSheet({ name, national, values, types, indicators,
                         )}
                         {older.length > 0 && (
                           <span className="block tabular-nums">
-                            Années précédentes :{" "}
-                            {older.map((v) => `${v.year} : ${formatValue(v.value)} ${v.unit}`).join(" · ")}
+                            Valeurs précédentes :{" "}
+                            {older.map((v) => `${periodLabel(v.year, v.month)} : ${formatValue(v.value)} ${v.unit}`).join(" · ")}
                           </span>
                         )}
                       </dd>

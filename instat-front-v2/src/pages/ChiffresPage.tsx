@@ -8,7 +8,7 @@ import { StatusLine } from "../components/home/SectionHead";
 import PageBanner from "../components/layout/PageBanner";
 import { mapRegions } from "../data/regionMap";
 import { useApiData } from "../hooks/useApiData";
-import { byName, formatValue } from "../lib/format";
+import { byName, byPeriodDesc, formatValue } from "../lib/format";
 import { useHashQuery } from "../lib/route";
 
 const fieldClass =
@@ -73,7 +73,8 @@ export default function ChiffresPage() {
   const indicatorValues = regionalValues.filter((v) => v.indicatorId === indicator?.id);
   const years = [...new Set(indicatorValues.map((v) => v.year))].sort((a, b) => b - a);
   const year = years.find((y) => String(y) === query.get("annee")) ?? years[0];
-  const shown = indicatorValues.filter((v) => v.year === year);
+  // Valeurs mensuelles d'une même année : la plus récente l'emporte (classées de la plus ancienne à la plus récente).
+  const shown = indicatorValues.filter((v) => v.year === year).sort((a, b) => byPeriodDesc(b, a));
   const byKey = new Map(shown.map((v) => [keyByFigure.get(v.figureRegionId)!, v.value]));
   const unit = shown[0]?.unit ?? "";
   const classes = quantileClasses([...byKey.values()]);

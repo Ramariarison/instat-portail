@@ -24,7 +24,7 @@ instat-portail/
 Le front fait foi. Les réponses JSON reprennent **exactement** ses types :
 
 - `instat-front-v2/src/types.ts` (site public : `User`, `Publication`, `NewsItem`, `Indicator`, `Role`)
-- `instat-front-v2/src/admin/data/types.ts` (back-office : `Thematique`, `Region`, `AdminPublication`, `DataType`, `IndicatorDef`, `FigureRegion`, `FigureValue`, `AdminUser`)
+- `instat-front-v2/src/admin/data/types.ts` (back-office : `Thematique`, `Region`, `AdminPublication`, `DataType`, `IndicatorDef`, `FigureRegion`, `FigureValue`, `KeyFigure`, `AdminUser`)
 - `instat-front-v2/src/admin/permissions.ts` (matrice RBAC)
 
 Ils sont recopiés dans `services/libs/common/src/contract/` (`contract.types.ts`, `permissions.ts`), et la liste des
@@ -102,7 +102,7 @@ Lecture publique sauf mention ; écriture = jeton `Authorization: Bearer …` + 
 |---|---|
 | auth | `POST /auth/login` → `{ token, expiresIn, user }` · `GET /auth/me` · `PATCH /auth/me` (nom) · `POST /auth/password` · `GET /auth/permissions` · `/users` (droit `users`) |
 | publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&sector=…&limit=&offset=` → `Publication[]` (total dans `X-Total-Count` ; `sector` répétable : au moins un des secteurs) · `GET /publications/:id` · `GET /publications/latest-nipc` (site public : publications en ligne seulement) · `/admin/publications` (droit `publications`) + `POST /admin/publications/:id/submit` · `/publish` · `/return` `{ comment }` (droit `validate`) · `GET /admin/publications/:id/reviews` · `GET /admin/publications/stats` (tableau de bord) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
-| chiffres | `/indicators` → `Indicator[]` (chiffres clés de l'accueil) · `/chiffres/types` · `/chiffres/indicators?typeId=` · `/chiffres/regions` · `/chiffres/values?figureRegionId=&indicatorId=` |
+| chiffres | `GET /indicators` → `Indicator[]` (chiffres clés de l'accueil : valeur nationale la plus récente des indicateurs choisis) · `/chiffres/key-figures` (choix et ordre de ces indicateurs, droit `indicateurs`) · `/chiffres/types` · `/chiffres/indicators?typeId=` · `/chiffres/regions` · `/chiffres/values?figureRegionId=&indicatorId=` |
 | files | `POST /files` (multipart, champ `file`, tout utilisateur connecté) → `{ id, name, size, type, url }` · `GET /files/:id` · `DELETE /files/:id` |
 
 Convention CRUD : `GET /x`, `GET /x/:id`, `POST /x` (201), `PATCH /x/:id` (mise à jour **partielle**, comme
@@ -139,7 +139,11 @@ Rôles (matrice dans `libs/common/src/contract/permissions.ts`, identique au fro
   « Mon compte » n'apparaît dans les jetons (auteur des publications) qu'à la connexion suivante.
 - Publications : région obligatoire si `level = regional` (et effacée si `national`), secteurs dans la liste connue.
 - Suppression d'une thématique, d'une région, d'un type ou d'un indicateur encore utilisé : 409 `IN_USE`.
-- Une seule valeur par (région en chiffres, indicateur, année) : 409 `ALREADY_EXISTS`.
+- Une seule valeur par (région en chiffres, indicateur, année, mois) : 409 `ALREADY_EXISTS` ; le mois (1 à 12) est
+  facultatif, pour les valeurs mensuelles (NIPC).
+- Chiffres clés de l'accueil : rien n'est recopié, `GET /indicators` lit la valeur la plus récente (année puis mois)
+  de la fiche nationale (`figure_regions.region_id` NULL) ; un indicateur sans valeur nationale n'est pas affiché.
+  Un indicateur choisi comme chiffre clé ne peut pas être supprimé (409 `IN_USE`).
 - Liens et images affichés sur le site : `http(s)://`, chemin `/…` ou ancre `#…` seulement. Fichiers : pas de SVG ni de HTML.
 
 ## Ajouter une migration
@@ -162,6 +166,7 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
   soumettre », « Enregistrer et publier », « Renvoyer… ») ; une publication non modifiable s'ouvre en consultation.
 - `#/connexion` : page de connexion à part (`src/pages/LoginPage.tsx`), avec `retour=` et `expiree=1` ; le site public n'y
   mène que par le lien « Espace agents » de la barre du haut, `#/admin` sans session y redirige.
+- `#/admin/chiffres/chiffres-cles` : chiffres clés de l'accueil (indicateur, libellé, décimales, ordre), valeur affichée en aperçu.
 - `#/admin/compte` : « Mon compte » (nom, mot de passe), pour tous les rôles, depuis le menu du compte.
 - `#/admin` : tableau de bord selon le rôle (`src/admin/pages/tableau-de-bord/`) — éditeur : ses publications à
   corriger, en attente, en brouillon ; administrateur : file « À valider », activité récente, publications en ligne par
@@ -173,7 +178,7 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
 ## Points ouverts
 
 - `Publication.kind` n'est pas saisi dans le back-office : il est déduit du premier secteur (`kindOf()` dans `apps/publications/src/publications/publication-kind.ts`).
-- Les chiffres clés de l'accueil (`/indicators`) et les actualités (`/news`) n'ont pas d'écran d'administration dans le front.
+- Les actualités (`/news`) n'ont pas d'écran d'administration dans le front.
 - Les actualités n'ont pas de contenu (seulement titre, date, contexte) : pas de page de détail, « Lire l'actualité » mène à la page « en préparation ».
 - Routage par hash (`#/…`, `src/lib/route.ts`) : simple, mais invisible pour les moteurs de recherche. Passer à React Router (adresses `/publications/…`) le jour où le référencement compte.
 - Documents d'exemple (`doc-…` des données de démonstration) : aucun fichier réel derrière.

@@ -15,6 +15,13 @@ export class CreateFigureValueDto {
   @Max(2100)
   year!: number;
 
+  /** Mois (1 à 12) pour une valeur mensuelle, comme le NIPC ; absent pour une valeur annuelle. */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  month?: number | null;
+
   @IsNumber()
   value!: number;
 

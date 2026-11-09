@@ -16,6 +16,20 @@ export function formatDateTime(iso: string): string {
   });
 }
 
+export const MONTHS = [
+  "janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+];
+
+/** « mars 2026 » pour une valeur mensuelle, « 2024 » sinon (même libellé que le service Chiffres). */
+export function periodLabel(year: number, month?: number): string {
+  return month ? `${MONTHS[month - 1]} ${year}` : String(year);
+}
+
+/** Tri du plus récent au plus ancien : année, puis mois (une valeur annuelle passe après les mois de son année). */
+export function byPeriodDesc(a: { year: number; month?: number }, b: { year: number; month?: number }): number {
+  return b.year - a.year || (b.month ?? 0) - (a.month ?? 0);
+}
+
 export function formatNumber(value: number, decimals = 0): string {
   return value.toLocaleString("fr-FR", {
     minimumFractionDigits: decimals,

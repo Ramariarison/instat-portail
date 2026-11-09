@@ -97,7 +97,7 @@ function IndicatorForm({
 }
 
 export default function IndicateursPage() {
-  const { dataTypes, indicators, figureValues } = useAdminData();
+  const { dataTypes, indicators, figureValues, keyFigures } = useAdminData();
   const { canCreate, canUpdate, canDelete } = usePermissions("indicateurs");
   const run = useAction();
   const [query, setQuery] = useState("");
@@ -161,7 +161,9 @@ export default function IndicateursPage() {
   const blockedReason =
     deleting && deletingUsage > 0
       ? `L'indicateur « ${deleting.name} » a ${deletingUsage} valeur${deletingUsage > 1 ? "s" : ""} dans « Données par régions ». Supprimez d'abord ces valeurs.`
-      : undefined;
+      : deleting && keyFigures.items.some((k) => k.indicatorId === deleting.id)
+        ? `L'indicateur « ${deleting.name} » est un chiffre clé de l'accueil. Retirez-le d'abord des chiffres clés.`
+        : undefined;
 
   return (
     <>
