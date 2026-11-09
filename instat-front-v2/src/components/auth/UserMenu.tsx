@@ -28,7 +28,29 @@ function MenuLink({ label, href, icon: Icon, onSelect }: { label: string; href: 
   );
 }
 
-export default function UserMenu() {
+/** Initiales dans un rond vert, avec la pastille « connecté ». */
+function Avatar({ name, size }: { name: string; size: "sm" | "lg" }) {
+  return (
+    <span aria-hidden="true" className="relative shrink-0">
+      <span
+        className={`flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--color-paddy),var(--color-paddy-deep))] font-semibold text-white shadow-[0_0_0_2px_#fff,0_0_0_3px_rgb(20_87_63/0.25)] ${
+          size === "sm" ? "size-9 text-[0.8rem]" : "size-11 text-[0.95rem]"
+        }`}
+      >
+        {initials(name)}
+      </span>
+      <span
+        className={`absolute right-0 bottom-0 rounded-full bg-[#3fae74] ring-2 ring-white ${size === "sm" ? "size-2.5" : "size-3"}`}
+      />
+    </span>
+  );
+}
+
+/**
+ * Menu du compte connecté. `nameFrom` : à partir de quelle largeur le nom et le rôle s'affichent à côté de l'avatar
+ * (le back-office a la place tout de suite, la barre du site public seulement sur très grand écran).
+ */
+export default function UserMenu({ nameFrom = "sm" }: { nameFrom?: "sm" | "2xl" }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -45,21 +67,19 @@ export default function UserMenu() {
         aria-controls="user-menu"
         aria-label={`Compte de ${user.name}, ${roleLabels[user.role]}`}
         onClick={() => setOpen((value) => !value)}
-        className={`flex h-11 items-center gap-2.5 border pr-2.5 pl-1 ${
-          open ? "border-paddy bg-paddy-soft/50" : "border-rule hover:border-paddy"
+        className={`group flex h-12 items-center gap-3 rounded-full border py-1 pr-3 pl-1 transition-colors ${
+          open ? "border-line bg-paper" : "border-transparent hover:border-line hover:bg-paper"
         }`}
       >
-        <span
-          className="flex size-8 items-center justify-center bg-paddy-deep text-[0.95rem] text-white font-semibold"
+        <Avatar name={user.name} size="sm" />
+        <span className={`hidden max-w-[11rem] text-left leading-tight ${nameFrom === "sm" ? "sm:block" : "2xl:block"}`}>
+          <span className="block truncate text-[0.95rem] font-semibold">{user.name}</span>
+          <span className="block truncate text-[0.72rem] text-muted">{roleLabels[user.role]}</span>
+        </span>
+        <ChevronDown
+          className={`size-4 text-muted transition-transform group-hover:text-ink ${open ? "rotate-180 text-ink" : ""}`}
           aria-hidden="true"
-        >
-          {initials(user.name)}
-        </span>
-        <span className="hidden text-left leading-tight whitespace-nowrap 2xl:block">
-          <span className="block text-[1rem] font-semibold">{user.name}</span>
-          <span className="block text-[0.68rem] text-muted">{roleLabels[user.role]}</span>
-        </span>
-        <ChevronDown className={`size-4 text-muted transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+        />
       </button>
 
       {open && (
@@ -69,12 +89,7 @@ export default function UserMenu() {
         >
           {/* Fiche du compte : qui est connecté, avec quel rôle. */}
           <div className="flex items-center gap-3 border-b border-line px-4 py-4">
-            <span
-              aria-hidden="true"
-              className="flex size-11 shrink-0 items-center justify-center bg-paddy-deep text-[1.05rem] font-semibold text-white"
-            >
-              {initials(user.name)}
-            </span>
+            <Avatar name={user.name} size="lg" />
             <div className="min-w-0">
               <p className="truncate font-semibold leading-tight">{user.name}</p>
               <p className="truncate text-sm text-muted">{user.email}</p>

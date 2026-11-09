@@ -99,7 +99,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           {/* Le site public n'a pas de bouton de connexion : l'accès des agents est dans la barre du haut. */}
-          {user && <UserMenu />}
+          {user && <UserMenu nameFrom="2xl" />}
           <button
             type="button"
             aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
