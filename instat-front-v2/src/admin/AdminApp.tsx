@@ -61,16 +61,10 @@ function renderPage(route: AdminRoute): ReactNode {
   }
 }
 
-/** Rubrique de la page, numérotée comme dans le menu visible pour ce rôle (« 1.3 »). */
-function sectionOf(route: AdminRoute, role: Role): AdminSection | null {
-  const groups = adminNav
-    .map((group) => ({ ...group, items: group.items.filter((item) => can(role, item.resource, "view")) }))
-    .filter((group) => group.items.length > 0);
-  for (const [groupIndex, group] of groups.entries()) {
-    const itemIndex = group.items.findIndex((item) => item.pages.includes(route.page));
-    if (itemIndex >= 0) return { number: `${groupIndex + 1}.${itemIndex + 1}`, group: group.title };
-  }
-  return null;
+/** Rubrique du menu où se trouve la page (« Gestion des publications »). */
+function sectionOf(route: AdminRoute): AdminSection | null {
+  const group = adminNav.find((g) => g.items.some((item) => item.pages.includes(route.page)));
+  return group ? { group: group.title } : null;
 }
 
 /** Chargement des données du back-office, ou erreur avec possibilité de réessayer. */
@@ -151,7 +145,7 @@ function Shell({ route, role }: { route: AdminRoute; role: Role }) {
         {state.status !== "ready" ? (
           <DataStatus />
         ) : allowed ? (
-          <AdminSectionContext.Provider value={sectionOf(route, role)}>{renderPage(route)}</AdminSectionContext.Provider>
+          <AdminSectionContext.Provider value={sectionOf(route)}>{renderPage(route)}</AdminSectionContext.Provider>
         ) : (
           <AccessDenied roleLabel={roleLabels[role]} homeHref={homeHref} />
         )}

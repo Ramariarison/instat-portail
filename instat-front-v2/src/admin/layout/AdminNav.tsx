@@ -8,10 +8,7 @@ interface AdminNavProps {
   role: Role;
 }
 
-/**
- * Menu de l'espace d'administration : seules les sections autorisées pour le rôle sont affichées.
- * Numérotation « 1.3 » identique au repère affiché au-dessus du titre de chaque page.
- */
+/** Menu de l'espace d'administration : seules les sections autorisées pour le rôle sont affichées. */
 export default function AdminNav({ route, role }: AdminNavProps) {
   const groups = adminNav
     .map((group) => ({ ...group, items: group.items.filter((item) => can(role, item.resource, "view")) }))
@@ -29,23 +26,20 @@ export default function AdminNav({ route, role }: AdminNavProps) {
           home ? "border-l-laterite bg-white text-paddy" : "border-l-transparent text-ink hover:bg-white"
         }`}
       >
+        <LayoutDashboard
+          className={`size-4 shrink-0 ${home ? "text-paddy" : "text-muted group-hover:text-paddy"}`}
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
         <span className={`flex-1 text-[1.07rem] leading-tight font-semibold ${home ? "" : "group-hover:text-paddy"}`}>
           Tableau de bord
         </span>
-        <LayoutDashboard
-          className={`size-4 shrink-0 ${home ? "text-paddy" : "text-muted/60 group-hover:text-paddy"}`}
-          strokeWidth={1.5}
-          aria-hidden="true"
-        />
       </a>
-      {groups.map((group, groupIndex) => (
+      {groups.map((group) => (
         <div key={group.title} className="mb-7 last:mb-0">
-          <p className="mb-1 flex items-baseline gap-2 border-b-2 border-ink pb-2 text-xs text-ink">
-            <span className="text-laterite tabular-nums">{groupIndex + 1}</span>
-            {group.title}
-          </p>
+          <p className="mb-1 border-b-2 border-ink pb-2 text-xs font-semibold tracking-[0.06em] text-ink uppercase">{group.title}</p>
           <ul>
-            {group.items.map(({ label, href, pages, icon: Icon }, itemIndex) => {
+            {group.items.map(({ label, href, pages, icon: Icon }) => {
               const active = pages.includes(route.page);
               return (
                 <li key={href} className="border-b border-line">
@@ -56,19 +50,14 @@ export default function AdminNav({ route, role }: AdminNavProps) {
                       active ? "border-laterite bg-white text-paddy" : "border-transparent text-ink hover:bg-white"
                     }`}
                   >
-                    <span
-                      className={`w-6 shrink-0 text-[0.7rem] tabular-nums ${active ? "text-laterite" : "text-muted"}`}
-                    >
-                      {groupIndex + 1}.{itemIndex + 1}
-                    </span>
+                    <Icon
+                      className={`size-4 shrink-0 ${active ? "text-paddy" : "text-muted group-hover:text-paddy"}`}
+                      strokeWidth={1.75}
+                      aria-hidden="true"
+                    />
                     <span className={`flex-1 text-[1.07rem] leading-tight font-semibold ${active ? "" : "group-hover:text-paddy"}`}>
                       {label}
                     </span>
-                    <Icon
-                      className={`size-4 shrink-0 ${active ? "text-paddy" : "text-muted/60 group-hover:text-paddy"}`}
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
                   </a>
                 </li>
               );

@@ -28,19 +28,17 @@ type Intent = "save" | "submit" | "publish";
 const EXCERPT_MAX = 300;
 
 function Section({
-  number,
   title,
   description,
   children,
 }: {
-  number: string;
   title: string;
   description?: string;
   children: React.ReactNode;
 }) {
   return (
     <section className="border border-t-2 border-line border-t-ink bg-white p-5 sm:p-7">
-      <BlockTitle number={number}>{title}</BlockTitle>
+      <BlockTitle>{title}</BlockTitle>
       {description && <p className="mt-1.5 text-[0.95rem] text-muted">{description}</p>}
       <div className="mt-6 space-y-6 border-t border-line pt-6">{children}</div>
     </section>
@@ -198,7 +196,7 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
 
         {/* En consultation, tous les champs et boutons des sections sont désactivés d'un coup. */}
         <fieldset disabled={!editable} className="m-0 min-w-0 space-y-6 border-0 p-0">
-          <Section number="01" title="Informations générales">
+          <Section title="Informations générales">
             <Field label="Titre" required error={errors.title}>
               {(aria) => <input {...aria} className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} />}
             </Field>
@@ -275,7 +273,7 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
             </div>
           </Section>
 
-          <Section number="02" title="Image du titre">
+          <Section title="Image du titre">
             <ImageUpload
               label="Image"
               hint="PNG, JPG ou WebP, de préférence au format paysage."
@@ -285,7 +283,7 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
             />
           </Section>
 
-          <Section number="03" title="Contenu">
+          <Section title="Contenu">
             <Field label="Extrait" required error={errors.excerpt} hint="Résumé affiché dans les listes de publications.">
               {(aria) => (
                 <>
@@ -310,7 +308,7 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
             </Field>
           </Section>
 
-          <Section number="04" title="Documents à télécharger" description="Fichiers que les visiteurs pourront télécharger depuis la publication.">
+          <Section title="Documents à télécharger" description="Fichiers que les visiteurs pourront télécharger depuis la publication.">
             <div>
               <input
                 ref={fileRef}
@@ -369,7 +367,7 @@ function PublicationForm({ initial }: { initial?: AdminPublication }) {
             )}
           </Section>
 
-          <Section number="05" title="Classement">
+          <Section title="Classement">
             <Checkbox
               label="La plus récente publication NIPC"
               hint="Une seule publication peut porter ce marqueur : en cochant cette case, vous le retirez de la précédente."

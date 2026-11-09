@@ -33,7 +33,7 @@ Les polices sont installées via `@fontsource` : aucune requête vers un service
 L'interface reprend les codes d'une publication statistique imprimée (annuaire, bulletin) plutôt que ceux d'une application :
 
 - angles presque droits (`--radius-*` dans `src/index.css`), filets fins, filet épais noir en tête de tableau ;
-- sections numérotées comme des tableaux (`components/home/SectionHead.tsx`, classe `.running-head`) ;
+- repères de section précédés d'un court trait laterite, comme les intitulés de tableaux (`components/home/SectionHead.tsx`, classe `.running-head`) ;
 - laterite réservé aux repères : numéros, onglet actif, valeur mise en avant ;
 - papier millimétré en fond des bandeaux verts (`.graph-paper`) ;
 - thèmes présentés comme un sommaire, avec points de conduite (`.leader`) ;

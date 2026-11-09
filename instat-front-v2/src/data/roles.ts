@@ -1,4 +1,4 @@
-import { BarChart3, FileText, UserRound, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, FileText, LayoutDashboard, PenLine, Users, type LucideIcon } from "lucide-react";
 import type { Role } from "../types";
 
 export const roleLabels: Record<Role, string> = {
@@ -20,22 +20,22 @@ export interface RoleAction {
   icon: LucideIcon;
 }
 
-const publications: RoleAction = { label: "Gérer les publications", href: "#/admin/publications", icon: FileText };
-const figures: RoleAction = { label: "Gérer « Madagascar en chiffres »", href: "#/admin/chiffres", icon: BarChart3 };
-const users: RoleAction = { label: "Gérer les utilisateurs et les rôles", href: "#/admin/utilisateurs", icon: Users };
-const editors: RoleAction = { label: "Gérer les comptes éditeurs", href: "#/admin/utilisateurs", icon: Users };
-const account: RoleAction = { label: "Mon compte", href: "#/admin/compte", icon: UserRound };
+const dashboard: RoleAction = { label: "Tableau de bord", href: "#/admin", icon: LayoutDashboard };
+const publications: RoleAction = { label: "Publications", href: "#/admin/publications", icon: FileText };
+const figures: RoleAction = { label: "Madagascar en chiffres", href: "#/admin/chiffres", icon: BarChart3 };
+const users: RoleAction = { label: "Utilisateurs et rôles", href: "#/admin/utilisateurs", icon: Users };
+const editors: RoleAction = { label: "Comptes éditeurs", href: "#/admin/utilisateurs", icon: Users };
 
 /**
- * Raccourcis affichés dans le menu du compte, selon le rôle.
+ * Raccourcis vers le back-office affichés dans le menu du compte, selon le rôle (« Mon compte » est à part).
  * Ce n'est qu'un reflet visuel : les droits réels sont contrôlés par le service d'authentification.
  */
 export const roleActions: Record<Role, RoleAction[]> = {
-  super_admin: [publications, figures, users, account],
-  admin: [publications, figures, editors, account],
+  super_admin: [dashboard, publications, figures, users],
+  admin: [dashboard, publications, figures, editors],
   editor: [
-    { label: "Rédiger une publication", href: "#/admin/publications/nouvelle", icon: FileText },
-    { label: "Saisir les données par région", href: "#/admin/chiffres/regions", icon: BarChart3 },
-    account,
+    dashboard,
+    { label: "Rédiger une publication", href: "#/admin/publications/nouvelle", icon: PenLine },
+    { label: "Données par région", href: "#/admin/chiffres/regions", icon: BarChart3 },
   ],
 };

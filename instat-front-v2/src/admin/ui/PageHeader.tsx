@@ -44,7 +44,7 @@ export default function PageHeader({ title, description, actions, breadcrumb, co
     <header className="mb-8">
       {section && (
         <p className="running-head">
-          <span className="font-medium text-laterite tabular-nums">{section.number}</span>
+          <span aria-hidden="true" className="h-[3px] w-6 shrink-0 bg-laterite" />
           <span>{section.group}</span>
         </p>
       )}
@@ -69,14 +69,9 @@ export default function PageHeader({ title, description, actions, breadcrumb, co
   );
 }
 
-/** Titre de bloc à l'intérieur d'une page (formulaire, carte…), numéroté comme un sous-chapitre. */
-export function BlockTitle({ number, children, as: Tag = "h2" }: { number?: string; children: ReactNode; as?: "h2" | "h3" }) {
-  return (
-    <Tag className="flex items-baseline gap-3 text-[1.55rem] leading-tight font-semibold tracking-[-0.01em]">
-      {number && <span className="text-xs font-normal tracking-normal text-laterite tabular-nums">{number}</span>}
-      <span>{children}</span>
-    </Tag>
-  );
+/** Titre de bloc à l'intérieur d'une page (formulaire, carte…). */
+export function BlockTitle({ children, as: Tag = "h2" }: { children: ReactNode; as?: "h2" | "h3" }) {
+  return <Tag className="text-[1.55rem] leading-tight font-semibold tracking-[-0.01em]">{children}</Tag>;
 }
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
