@@ -58,8 +58,8 @@
 
 @layer components {
   /*
-   * Repère de section, à la manière d'un intitulé de tableau : « 01 ── Madagascar en chiffres ».
-   * Le numéro est en laterite, le filet prend toute la largeur restante.
+   * Repère de section, à la manière d'un intitulé de tableau : « ▬ INDICATEURS CLÉS ──── ».
+   * Sur l'accueil, un court trait laterite le précède ; le filet prend toute la largeur restante.
    */
   .running-head {
     display: flex;

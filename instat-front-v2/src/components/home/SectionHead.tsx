@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
 interface SectionHeadProps {
-  /** Numéro de section, affiché comme l'intitulé d'un tableau (« 01 »). */
-  number: string;
   /** Libellé court du repère, au-dessus du titre. */
   kicker: string;
   title: string;
@@ -10,11 +8,11 @@ interface SectionHeadProps {
   action?: ReactNode;
 }
 
-export default function SectionHead({ number, kicker, title, description, action }: SectionHeadProps) {
+export default function SectionHead({ kicker, title, description, action }: SectionHeadProps) {
   return (
     <header>
       <p className="running-head">
-        <span className="font-medium text-laterite">{number}</span>
+        <span aria-hidden="true" className="h-[3px] w-6 shrink-0 bg-laterite" />
         <span>{kicker}</span>
       </p>
       <div className="mt-5 grid gap-x-12 gap-y-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">

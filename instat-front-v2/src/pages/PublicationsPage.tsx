@@ -247,8 +247,7 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
         {state.status === "loading" && !shown && (
           <LoadingRegion label="Chargement des publications…">
             {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[3rem_minmax(0,1fr)_11rem]">
-                <Skeleton className="mt-1.5 hidden h-3 w-5 sm:block" />
+              <div key={i} className="grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,1fr)_11rem]">
                 <div>
                   <Skeleton className={`h-5 ${i % 3 === 1 ? "w-1/2" : i % 3 === 2 ? "w-3/4" : "w-5/6"}`} />
                   <Skeleton className="mt-3 h-3 w-52" />
@@ -287,14 +286,11 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
             aria-busy={refreshing}
             className={`transition-opacity duration-200 ${refreshing ? "pointer-events-none opacity-45" : ""}`}
           >
-            {shown.items.map((publication, index) => (
+            {shown.items.map((publication) => (
               <li
                 key={publication.id}
-                className="group relative grid gap-x-8 gap-y-1 border-b border-line py-5 sm:grid-cols-[3rem_minmax(0,1fr)_11rem]"
+                className="group relative grid gap-x-8 gap-y-1 border-b border-line py-5 sm:grid-cols-[minmax(0,1fr)_11rem]"
               >
-                <span aria-hidden="true" className="hidden pt-1 text-xs text-muted tabular-nums sm:block">
-                  {String(first + index + 1).padStart(2, "0")}
-                </span>
                 <div>
                   <a
                     href={publication.href}

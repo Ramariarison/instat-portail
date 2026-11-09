@@ -6,10 +6,7 @@ import SectionHead from "./SectionHead";
 function LinkList({ title, items }: { title: string; items: ServiceLink[] }) {
   return (
     <div>
-      <h3 className="flex items-baseline justify-between border-b-2 border-ink pb-3 text-xs text-muted">
-        <span className="text-ink">{title}</span>
-        <span className="tabular-nums">{String(items.length).padStart(2, "0")}</span>
-      </h3>
+      <h3 className="border-b-2 border-ink pb-3 text-xs font-semibold tracking-[0.06em] text-ink uppercase">{title}</h3>
       <ul>
         {items.map(({ id, label, description, icon: Icon, href }) => (
           <li key={id} className="border-b border-line">
@@ -37,7 +34,7 @@ export default function DataAndServices() {
   return (
     <section id="services" className="scroll-mt-20 border-t border-line bg-white">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <SectionHead number="04" kicker="Accès aux données" title="Bases de données et services" />
+        <SectionHead kicker="Accès aux données" title="Bases de données et services" />
 
         <div className="mt-12 grid gap-14 lg:grid-cols-2 lg:gap-16">
           <LinkList title="Bases de données" items={databases} />

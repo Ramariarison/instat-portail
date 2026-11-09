@@ -15,7 +15,6 @@ export default function KeyFigures() {
     <section id="chiffres" className="scroll-mt-20">
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-20 sm:px-6 lg:px-8">
         <SectionHead
-          number="01"
           kicker="Indicateurs clés"
           title="Madagascar en chiffres"
           description="Population, croissance, inflation et indices des prix, en un coup d'œil."
@@ -35,10 +34,7 @@ export default function KeyFigures() {
         <dl hidden={!lead} className="mt-12 grid border-t-2 border-ink lg:grid-cols-12">
           {lead && (
             <div className="flex flex-col justify-between gap-8 border-b border-line py-8 lg:col-span-5 lg:border-r lg:border-b-0 lg:pr-10">
-              <dt className="flex items-baseline gap-3 text-[0.95rem] text-muted">
-                <span className="text-xs text-laterite">1.0</span>
-                {lead.label}
-              </dt>
+              <dt className="text-[0.95rem] text-muted">{lead.label}</dt>
               <dd>
                 <span className="block text-[clamp(3rem,6vw,4.75rem)] leading-[0.95] font-bold tracking-[-0.02em] tabular-nums">
                   {formatNumber(lead.value, lead.decimals)}
@@ -52,15 +48,12 @@ export default function KeyFigures() {
           )}
 
           <div className="grid sm:grid-cols-2 lg:col-span-7 lg:pl-10">
-            {others.map((indicator, i) => (
+            {others.map((indicator) => (
               <div
                 key={indicator.id}
                 className="border-b border-line py-6 last:border-b-0 sm:odd:pr-8 sm:even:border-l sm:even:pl-8 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
               >
-                <dt className="flex items-baseline gap-3 text-[0.95rem] text-muted">
-                  <span className="text-xs text-laterite">{`2.${i + 1}`}</span>
-                  {indicator.label}
-                </dt>
+                <dt className="text-[0.95rem] text-muted">{indicator.label}</dt>
                 <dd className="mt-3 flex items-baseline justify-between gap-4">
                   <span>
                     <span className="text-[2.75rem] leading-none font-semibold tracking-[-0.02em] tabular-nums">

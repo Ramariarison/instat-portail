@@ -22,8 +22,7 @@ export default function NewsPage() {
         {result.status === "loading" ? (
           <LoadingRegion label="Chargement des actualités…" className="border-t-2 border-ink">
             {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} className="grid gap-x-8 gap-y-2 border-b border-line py-6 sm:grid-cols-[3rem_13rem_minmax(0,1fr)]">
-                <Skeleton className="mt-1.5 hidden h-3 w-5 sm:block" />
+              <div key={i} className="grid gap-x-8 gap-y-2 border-b border-line py-6 sm:grid-cols-[13rem_minmax(0,1fr)]">
                 <Skeleton className="mt-1.5 h-3 w-32" />
                 <div>
                   <Skeleton className={`h-5 ${i % 2 ? "w-2/3" : "w-5/6"}`} />
@@ -37,15 +36,9 @@ export default function NewsPage() {
             {result.status === "error" ? `Actualités indisponibles. ${result.message}` : "Aucune actualité pour le moment."}
           </StatusLine>
         ) : (
-          <ol className="border-t-2 border-ink">
-            {result.data.map((item, index) => (
-              <li
-                key={item.id}
-                className="grid gap-x-8 gap-y-1 border-b border-line py-6 sm:grid-cols-[3rem_13rem_minmax(0,1fr)]"
-              >
-                <span aria-hidden="true" className="hidden pt-1 text-xs text-laterite tabular-nums sm:block">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+          <ul className="border-t-2 border-ink">
+            {result.data.map((item) => (
+              <li key={item.id} className="grid gap-x-8 gap-y-1 border-b border-line py-6 sm:grid-cols-[13rem_minmax(0,1fr)]">
                 <p className="pt-1 text-xs text-muted">{item.dateLabel ?? "Date non précisée"}</p>
                 <div>
                   <h2 className="text-xl leading-snug font-semibold">{item.title}</h2>
@@ -53,7 +46,7 @@ export default function NewsPage() {
                 </div>
               </li>
             ))}
-          </ol>
+          </ul>
         )}
       </div>
     </>

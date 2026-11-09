@@ -141,7 +141,9 @@ export default function PublicationPage({ id }: { id: string }) {
           <section aria-labelledby="documents-title">
             <h2 id="documents-title" className="flex items-baseline justify-between border-b-2 border-ink pb-2 text-xs">
               <span>Documents à télécharger</span>
-              <span className="text-muted tabular-nums">{String(publication.documents.length).padStart(2, "0")}</span>
+              <span className="text-muted">
+                {publication.documents.length} fichier{publication.documents.length > 1 ? "s" : ""}
+              </span>
             </h2>
             {publication.documents.length > 0 ? (
               <ul>

@@ -30,7 +30,6 @@ export default function Publications() {
     <section id="publications" className="scroll-mt-20 border-t border-line bg-white">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <SectionHead
-          number="02"
           kicker="Dernières parutions"
           title="Publications récentes"
           action={
@@ -91,14 +90,11 @@ export default function Publications() {
               </StatusLine>
             </li>
           ) : null}
-          {items.map((publication, index) => (
+          {items.map((publication) => (
             <li
               key={publication.id}
-              className="group relative grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] lg:grid-cols-[2.5rem_minmax(0,1fr)_11rem_auto]"
+              className="group relative grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_11rem_auto]"
             >
-              <span aria-hidden="true" className="hidden pt-1 text-xs text-muted tabular-nums sm:block">
-                {String(index + 1).padStart(2, "0")}
-              </span>
               <div>
                 <a
                   href={publication.href}
@@ -140,9 +136,8 @@ function PublicationRowsSkeleton() {
       {Array.from({ length: 4 }, (_, i) => (
         <div
           key={i}
-          className="grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] lg:grid-cols-[2.5rem_minmax(0,1fr)_11rem_auto]"
+          className="grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_11rem_auto]"
         >
-          <Skeleton className="mt-1.5 hidden h-3 w-5 sm:block" />
           <div>
             <Skeleton className={`h-5 ${i % 2 ? "w-3/5" : "w-4/5"}`} />
             <Skeleton className="mt-3 h-3 w-40" />
