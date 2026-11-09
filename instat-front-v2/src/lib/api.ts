@@ -53,7 +53,32 @@ export function onUnauthorized(listener: () => void): () => void {
   return () => unauthorizedListeners.delete(listener);
 }
 
+const activityListeners = new Set<(busy: boolean) => void>();
+let pending = 0;
+
+/** Prévient quand des requêtes sont en cours (vrai) ou terminées (faux) : barre de progression en haut de page. */
+export function onActivity(listener: (busy: boolean) => void): () => void {
+  activityListeners.add(listener);
+  listener(pending > 0);
+  return () => activityListeners.delete(listener);
+}
+
+function track(delta: 1 | -1): void {
+  const was = pending > 0;
+  pending += delta;
+  if (was !== pending > 0) activityListeners.forEach((listener) => listener(pending > 0));
+}
+
 async function send(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<{ data: unknown; response: Response }> {
+  track(1);
+  try {
+    return await exchange(method, path, body, signal);
+  } finally {
+    track(-1);
+  }
+}
+
+async function exchange(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<{ data: unknown; response: Response }> {
   const headers: Record<string, string> = {};
   if (token) headers.Authorization = `Bearer ${token}`;
 

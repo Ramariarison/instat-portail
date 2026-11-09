@@ -2,10 +2,11 @@ import { useId, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import type { DataType, FigureRegion, FigureValue, IndicatorDef, Region } from "../admin/data/types";
 import { quantileClasses, regionKey } from "../components/chiffres/choropleth";
-import RegionMap, { MapLegend } from "../components/chiffres/RegionMap";
+import RegionMap, { MapLegend, MapSkeleton } from "../components/chiffres/RegionMap";
 import RegionSheet from "../components/chiffres/RegionSheet";
 import { StatusLine } from "../components/home/SectionHead";
 import PageBanner from "../components/layout/PageBanner";
+import { LoadingRegion, Skeleton, SkeletonText } from "../components/ui/Skeleton";
 import { mapRegions } from "../data/regionMap";
 import { useApiData } from "../hooks/useApiData";
 import { byName, byPeriodDesc, formatValue } from "../lib/format";
@@ -38,9 +39,11 @@ export default function ChiffresPage() {
       <>
         <Banner />
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <StatusLine className="border-t-2 border-ink">
-            {failed?.status === "error" ? `Données indisponibles. ${failed.message}` : "Chargement des données…"}
-          </StatusLine>
+          {failed?.status === "error" ? (
+            <StatusLine className="border-t-2 border-ink">Données indisponibles. {failed.message}</StatusLine>
+          ) : (
+            <ChiffresSkeleton />
+          )}
         </div>
       </>
     );
@@ -250,5 +253,47 @@ function Banner() {
       description="Les principaux indicateurs du pays et de ses 23 régions. Choisissez un indicateur pour colorer la carte, puis une région pour ouvrir sa fiche."
       crumbs={[{ label: "Madagascar en chiffres" }]}
     />
+  );
+}
+
+/** Même disposition que la page : réglages et carte à gauche, fiche à droite. */
+function ChiffresSkeleton() {
+  return (
+    <LoadingRegion label="Chargement des données…" className="grid gap-12 lg:grid-cols-12 lg:gap-14">
+      <div className="lg:col-span-5">
+        <div className="border-t-2 border-ink pt-5">
+          <Skeleton className="h-3.5 w-36" />
+          <Skeleton className="mt-2 h-11 w-full" />
+        </div>
+        <div className="mt-6 border border-line bg-white p-4 sm:p-6">
+          <Skeleton className="h-4 w-2/3" />
+          <div className="mt-4">
+            <MapSkeleton />
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line pt-4 sm:grid-cols-3">
+            {Array.from({ length: 6 }, (_, i) => (
+              <Skeleton key={i} className="h-3.5 w-24" />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="lg:col-span-7">
+        <div className="border-t-2 border-ink pt-5">
+          <Skeleton className="h-3 w-28" />
+          <Skeleton className="mt-3 h-9 w-56" />
+        </div>
+        {Array.from({ length: 3 }, (_, group) => (
+          <div key={group} className="mt-10">
+            <Skeleton className="h-3 w-44" />
+            {Array.from({ length: 3 }, (_, i) => (
+              <div key={i} className="flex items-baseline justify-between gap-6 border-b border-line py-4">
+                <SkeletonText lines={1} className="w-1/2" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </LoadingRegion>
   );
 }

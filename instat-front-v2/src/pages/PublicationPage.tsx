@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowDownToLine, FileText } from "lucide-react";
 import { sectors } from "../admin/data/sectors";
 import type { AdminPublication, Region, Thematique } from "../admin/data/types";
 import PageBanner from "../components/layout/PageBanner";
+import { LoadingRegion, Skeleton, SkeletonText } from "../components/ui/Skeleton";
 import { useApiData } from "../hooks/useApiData";
 import { fileUrl } from "../lib/api";
 import { formatBytes, formatDate } from "../lib/format";
@@ -30,10 +31,32 @@ export default function PublicationPage({ id }: { id: string }) {
   if (result.status === "loading") {
     return (
       <>
-        <PageBanner kicker="Publication" title="Chargement…" crumbs={[{ label: "Publications", href: "#/publications" }]} />
-        <p role="status" className="mx-auto max-w-7xl px-4 py-12 text-sm text-muted sm:px-6 lg:px-8">
-          Chargement de la publication…
-        </p>
+        <PageBanner kicker="Publication" title="Chargement de la publication" loading crumbs={[{ label: "Publications", href: "#/publications" }]} />
+        <LoadingRegion
+          label="Chargement de la publication…"
+          className="mx-auto grid max-w-7xl gap-12 px-4 py-12 sm:px-6 lg:grid-cols-12 lg:gap-14 lg:px-8"
+        >
+          <div className="lg:col-span-8">
+            <div className="border-l-[3px] border-line pl-5">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="mt-3 h-6 w-2/3" />
+            </div>
+            <SkeletonText lines={4} className="mt-10" />
+            <SkeletonText lines={3} className="mt-8" />
+          </div>
+          <div className="space-y-4 lg:col-span-4">
+            <Skeleton className="h-4 w-32" />
+            {Array.from({ length: 2 }, (_, i) => (
+              <div key={i} className="flex items-center gap-3 border-b border-line py-3">
+                <Skeleton className="size-5 shrink-0" />
+                <span className="flex-1">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="mt-2 h-3 w-16" />
+                </span>
+              </div>
+            ))}
+          </div>
+        </LoadingRegion>
       </>
     );
   }

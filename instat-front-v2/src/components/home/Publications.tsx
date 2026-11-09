@@ -4,6 +4,7 @@ import { publications as samplePublications } from "../../data/publications";
 import { useApiData } from "../../hooks/useApiData";
 import { formatDate } from "../../lib/format";
 import type { Publication } from "../../types";
+import { LoadingRegion, Skeleton } from "../ui/Skeleton";
 import SectionHead, { sectionLinkClass, StatusLine } from "./SectionHead";
 
 /** Nombre de publications affichées par onglet. */
@@ -78,14 +79,15 @@ export default function Publications() {
         </div>
 
         <ol id="publications-panel" role="tabpanel" aria-labelledby={`tab-${scope}`}>
-          {current.status !== "ready" || items.length === 0 ? (
+          {current.status === "loading" && (
+            <li>
+              <PublicationRowsSkeleton />
+            </li>
+          )}
+          {current.status === "error" || (current.status === "ready" && items.length === 0) ? (
             <li>
               <StatusLine>
-                {current.status === "loading"
-                  ? "Chargement des publications…"
-                  : current.status === "error"
-                    ? `Publications indisponibles. ${current.message}`
-                    : "Aucune publication pour le moment."}
+                {current.status === "error" ? `Publications indisponibles. ${current.message}` : "Aucune publication pour le moment."}
               </StatusLine>
             </li>
           ) : null}
@@ -128,5 +130,27 @@ export default function Publications() {
         </ol>
       </div>
     </section>
+  );
+}
+
+/** Lignes de la liste en attente : numéro, titre sur deux lignes, type, date et bouton. */
+function PublicationRowsSkeleton() {
+  return (
+    <LoadingRegion label="Chargement des publications…">
+      {Array.from({ length: 4 }, (_, i) => (
+        <div
+          key={i}
+          className="grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] lg:grid-cols-[2.5rem_minmax(0,1fr)_11rem_auto]"
+        >
+          <Skeleton className="mt-1.5 hidden h-3 w-5 sm:block" />
+          <div>
+            <Skeleton className={`h-5 ${i % 2 ? "w-3/5" : "w-4/5"}`} />
+            <Skeleton className="mt-3 h-3 w-40" />
+          </div>
+          <Skeleton className="mt-1.5 hidden h-3 w-24 lg:block" />
+          <Skeleton className="h-9 w-16" />
+        </div>
+      ))}
+    </LoadingRegion>
   );
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
+import { Skeleton } from "../ui/Skeleton";
 
 interface Crumb {
   label: string;
@@ -13,10 +14,12 @@ interface PageBannerProps {
   description?: ReactNode;
   /** Fil d'Ariane ; « Accueil » est ajouté en tête. */
   crumbs?: Crumb[];
+  /** Contenu en cours de chargement : le titre et la description sont remplacés par leur squelette. */
+  loading?: boolean;
 }
 
 /** En-tête des pages intérieures : même bandeau que l'accueil (papier millimétré, signet laterite). */
-export default function PageBanner({ kicker, title, description, crumbs = [] }: PageBannerProps) {
+export default function PageBanner({ kicker, title, description, crumbs = [], loading = false }: PageBannerProps) {
   const trail: Crumb[] = [{ label: "Accueil", href: "#accueil" }, ...crumbs];
 
   return (
@@ -46,10 +49,21 @@ export default function PageBanner({ kicker, title, description, crumbs = [] }: 
           <span className="text-white">{kicker}</span>
           <span>INSTAT · Madagascar</span>
         </p>
-        <h1 className="mt-6 max-w-4xl text-3xl leading-tight font-bold tracking-[-0.01em] sm:text-4xl">
-          {title}
-        </h1>
-        {description && <div className="mt-4 max-w-2xl text-[1.05rem] leading-relaxed text-white/75">{description}</div>}
+        {loading ? (
+          <div className="loading-reveal mt-6 max-w-4xl">
+            <h1 className="sr-only">{title}</h1>
+            <Skeleton className="h-9 w-4/5 sm:h-10" />
+            <Skeleton className="mt-3 h-9 w-1/2 sm:h-10" />
+            <Skeleton className="mt-6 h-4 w-full max-w-xl" />
+          </div>
+        ) : (
+          <>
+            <h1 className="mt-6 max-w-4xl text-3xl leading-tight font-bold tracking-[-0.01em] sm:text-4xl">
+              {title}
+            </h1>
+            {description && <div className="mt-4 max-w-2xl text-[1.05rem] leading-relaxed text-white/75">{description}</div>}
+          </>
+        )}
       </div>
     </section>
   );

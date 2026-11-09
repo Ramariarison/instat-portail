@@ -40,7 +40,8 @@ export default function CollectionPage({ slug }: { slug: string }) {
     <>
       <PageBanner
         kicker="Thèmes et données"
-        title={thematiques.status === "loading" ? "Chargement…" : "Rubrique introuvable"}
+        title={thematiques.status === "loading" ? "Chargement de la rubrique" : "Rubrique introuvable"}
+        loading={thematiques.status === "loading"}
         description={
           thematiques.status === "error"
             ? thematiques.message

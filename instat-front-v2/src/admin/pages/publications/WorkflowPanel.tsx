@@ -6,6 +6,7 @@ import { useAdminData } from "../../data/AdminDataContext";
 import type { AdminPublication, PublicationReview } from "../../data/types";
 import Badge from "../../ui/Badge";
 import { BlockTitle } from "../../ui/PageHeader";
+import { LoadingRegion, Skeleton } from "../../../components/ui/Skeleton";
 import { statusLabels, statusTones } from "../../workflow";
 
 const reviewLabels: Record<PublicationReview["action"], string> = {
@@ -58,7 +59,14 @@ export default function WorkflowPanel({ publication, lockedReason }: { publicati
       {error ? (
         <p className="mt-2 text-sm text-muted">{error}</p>
       ) : reviews === null ? (
-        <p className="mt-2 text-sm text-muted">Chargement…</p>
+        <LoadingRegion label="Chargement de l'historique…" className="mt-2 border-t border-line">
+          {Array.from({ length: 2 }, (_, i) => (
+            <div key={i} className="flex gap-4 border-b border-line py-3">
+              <Skeleton className="h-3 w-32" />
+              <Skeleton className="h-3 w-48" />
+            </div>
+          ))}
+        </LoadingRegion>
       ) : reviews.length === 0 ? (
         <p className="mt-2 text-sm text-muted">Pas encore soumise à validation.</p>
       ) : (

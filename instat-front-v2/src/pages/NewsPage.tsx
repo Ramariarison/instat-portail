@@ -1,5 +1,6 @@
 import PageBanner from "../components/layout/PageBanner";
 import { StatusLine } from "../components/home/SectionHead";
+import { LoadingRegion, Skeleton } from "../components/ui/Skeleton";
 import { news as sampleNews } from "../data/news";
 import { useApiData } from "../hooks/useApiData";
 import type { NewsItem } from "../types";
@@ -18,13 +19,22 @@ export default function NewsPage() {
       />
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        {result.status !== "ready" || result.data.length === 0 ? (
+        {result.status === "loading" ? (
+          <LoadingRegion label="Chargement des actualités…" className="border-t-2 border-ink">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="grid gap-x-8 gap-y-2 border-b border-line py-6 sm:grid-cols-[3rem_13rem_minmax(0,1fr)]">
+                <Skeleton className="mt-1.5 hidden h-3 w-5 sm:block" />
+                <Skeleton className="mt-1.5 h-3 w-32" />
+                <div>
+                  <Skeleton className={`h-5 ${i % 2 ? "w-2/3" : "w-5/6"}`} />
+                  <Skeleton className="mt-3 h-3 w-48" />
+                </div>
+              </div>
+            ))}
+          </LoadingRegion>
+        ) : result.status === "error" || result.data.length === 0 ? (
           <StatusLine className="border-t-2 border-ink">
-            {result.status === "loading"
-              ? "Chargement des actualités…"
-              : result.status === "error"
-                ? `Actualités indisponibles. ${result.message}`
-                : "Aucune actualité pour le moment."}
+            {result.status === "error" ? `Actualités indisponibles. ${result.message}` : "Aucune actualité pour le moment."}
           </StatusLine>
         ) : (
           <ol className="border-t-2 border-ink">

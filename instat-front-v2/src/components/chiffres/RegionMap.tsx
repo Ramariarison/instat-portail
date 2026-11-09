@@ -129,3 +129,14 @@ export function MapLegend({ classes, format }: { classes: ColorClass[]; format: 
     </ul>
   );
 }
+
+/** Fond de carte en attente des données : les 23 régions en gris, qui pulsent doucement. */
+export function MapSkeleton() {
+  return (
+    <svg viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} aria-hidden="true" className="mx-auto block h-auto max-h-[62vh] w-full animate-pulse">
+      {regions.map((region) => (
+        <path key={region.key} d={region.d} fill="var(--color-line)" stroke="#ffffff" strokeWidth={0.8} strokeLinejoin="round" />
+      ))}
+    </svg>
+  );
+}

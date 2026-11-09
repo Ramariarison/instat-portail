@@ -4,6 +4,7 @@ import { news as sampleNews } from "../../data/news";
 import { useApiData } from "../../hooks/useApiData";
 import type { NewsItem } from "../../types";
 import DecorativeBars from "../layout/DecorativeBars";
+import { LoadingRegion, Skeleton, SkeletonText } from "../ui/Skeleton";
 
 /** Distance (px) d'un glissement du doigt pour changer d'actualité. */
 const SWIPE = 50;
@@ -164,14 +165,12 @@ export default function Hero() {
         <div className="min-w-0 lg:col-span-5">
           {result.status === "ready" && result.data.length > 0 ? (
             <NewsCarousel news={result.data} />
+          ) : result.status === "loading" ? (
+            <NewsSkeleton />
           ) : (
             // Même hauteur que le carrousel : la page ne « saute » pas quand les actualités arrivent.
             <p role="status" className="flex min-h-[18rem] items-center bg-white px-5 py-8 text-sm text-muted">
-              {result.status === "loading"
-                ? "Chargement des actualités…"
-                : result.status === "error"
-                  ? `Actualités indisponibles. ${result.message}`
-                  : "Aucune actualité pour le moment."}
+              {result.status === "error" ? `Actualités indisponibles. ${result.message}` : "Aucune actualité pour le moment."}
             </p>
           )}
         </div>
@@ -180,5 +179,24 @@ export default function Hero() {
       {/* Histogramme décoratif : il fait la transition avec la page. */}
       <DecorativeBars />
     </section>
+  );
+}
+
+/** Carte des actualités en attente, à la hauteur du carrousel (sur fond blanc, comme lui). */
+function NewsSkeleton() {
+  return (
+    <LoadingRegion label="Chargement des actualités…" className="min-h-[18rem] bg-white text-ink">
+      <div className="flex items-center justify-between border-b border-line px-5 py-3">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-6 w-16" />
+      </div>
+      <div className="px-5 py-5">
+        <Skeleton className="h-3 w-32" />
+        <Skeleton className="mt-4 h-5 w-11/12" />
+        <Skeleton className="mt-2.5 h-5 w-3/4" />
+        <SkeletonText lines={2} className="mt-5" />
+        <Skeleton className="mt-6 h-4 w-28" />
+      </div>
+    </LoadingRegion>
   );
 }

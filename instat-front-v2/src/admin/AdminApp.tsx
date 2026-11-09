@@ -26,6 +26,7 @@ import DashboardPage from "./pages/tableau-de-bord/DashboardPage";
 import RolesPage from "./pages/utilisateurs/RolesPage";
 import UsersPage from "./pages/utilisateurs/UsersPage";
 import type { Role } from "../types";
+import { LoadingRegion, Skeleton } from "../components/ui/Skeleton";
 
 function renderPage(route: AdminRoute): ReactNode {
   switch (route.page) {
@@ -76,10 +77,23 @@ function sectionOf(route: AdminRoute, role: Role): AdminSection | null {
 function DataStatus() {
   const { state, reload } = useAdminData();
   if (state.status === "loading") {
+    // Forme d'une page du back-office : en-tête, recherche, tableau.
     return (
-      <p role="status" className="border-t-2 border-ink py-8 text-sm text-muted">
-        Chargement des données…
-      </p>
+      <LoadingRegion label="Chargement des données…">
+        <Skeleton className="h-3 w-40" />
+        <Skeleton className="mt-4 h-9 w-72 max-w-full" />
+        <Skeleton className="mt-4 h-4 w-full max-w-lg" />
+        <Skeleton className="mt-8 h-11 w-full max-w-md" />
+        <div className="mt-6 border-t-2 border-line bg-white">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="flex items-center gap-6 border-b border-line px-4 py-4">
+              <Skeleton className={`h-4 ${i % 2 ? "w-1/3" : "w-2/5"}`} />
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="ml-auto h-7 w-20" />
+            </div>
+          ))}
+        </div>
+      </LoadingRegion>
     );
   }
   if (state.status === "error") {

@@ -102,6 +102,52 @@
     background-position: -1px -1px;
   }
 
+  /*
+   * Squelette : la forme du contenu attendu, en gris, parcourue d'un reflet lent.
+   * Il n'apparaît qu'après 150 ms (.loading-reveal) : un chargement rapide ne clignote pas.
+   */
+  .skeleton {
+    background-color: var(--color-line);
+    background-image: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.6) 50%, transparent 100%);
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  .on-dark .skeleton {
+    background-color: rgb(255 255 255 / 0.12);
+    background-image: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.1) 50%, transparent 100%);
+  }
+
+  /* Carte blanche posée sur un bandeau sombre (actualités de l'accueil) : squelette clair. */
+  .on-dark :where(.bg-white) .skeleton {
+    background-color: var(--color-line);
+    background-image: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.6) 50%, transparent 100%);
+  }
+
+  .loading-reveal {
+    animation: reveal 250ms ease-out 150ms both;
+  }
+
+  /* Barre de progression des requêtes, en haut de la fenêtre : un segment laterite qui avance. */
+  .activity-bar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 60;
+    height: 3px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .activity-bar::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    background-color: var(--color-laterite);
+    animation: progress 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
   /* Points de conduite entre un intitulé et son renvoi, comme dans un sommaire. */
   .leader {
     flex: 1;
@@ -112,7 +158,7 @@
   }
 }
 
-/* Seul moment animé de la page : l'histogramme du bandeau qui se dessine au chargement. */
+/* L'histogramme du bandeau qui se dessine au chargement. */
 @keyframes grow {
   from {
     transform: scaleY(0);
@@ -131,6 +177,34 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Chargement : reflet des squelettes, apparition différée, barre de progression. */
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
   }
 }
 

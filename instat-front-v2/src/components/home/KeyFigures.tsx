@@ -4,6 +4,7 @@ import { indicators as sampleIndicators } from "../../data/indicators";
 import { useApiData } from "../../hooks/useApiData";
 import { formatNumber } from "../../lib/format";
 import type { Indicator } from "../../types";
+import { LoadingRegion, Skeleton } from "../ui/Skeleton";
 import SectionHead, { sectionLinkClass, StatusLine } from "./SectionHead";
 
 export default function KeyFigures() {
@@ -26,10 +27,9 @@ export default function KeyFigures() {
           }
         />
 
-        {result.status !== "ready" && (
-          <StatusLine className="mt-12 border-t-2 border-ink">
-            {result.status === "loading" ? "Chargement des indicateurs…" : `Indicateurs indisponibles. ${result.message}`}
-          </StatusLine>
+        {result.status === "loading" && <KeyFiguresSkeleton />}
+        {result.status === "error" && (
+          <StatusLine className="mt-12 border-t-2 border-ink">Indicateurs indisponibles. {result.message}</StatusLine>
         )}
 
         <dl hidden={!lead} className="mt-12 grid border-t-2 border-ink lg:grid-cols-12">
@@ -81,5 +81,37 @@ export default function KeyFigures() {
         </p>
       </div>
     </section>
+  );
+}
+
+/** Même grille que les chiffres : un grand chiffre à gauche, cinq petits à droite. */
+function KeyFiguresSkeleton() {
+  return (
+    <LoadingRegion label="Chargement des indicateurs…" className="mt-12 grid border-t-2 border-ink lg:grid-cols-12">
+      <div className="flex flex-col justify-between gap-8 border-b border-line py-8 lg:col-span-5 lg:border-r lg:border-b-0 lg:pr-10">
+        <Skeleton className="h-4 w-48" />
+        <div>
+          <Skeleton className="h-16 w-4/5 sm:h-[4.5rem]" />
+          <div className="mt-4 flex justify-between border-t border-line pt-3">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-10" />
+          </div>
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:col-span-7 lg:pl-10">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div
+            key={i}
+            className="border-b border-line py-6 last:border-b-0 sm:odd:pr-8 sm:even:border-l sm:even:pl-8 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
+          >
+            <Skeleton className="h-4 w-44" />
+            <div className="mt-4 flex items-end justify-between">
+              <Skeleton className="h-10 w-28" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </LoadingRegion>
   );
 }

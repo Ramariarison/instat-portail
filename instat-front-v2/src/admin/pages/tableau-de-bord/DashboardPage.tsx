@@ -17,6 +17,7 @@ import RecentActivity from "./RecentActivity";
 import StatTile from "./StatTile";
 import ThematiqueCoverage from "./ThematiqueCoverage";
 import { type StatsState, useDashboardStats } from "./useDashboardStats";
+import { LoadingRegion, Skeleton } from "../../../components/ui/Skeleton";
 
 const today = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
@@ -24,7 +25,21 @@ const byDateDesc = (a: AdminPublication, b: AdminPublication) => b.date.localeCo
 
 /** Contenu qui dépend des chiffres du service : chargement, erreur, ou rendu. */
 function WithStats({ state, children }: { state: StatsState; children: (stats: Extract<StatsState, { status: "ready" }>["stats"]) => ReactNode }) {
-  if (state.status === "loading") return <p className="py-6 text-center text-sm text-muted">Chargement…</p>;
+  if (state.status === "loading") {
+    return (
+      <LoadingRegion label="Chargement des chiffres…" className="space-y-4 py-1">
+        {Array.from({ length: 4 }, (_, i) => (
+          <div key={i}>
+            <div className="flex justify-between">
+              <Skeleton className={`h-3.5 ${i % 2 ? "w-1/3" : "w-1/2"}`} />
+              <Skeleton className="h-3.5 w-8" />
+            </div>
+            <Skeleton className="mt-2 h-2 w-full" />
+          </div>
+        ))}
+      </LoadingRegion>
+    );
+  }
   if (state.status === "error") return <p className="text-sm text-muted">{state.message}</p>;
   return <>{children(state.stats)}</>;
 }

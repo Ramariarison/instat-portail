@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import type { Region, Thematique } from "../admin/data/types";
 import PageBanner from "../components/layout/PageBanner";
+import { LoadingRegion, Skeleton } from "../components/ui/Skeleton";
 import { SAMPLE_DATA } from "../config";
 import { publications as samplePublications } from "../data/publications";
 import { useApiData } from "../hooks/useApiData";
@@ -21,7 +22,11 @@ const scopes: { id: "" | Publication["scope"]; label: string }[] = [
 const fieldClass =
   "h-11 w-full border border-rule bg-white px-3 text-[0.95rem] hover:border-muted focus-visible:border-paddy focus-visible:shadow-[inset_0_0_0_1px_var(--color-paddy)] focus-visible:outline-none";
 
-type State = { status: "loading" } | { status: "error"; message: string } | { status: "ready"; page: Page<Publication> };
+/** Pendant un nouveau chargement (filtre, page), la liste précédente reste affichée, estompée : la page ne saute pas. */
+type State =
+  | { status: "loading"; previous?: Page<Publication> }
+  | { status: "error"; message: string }
+  | { status: "ready"; page: Page<Publication> };
 
 /** Rubrique du menu « Thèmes et données » : même liste, avec un filtre imposé. */
 export interface Preset {
@@ -89,7 +94,10 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
     for (const sector of presetSectors.split(",").filter(Boolean)) params.append("sector", sector);
 
     const controller = new AbortController();
-    setState({ status: "loading" });
+    setState((current) => ({
+      status: "loading",
+      previous: current.status === "ready" ? current.page : current.status === "loading" ? current.previous : undefined,
+    }));
     api.page<Publication>(`/publications?${params}`, controller.signal).then(
       (result) => setState({ status: "ready", page: result }),
       (error: unknown) => {
@@ -106,7 +114,10 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
     resultsRef.current?.focus({ preventScroll: true });
   }, [state]);
 
-  const total = state.status === "ready" ? state.page.total : 0;
+  // Liste affichée : la réponse, ou la précédente pendant un rechargement.
+  const shown = state.status === "ready" ? state.page : state.status === "loading" ? state.previous : undefined;
+  const refreshing = state.status === "loading" && shown !== undefined;
+  const total = shown?.total ?? 0;
   const pages = Math.max(1, Math.ceil(total / PER_PAGE));
   const first = (page - 1) * PER_PAGE;
   const sortedThemes =
@@ -223,11 +234,7 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
             })}
           </div>
           <p role="status" className="pb-3 text-xs text-muted tabular-nums">
-            {state.status === "loading"
-              ? "Chargement…"
-              : state.status === "error"
-                ? ""
-                : `${formatNumber(total)} publication${total > 1 ? "s" : ""}`}
+            {shown ? `${formatNumber(total)} publication${total > 1 ? "s" : ""}` : state.status === "loading" ? "Chargement…" : ""}
           </p>
         </div>
 
@@ -237,7 +244,22 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
           </p>
         )}
 
-        {state.status === "ready" && state.page.items.length === 0 && (
+        {state.status === "loading" && !shown && (
+          <LoadingRegion label="Chargement des publications…">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="grid gap-x-8 gap-y-2 border-b border-line py-5 sm:grid-cols-[3rem_minmax(0,1fr)_11rem]">
+                <Skeleton className="mt-1.5 hidden h-3 w-5 sm:block" />
+                <div>
+                  <Skeleton className={`h-5 ${i % 3 === 1 ? "w-1/2" : i % 3 === 2 ? "w-3/4" : "w-5/6"}`} />
+                  <Skeleton className="mt-3 h-3 w-52" />
+                </div>
+                <Skeleton className="mt-1.5 hidden h-3 w-24 sm:block" />
+              </div>
+            ))}
+          </LoadingRegion>
+        )}
+
+        {shown && shown.items.length === 0 && (
           <div className="py-10">
             <p className="text-[1.05rem]">
               {preset && !filtered
@@ -259,9 +281,13 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
           </div>
         )}
 
-        {state.status === "ready" && state.page.items.length > 0 && (
-          <ol start={first + 1}>
-            {state.page.items.map((publication, index) => (
+        {shown && shown.items.length > 0 && (
+          <ol
+            start={first + 1}
+            aria-busy={refreshing}
+            className={`transition-opacity duration-200 ${refreshing ? "pointer-events-none opacity-45" : ""}`}
+          >
+            {shown.items.map((publication, index) => (
               <li
                 key={publication.id}
                 className="group relative grid gap-x-8 gap-y-1 border-b border-line py-5 sm:grid-cols-[3rem_minmax(0,1fr)_11rem]"
@@ -294,7 +320,7 @@ export default function PublicationsPage({ preset }: { preset?: Preset }) {
           </ol>
         )}
 
-        {state.status === "ready" && pages > 1 && (
+        {shown && pages > 1 && (
           <nav aria-label="Pages de résultats" className="mt-8 flex items-center justify-between gap-4">
             <button
               type="button"

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ActivityBar } from "./components/ui/Skeleton";
 import { AuthProvider } from "./context/AuthContext";
 import { useRoute } from "./lib/route";
 import AdminApp from "./admin/AdminApp";
@@ -94,6 +95,7 @@ export default function App() {
 
   return (
     <AuthProvider>
+      <ActivityBar />
       {segments[0] === "admin" ? (
         <AdminApp segments={segments} />
       ) : segments[0] === "connexion" ? (
