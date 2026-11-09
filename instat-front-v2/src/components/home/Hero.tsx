@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play, Search } from "lucide-react";
+import heroPhoto from "../../assets/hero/hero-rizieres-1920.webp";
+import heroPhotoSmall from "../../assets/hero/hero-rizieres-1024.webp";
 import { news as sampleNews } from "../../data/news";
 import { publications as samplePublications } from "../../data/publications";
 import { useApiData } from "../../hooks/useApiData";
@@ -273,12 +275,27 @@ export default function Hero() {
   const result = useApiData<NewsItem[]>("/news?limit=10", sampleNews);
 
   return (
-    <section id="accueil" className="on-dark graph-paper relative overflow-hidden bg-paddy-deep text-white">
-      {/* Halo discret derrière le texte : le vert n'est pas un aplat uniforme. */}
+    <section id="accueil" className="on-dark relative overflow-hidden bg-paddy-deep text-white">
+      {/* Fond : rizières des Hautes Terres, fondues dans le vert (la photo ne donne que la lumière, le vert la couleur),
+          plus sombres à gauche pour le texte et en bas vers l'histogramme ; papier millimétré par-dessus. */}
+      <img
+        src={heroPhoto}
+        srcSet={`${heroPhotoSmall} 1024w, ${heroPhoto} 1920w`}
+        sizes="100vw"
+        alt=""
+        aria-hidden="true"
+        fetchPriority="high"
+        className="pointer-events-none absolute inset-0 size-full object-cover object-[center_60%] opacity-70 mix-blend-luminosity"
+      />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_15%_20%,rgb(255_255_255/0.07),transparent_55%)]"
+        className="pointer-events-none absolute inset-0 bg-[rgb(13_59_43/0.62)] lg:bg-transparent lg:bg-[linear-gradient(90deg,rgb(13_59_43/0.94)_0%,rgb(13_59_43/0.82)_40%,rgb(13_59_43/0.35)_72%,rgb(13_59_43/0.2)_100%)]"
       />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(13_59_43/0.35)_0%,transparent_35%,rgb(13_59_43/0.75)_100%)]"
+      />
+      <div aria-hidden="true" className="graph-paper pointer-events-none absolute inset-0" />
       <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pt-14 pb-36 sm:px-6 sm:pb-44 lg:grid-cols-12 lg:items-center lg:gap-14 lg:px-8 lg:pt-16">
         <div className="lg:col-span-7">
           <p className="running-head max-w-xl">
@@ -321,6 +338,19 @@ export default function Hero() {
           )}
         </div>
       </div>
+
+      {/* Mention exigée par la licence de la photo. */}
+      <p className="absolute right-4 bottom-[6.5rem] z-10 text-[0.68rem] text-white/45 sm:right-6 sm:bottom-[8.5rem] lg:right-8">
+        Photo :{" "}
+        <a
+          href="https://commons.wikimedia.org/wiki/File:Madagascar_-_rice_terraces.jpg"
+          target="_blank"
+          rel="noreferrer"
+          className="underline decoration-white/25 underline-offset-2 hover:text-white/80"
+        >
+          Hardscarf, CC BY-SA 3.0
+        </a>
+      </p>
 
       {/* Histogramme décoratif : il fait la transition avec la page. */}
       <DecorativeBars />

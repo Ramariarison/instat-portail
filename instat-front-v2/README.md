@@ -116,4 +116,12 @@ Le front ne parle qu'à la passerelle d'API (`/api`), par `src/lib/api.ts`.
 
 Lien d'évitement, navigation au clavier (menus, onglets, carrousel), focus visible, `aria-live` sur les actualités,
 formulaire avec libellés et erreur annoncée (`role="alert"`), `prefers-reduced-motion` respecté.
-Le carrousel ne défile pas tout seul.
+Le carrousel des actualités défile au rythme de lecture ; il s'arrête au survol, au clavier, onglet caché ou hors de
+l'écran, a un bouton pause, et reste immobile si le système demande moins d'animations.
+
+## Crédits
+
+Photo du bandeau d'accueil (`src/assets/hero/`, réduite et convertie en WebP) : « Madagascar - rice terraces » par
+Hardscarf, licence [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/), via
+[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Madagascar_-_rice_terraces.jpg). La mention apparaît
+aussi sur le bandeau.
