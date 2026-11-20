@@ -13,8 +13,11 @@ instat-portail/
 │   ├── apps/files/      fichiers envoyés (images, documents)  → volume disque
 │   ├── test/            scénario de bout en bout de l'API (api-smoke.sh)
 │   ├── gateway/         nginx : passerelle /api + sert le build du front
+│   ├── caddy/           HTTPS devant la passerelle sur le serveur (profil « production »)
+│   ├── backup/          sauvegarde des bases et des fichiers (backup.sh, serveur)
 │   ├── pgadmin/         serveur déclaré pour pgAdmin (outil de développement)
 │   └── postgres/        script de création des bases (une base et un rôle par service)
+├── docs/                déploiement sur GCP (deploiement-gcp.md), schéma des données
 ├── docker-compose.yml
 └── .env.example
 ```
@@ -42,6 +45,11 @@ docker compose up --build        # http://localhost:8080 (site) et http://localh
 docker compose down -v           # tout effacer, bases comprises
 docker compose --profile outils up -d   # + pgAdmin sur http://localhost:5050 (poste local seulement)
 ```
+
+Serveur (VM Compute Engine, guide pas à pas dans `docs/deploiement-gcp.md`) : même pile, avec dans le `.env`
+`COMPOSE_PROFILES=production` et `DOMAIN=…` (Caddy, certificat Let's Encrypt automatique), `GATEWAY_PORT=127.0.0.1:8080`
+et `BACKUP_BUCKET=gs://…` pour `services/backup/backup.sh` (cron). La passerelle lit l'adresse du visiteur dans
+`X-Forwarded-For` quand la requête vient de `REAL_IP_FROM` (réseaux Docker) : indispensable à la limite de connexions.
 
 pgAdmin (profil `outils`, jamais démarré par défaut) : le serveur « INSTAT (local) » est déjà déclaré
 (`services/pgadmin/servers.json`) ; se connecter avec l'utilisateur `postgres` et `POSTGRES_PASSWORD` du `.env`.

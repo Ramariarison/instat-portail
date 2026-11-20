@@ -13,7 +13,7 @@ export interface ServiceOptions {
   description: string;
   /** Module racine du service. */
   module: Type<unknown>;
-  /** Réglages propres au service avant l'écoute (ex. : envoi de fichiers). */
+  /** Réglages propres au service avant l'écoute. */
   configure?: (app: NestFastifyApplication) => Promise<void> | void;
 }
 

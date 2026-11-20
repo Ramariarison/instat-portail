@@ -1,0 +1,9 @@
+# Proxy HTTPS du serveur (profil « production » de docker-compose.yml).
+# Certificat Let's Encrypt obtenu et renouvelé automatiquement pour DOMAIN : l'enregistrement DNS doit
+# pointer vers le serveur et les ports 80 et 443 être ouverts. Le visiteur est transmis à la passerelle
+# dans X-Forwarded-For (lu par nginx, voir set_real_ip_from).
+{$DOMAIN} {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy gateway:80
+}

@@ -11,6 +11,7 @@ RUN npm run build
 
 FROM nginx:1.28-alpine
 ENV CORS_ORIGIN=""
+ENV REAL_IP_FROM="172.16.0.0/12"
 COPY services/gateway/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=front /front/dist /usr/share/nginx/html
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD wget -qO- http://127.0.0.1/api/health >/dev/null || exit 1

@@ -84,6 +84,7 @@ services:
     restart: unless-stopped
     environment:
       CORS_ORIGIN: ${CORS_ORIGIN:-}
+      REAL_IP_FROM: ${REAL_IP_FROM:-172.16.0.0/12}
     ports:
       - "${GATEWAY_PORT:-8080}:80"
     depends_on:
@@ -91,6 +92,25 @@ services:
       publications: { condition: service_healthy }
       chiffres: { condition: service_healthy }
       files: { condition: service_healthy }
+
+  # Serveur : HTTPS (certificat Let's Encrypt automatique) devant la passerelle, pour le domaine DOMAIN.
+  # Démarré seulement avec le profil « production » (COMPOSE_PROFILES=production dans le .env du serveur).
+  caddy:
+    image: caddy:2.10-alpine
+    profiles: ["production"]
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      gateway: { condition: service_healthy }
 
   # Outil de développement, démarré seulement sur demande : docker compose --profile outils up -d
   # → http://localhost:5050 (sans écran de connexion, accessible depuis ce poste uniquement).
@@ -116,3 +136,5 @@ volumes:
   pgdata:
   files:
   pgadmin:
+  caddy_data:
+  caddy_config:
