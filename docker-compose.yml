@@ -16,7 +16,9 @@ x-node-env: &node-env
 
 services:
   postgres:
-    image: postgis/postgis:17-3.5-alpine
+    # PostGIS n'est pas utilisé. Serveur ARM (Oracle Cloud) : POSTGRES_IMAGE=postgres:17-alpine, l'image PostGIS
+    # n'existant qu'en amd64. Ne pas changer d'image sur un volume existant (extension PostGIS déjà installée).
+    image: ${POSTGRES_IMAGE:-postgis/postgis:17-3.5-alpine}
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Définir POSTGRES_PASSWORD dans .env}

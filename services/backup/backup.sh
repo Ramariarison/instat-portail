@@ -3,13 +3,17 @@
 #   services/backup/backup.sh
 #   → sauvegardes/AAAA-MM-JJ_HHMM-bases.sql.gz et sauvegardes/AAAA-MM-JJ_HHMM-fichiers.tar.gz
 # Variables (facultatives, lues dans l'environnement ou dans le .env du dépôt) :
-#   BACKUP_BUCKET=gs://…   copie en plus chaque sauvegarde vers Cloud Storage (gcloud storage cp)
+#   BACKUP_BUCKET          copie en plus chaque sauvegarde vers un stockage objet :
+#                          gs://<bucket>   Google Cloud Storage (gcloud storage cp, compte de service de la VM)
+#                          oci://<bucket>  Oracle Object Storage (oci os object put, instance principal de la VM)
 #   BACKUP_DIR             dossier local (défaut : sauvegardes, à la racine du dépôt)
 #   BACKUP_KEEP_DAYS       durée de conservation locale en jours (défaut : 7)
 # Restauration : voir docs/deploiement-gcp.md.
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
+# Sous cron, PATH ne contient pas les outils installés pour l'utilisateur (oci via pipx : ~/.local/bin).
+PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 
 env_value() {
   grep -E "^$1=" .env 2>/dev/null | tail -n 1 | cut -d= -f2- || true
@@ -32,9 +36,22 @@ mv "$dir/$stamp-bases.sql.gz.part" "$dir/$stamp-bases.sql.gz"
 docker compose exec -T files tar -C /data/files -czf - . > "$dir/$stamp-fichiers.tar.gz.part"
 mv "$dir/$stamp-fichiers.tar.gz.part" "$dir/$stamp-fichiers.tar.gz"
 
-if [ -n "$bucket" ]; then
-  gcloud storage cp --quiet "$dir/$stamp-bases.sql.gz" "$dir/$stamp-fichiers.tar.gz" "${bucket%/}/"
-fi
+case "$bucket" in
+  "") ;;
+  gs://*)
+    gcloud storage cp --quiet "$dir/$stamp-bases.sql.gz" "$dir/$stamp-fichiers.tar.gz" "${bucket%/}/"
+    ;;
+  oci://*)
+    for file in "$stamp-bases.sql.gz" "$stamp-fichiers.tar.gz"; do
+      oci os object put --auth instance_principal --bucket-name "${bucket#oci://}" \
+        --file "$dir/$file" --name "$file" --no-multipart >/dev/null
+    done
+    ;;
+  *)
+    echo "BACKUP_BUCKET inconnu : $bucket (attendu gs://… ou oci://…)" >&2
+    exit 1
+    ;;
+esac
 
 find "$dir" -maxdepth 1 -name '*.gz' -mtime +"$keep" -delete
 find "$dir" -maxdepth 1 -name '*.part' -mmin +60 -delete
