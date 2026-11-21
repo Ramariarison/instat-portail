@@ -58,6 +58,39 @@
 
 @layer components {
   /*
+   * Fond du back-office : halos verts très légers (en haut), une pointe de latérite (en bas à droite) et une
+   * trame de points qui s'efface vers le bas. Couches fixes : le fond ne défile pas avec le contenu.
+   */
+  .admin-backdrop {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+  }
+
+  .admin-backdrop::before,
+  .admin-backdrop::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .admin-backdrop::before {
+    background:
+      radial-gradient(56rem 34rem at 0% 0%, rgb(20 87 63 / 0.2), transparent 62%),
+      radial-gradient(44rem 30rem at 100% 8%, rgb(63 174 116 / 0.17), transparent 60%),
+      radial-gradient(40rem 34rem at 92% 100%, rgb(179 57 43 / 0.09), transparent 62%),
+      linear-gradient(180deg, #f1f6f3, #e7efea);
+  }
+
+  .admin-backdrop::after {
+    background-image: radial-gradient(rgb(13 59 43 / 0.16) 1px, transparent 1.3px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(180deg, #000, transparent 65%);
+  }
+
+  /*
    * Repère de section, à la manière d'un intitulé de tableau : « ▬ INDICATEURS CLÉS ──── ».
    * Sur l'accueil, un court trait laterite le précède ; le filet prend toute la largeur restante.
    */

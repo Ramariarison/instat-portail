@@ -179,16 +179,18 @@ export default function AdminApp({ segments }: { segments: string[] }) {
   return (
     <AdminDataProvider>
       <ToastProvider>
-        <AdminHeader />
-        {user ? (
-          <Shell route={route} role={user.role} />
-        ) : (
-          <main className="px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
-            <p role="status" className="mx-auto max-w-2xl text-sm text-muted">
-              {ready ? "Redirection vers la page de connexion…" : "Vérification de la session…"}
-            </p>
-          </main>
-        )}
+        <div className="admin-backdrop">
+          <AdminHeader />
+          {user ? (
+            <Shell route={route} role={user.role} />
+          ) : (
+            <main className="px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
+              <p role="status" className="mx-auto max-w-2xl text-sm text-muted">
+                {ready ? "Redirection vers la page de connexion…" : "Vérification de la session…"}
+              </p>
+            </main>
+          )}
+        </div>
       </ToastProvider>
     </AdminDataProvider>
   );
