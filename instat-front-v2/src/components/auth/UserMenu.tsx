@@ -3,7 +3,7 @@ import { ChevronDown, LogOut, UserRound, type LucideIcon } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useDismiss } from "../../hooks/useDismiss";
 import { roleActions, roleLabels } from "../../data/roles";
-import { initials } from "../../lib/format";
+import Avatar from "./Avatar";
 
 /** Page du back-office ouverte : le raccourci correspondant est mis en évidence. */
 function isCurrent(href: string): boolean {
@@ -25,24 +25,6 @@ function MenuLink({ label, href, icon: Icon, onSelect }: { label: string; href: 
       <Icon className={`size-4 shrink-0 ${current ? "text-paddy" : "text-muted"}`} strokeWidth={1.75} aria-hidden="true" />
       {label}
     </a>
-  );
-}
-
-/** Initiales dans un rond vert, avec la pastille « connecté ». */
-function Avatar({ name, size }: { name: string; size: "sm" | "lg" }) {
-  return (
-    <span aria-hidden="true" className="relative shrink-0">
-      <span
-        className={`flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--color-paddy),var(--color-paddy-deep))] font-semibold text-white shadow-[0_0_0_2px_#fff,0_0_0_3px_rgb(20_87_63/0.25)] ${
-          size === "sm" ? "size-9 text-[0.8rem]" : "size-11 text-[0.95rem]"
-        }`}
-      >
-        {initials(name)}
-      </span>
-      <span
-        className={`absolute right-0 bottom-0 rounded-full bg-[#3fae74] ring-2 ring-white ${size === "sm" ? "size-2.5" : "size-3"}`}
-      />
-    </span>
   );
 }
 
