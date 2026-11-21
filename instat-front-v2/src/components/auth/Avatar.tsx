@@ -3,7 +3,7 @@ import { initials } from "../../lib/format";
 const sizes = {
   sm: { disc: "size-9 text-[0.8rem]", dot: "size-2.5" },
   lg: { disc: "size-11 text-[0.95rem]", dot: "size-3" },
-  xl: { disc: "size-20 text-2xl", dot: "size-4" },
+  xl: { disc: "size-14 text-xl", dot: "size-3.5" },
 };
 
 /** Initiales dans un rond vert, avec la pastille « connecté » (menu du compte, « Mon compte »). */
