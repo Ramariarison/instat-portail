@@ -5,6 +5,6 @@ const PICTO_PNG = /^[\w\-. ]+\.png$/i;
 export function pictoError(value: string): string | undefined {
   const picto = value.trim();
   if (!picto) return "Saisissez le nom du fichier picto.";
-  if (!PICTO_PNG.test(picto)) return "Indiquez un nom de fichier PNG, par exemple : population.png";
+  if (!PICTO_PNG.test(picto)) return "Indiquez un nom de fichier PNG, comme population.png";
   return undefined;
 }

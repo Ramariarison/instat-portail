@@ -81,7 +81,7 @@ function ValueForm({
     if (!typeId) next.typeId = "Choisissez un type de données.";
     if (!indicatorId) next.indicatorId = "Choisissez un indicateur.";
     if (!/^\d{4}$/.test(year.trim()) || yearNumber < 1900 || yearNumber > 2100)
-      next.year = "Saisissez une année à 4 chiffres, par exemple 2018.";
+      next.year = "Saisissez une année à 4 chiffres, comme 2018.";
     else if (
       indicatorId &&
       existing.some(
@@ -89,7 +89,7 @@ function ValueForm({
       )
     )
       next.year = "Une valeur existe déjà pour cet indicateur et cette période. Modifiez-la plutôt.";
-    if (parsed === null) next.value = "Saisissez un nombre, par exemple 4,5 ou 25 000.";
+    if (parsed === null) next.value = "Saisissez un nombre, comme 4,5 ou 25 000.";
     if (!unit.trim()) next.unit = "Indiquez l'unité (km², habitants, %…).";
     if (!source.trim()) next.source = "Indiquez la source de la donnée.";
     if (link.trim() && !isHttpLink(link.trim())) next.link = "Saisissez une adresse complète, commençant par https://";

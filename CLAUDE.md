@@ -60,7 +60,10 @@ pgAdmin (profil `outils`, jamais démarré par défaut) : le serveur « INSTAT (
 Il tourne sans écran de connexion et n'écoute que sur 127.0.0.1 : ne pas l'exposer ailleurs.
 
 `SEED_DEMO=true` charge les données d'exemple du front (mêmes identifiants), plus un lot d'exemples couvrant toutes
-les thématiques (chaque lot une seule fois : table `demo_seeds` du service Publications), et les comptes de démonstration
+les thématiques et une image par publication de démonstration (`/demo/publications/<id>.jpg`, servie par la
+passerelle seulement si `SEED_DEMO=true`, photos Wikimedia Commons sous licence libre choisies dans
+`services/gateway/demo/photos.json`, téléchargées et légendées par `build-images.py`, crédits dans `CREDITS.md`) (chaque lot une seule
+fois : table `demo_seeds` du service Publications), et les comptes de démonstration
 `superadmin@instat.demo`, `admin@instat.demo`, `editeur@instat.demo` (mot de passe `demo1234`), seulement si les tables sont vides.
 En production : `SEED_DEMO=false` et `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD` pour le premier super administrateur.
 

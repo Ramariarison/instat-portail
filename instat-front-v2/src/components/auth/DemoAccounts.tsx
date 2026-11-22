@@ -12,7 +12,7 @@ export default function DemoAccounts({ selected, onPick }: { selected?: string; 
     <details className="group border border-dashed border-rule">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm text-muted hover:text-ink [&::-webkit-details-marker]:hidden">
         <span>
-          Comptes de démonstration <span className="text-xs">(données d'exemple)</span>
+          Comptes de démonstration
         </span>
         <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden="true" />
       </summary>

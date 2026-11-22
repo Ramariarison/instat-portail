@@ -58,7 +58,7 @@ function UserForm({
     const next: typeof errors = {};
     const mail = email.trim();
     if (name.trim().length < 2) next.name = "Saisissez le nom complet.";
-    if (!EMAIL.test(mail)) next.email = "Saisissez une adresse e-mail valide, par exemple prenom.nom@instat.mg";
+    if (!EMAIL.test(mail)) next.email = "Saisissez une adresse e-mail valide, de la forme prenom.nom@instat.mg";
     else if (others.some((user) => user.email.toLowerCase() === mail.toLowerCase()))
       next.email = "Un compte utilise déjà cette adresse e-mail.";
     if (password && password.length < PASSWORD_MIN)

@@ -19,7 +19,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
     const { rows } = await this.pool.query<{ count: number }>("SELECT count(*)::int AS count FROM data_types");
     if (rows[0]!.count > 0) return;
     await runInTransaction(this.pool, (client) => this.seed(client));
-    this.logger.log("Données d'exemple chargées.");
+    this.logger.log("Données de démonstration chargées.");
   }
 
   private async seed(client: PoolClient): Promise<void> {

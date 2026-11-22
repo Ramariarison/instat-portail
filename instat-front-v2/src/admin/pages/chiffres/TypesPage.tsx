@@ -65,7 +65,7 @@ function TypeForm({
       <Field
         label="Nom du fichier picto (PNG)"
         required
-        hint="Nom du fichier image déjà présent sur le serveur, par exemple « population.png »."
+        hint="Nom du fichier image déjà présent sur le serveur, comme « population.png »."
         error={errors.picto}
       >
         {(aria) => (

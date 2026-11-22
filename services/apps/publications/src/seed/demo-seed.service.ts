@@ -9,10 +9,16 @@ import { thematiqueSeeds } from "./data/thematiques.data";
 const regionId = (name: string) => `reg-${slug(name)}`;
 const thematiqueId = (name: string) => `th-${slug(name)}`;
 
+/** Texte de la fiche : un paragraphe par élément, séparés par une ligne vide. */
+const content = (body: string[]) => body.join("\n\n");
+
+/** Premiers textes provisoires des publications de démonstration, remplacés par le lot « textes-publications ». */
+const PROVISIONAL_EXCERPT = /^Publication (d'exemple|de l'INSTAT) : /;
+
 /**
- * Données d'exemple (SEED_DEMO=true), chargées au démarrage après les migrations.
- * Les publications d'exemple sont déjà en ligne (statut « published »).
- * Chaque lot ne l'est qu'une fois (table demo_seeds) : un exemple supprimé dans le back-office ne revient pas.
+ * Données de démonstration (SEED_DEMO=true), chargées au démarrage après les migrations.
+ * Les publications de démonstration sont déjà en ligne (statut « published »).
+ * Chaque lot ne l'est qu'une fois (table demo_seeds) : une publication supprimée dans le back-office ne revient pas.
  */
 @Injectable()
 export class DemoSeedService implements OnApplicationBootstrap {
@@ -24,6 +30,8 @@ export class DemoSeedService implements OnApplicationBootstrap {
     if (process.env.SEED_DEMO !== "true") return;
     await this.runOnce("socle", (client) => this.seedBase(client));
     await this.runOnce("publications-par-thematique", (client) => this.seedExtraPublications(client));
+    await this.runOnce("couvertures-publications", (client) => this.seedCovers(client));
+    await this.runOnce("textes-publications", (client) => this.seedTexts(client));
   }
 
   /** Exécute un lot dans une transaction, s'il n'est pas déjà marqué dans demo_seeds. */
@@ -32,7 +40,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
       const marked = await client.query("INSERT INTO demo_seeds (name) VALUES ($1) ON CONFLICT DO NOTHING", [name]);
       if (!marked.rowCount) return;
       await seed(client);
-      this.logger.log(`Données d'exemple chargées : ${name}`);
+      this.logger.log(`Données de démonstration chargées : ${name}`);
     });
   }
 
@@ -62,8 +70,8 @@ export class DemoSeedService implements OnApplicationBootstrap {
           p.region ? "regional" : "national",
           p.region ? regionId(p.region) : null,
           thematiqueId(p.thematique),
-          `Publication de l'INSTAT : ${p.title}.`,
-          `${p.title}.\n\nContenu d'exemple, à remplacer par le texte de la publication.`,
+          p.excerpt,
+          content(p.body),
           JSON.stringify([{ id: `doc-${p.id}`, name: p.file, size: 1_250_000 }]),
           p.date,
           Boolean(p.nipc),
@@ -94,11 +102,39 @@ export class DemoSeedService implements OnApplicationBootstrap {
           p.region ? "regional" : "national",
           p.region ? regionId(p.region) : null,
           thematiqueId(p.thematique),
-          `Publication d'exemple : ${p.title}.`,
-          `${p.title}.\n\nContenu d'exemple, à remplacer par le texte de la publication.`,
+          p.excerpt,
+          content(p.body),
           p.date,
           p.sectors,
         ],
+      );
+    }
+  }
+
+  /**
+   * Image des publications de démonstration, servie par la passerelle (/demo/publications/<id>.jpg) ;
+   * une image déjà choisie dans le back-office est gardée.
+   */
+  private async seedCovers(client: PoolClient): Promise<void> {
+    for (const { id } of [...basePublicationSeeds, ...extraPublicationSeeds]) {
+      await client.query("UPDATE publications SET image_url = $2 WHERE id = $1 AND image_url IS NULL", [
+        `pub-${id}`,
+        `/demo/publications/${id}.jpg`,
+      ]);
+    }
+  }
+
+  /**
+   * Titres, dates, résumés et textes définitifs des publications de démonstration, sur une base chargée avec les
+   * premiers textes provisoires ; une publication déjà retouchée dans le back-office n'est pas modifiée.
+   */
+  private async seedTexts(client: PoolClient): Promise<void> {
+    for (const p of [...basePublicationSeeds, ...extraPublicationSeeds]) {
+      const { rows } = await client.query<{ excerpt: string }>("SELECT excerpt FROM publications WHERE id = $1", [`pub-${p.id}`]);
+      if (!rows[0] || !PROVISIONAL_EXCERPT.test(rows[0].excerpt)) continue;
+      await client.query(
+        "UPDATE publications SET title = $2, date = $3, published_at = $3::date, excerpt = $4, content = $5 WHERE id = $1",
+        [`pub-${p.id}`, p.title, p.date, p.excerpt, content(p.body)],
       );
     }
   }

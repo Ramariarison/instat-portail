@@ -14,4 +14,11 @@ ENV CORS_ORIGIN=""
 ENV REAL_IP_FROM="172.16.0.0/12"
 COPY services/gateway/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=front /front/dist /usr/share/nginx/html
+# Images des publications de démonstration (/demo/publications/<id>.jpg, voir services/gateway/demo/build-images.py) :
+# seulement avec les données de démonstration (SEED_DEMO=true).
+ARG VITE_SHOW_DEMO_ACCOUNTS=false
+RUN --mount=type=bind,source=services/gateway/demo/publications,target=/demo-publications \
+  if [ "$VITE_SHOW_DEMO_ACCOUNTS" = "true" ]; then \
+    mkdir -p /usr/share/nginx/html/demo && cp -r /demo-publications /usr/share/nginx/html/demo/publications; \
+  fi
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD wget -qO- http://127.0.0.1/api/health >/dev/null || exit 1
