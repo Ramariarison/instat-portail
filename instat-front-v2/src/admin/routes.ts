@@ -5,6 +5,7 @@ import {
   Layers,
   Map,
   MapPin,
+  Newspaper,
   ShieldCheck,
   Tags,
   Users,
@@ -18,6 +19,7 @@ export type AdminRoute =
   | { page: "regions" }
   | { page: "publications" }
   | { page: "publication-form"; id?: string }
+  | { page: "news" }
   | { page: "types" }
   | { page: "indicateurs" }
   | { page: "figures" }
@@ -52,6 +54,8 @@ export function matchAdmin(seg: string[]): AdminRoute {
     }
   }
 
+  if (a === "actualites" && !b) return { page: "news" };
+
   if (a === "compte" && !b) return { page: "account" };
 
   if (a === "utilisateurs") {
@@ -73,6 +77,8 @@ export function requirement(route: AdminRoute): { resource: Resource; action: Ac
       return { resource: "publications", action: "view" };
     case "publication-form":
       return { resource: "publications", action: route.id ? "update" : "create" };
+    case "news":
+      return { resource: "actualites", action: "view" };
     case "types":
       return { resource: "types", action: "view" };
     case "indicateurs":
@@ -110,6 +116,7 @@ export const adminNav: AdminNavGroup[] = [
       { label: "Thématiques", href: "#/admin/publications/thematiques", resource: "thematiques", pages: ["thematiques"], icon: Tags },
       { label: "Régions", href: "#/admin/publications/regions", resource: "regions", pages: ["regions"], icon: MapPin },
       { label: "Publications", href: "#/admin/publications", resource: "publications", pages: ["publications", "publication-form"], icon: FileText },
+      { label: "Actualités", href: "#/admin/actualites", resource: "actualites", pages: ["news"], icon: Newspaper },
     ],
   },
   {

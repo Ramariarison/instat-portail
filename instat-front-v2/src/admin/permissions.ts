@@ -9,6 +9,7 @@ export type Resource =
   | "thematiques"
   | "regions"
   | "publications"
+  | "actualites"
   | "types"
   | "indicateurs"
   | "figures"
@@ -29,6 +30,7 @@ export const permissions: Record<Role, Partial<Record<Resource, Action[]>>> = {
     thematiques: all,
     regions: all,
     publications: [...all, "validate"],
+    actualites: all,
     types: all,
     indicateurs: all,
     figures: all,
@@ -39,6 +41,7 @@ export const permissions: Record<Role, Partial<Record<Resource, Action[]>>> = {
     thematiques: all,
     regions: all,
     publications: [...all, "validate"],
+    actualites: all,
     types: all,
     indicateurs: all,
     figures: all,
@@ -73,6 +76,7 @@ export const resourceGroups: { title: string; items: { resource: Resource; label
       { resource: "thematiques", label: "Thématiques" },
       { resource: "regions", label: "Régions" },
       { resource: "publications", label: "Publications" },
+      { resource: "actualites", label: "Actualités" },
     ],
   },
   {

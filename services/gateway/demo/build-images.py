@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-Images des publications de démonstration (SEED_DEMO=true) : publications/<id>.jpg (16:9) et CREDITS.md.
+Images des publications et des actualités de démonstration (SEED_DEMO=true), 16:9, et CREDITS.md :
+publications/<id>.jpg et actualites/<id>.jpg, servies par la passerelle sous /demo/.
 
 Lit les publications dans services/apps/publications/src/seed/data/publications.data.ts. Pour chacune :
 - si photos.json lui attribue une photo de Wikimedia Commons (licence libre), la télécharge, la recadre en 16:9
   (« y » : position verticale du cadrage, de 0 en haut à 1 en bas, 0,5 par défaut) et y inscrit le crédit
   (auteur, licence) exigé par la licence ; CREDITS.md reprend les crédits et les liens ;
 - sinon, dessine une couverture aux couleurs de sa thématique (titre, date, carte de la région ou motif graphique).
+Les actualités de la section « actualites » de photos.json reçoivent leur photo de la même façon.
 
     python3 services/gateway/demo/build-images.py      (depuis la racine du dépôt, Pillow et Internet nécessaires)
 """
@@ -29,6 +31,7 @@ REGION_MAP = ROOT / "instat-front-v2/src/data/regionMap.ts"
 FONT = ROOT / "instat-front-v2/node_modules/@fontsource-variable/libre-franklin/files/libre-franklin-latin-wght-normal.woff2"
 DEMO = Path(__file__).resolve().parent
 OUT = DEMO / "publications"
+OUT_NEWS = DEMO / "actualites"
 PHOTOS = DEMO / "photos.json"
 CREDITS = DEMO / "CREDITS.md"
 USER_AGENT = "instat-portail-demo/1.0 (https://github.com/Ramariarison/instat-portail)"
@@ -69,12 +72,13 @@ def font(size, weight):
 
 
 def read_publications():
-    """Champs utiles des deux lots d'exemple, lus dans le fichier TypeScript (une publication par ligne)."""
+    """Champs utiles des deux lots, lus dans le fichier TypeScript : de chaque « id: » au suivant."""
+    text = SEEDS.read_text(encoding="utf-8")
+    starts = [m.start() for m in re.finditer(r'\bid: "', text)]
     pubs = []
-    for line in SEEDS.read_text(encoding="utf-8").splitlines():
-        if not line.strip().startswith("{ id:"):
-            continue
-        field = lambda name: (m.group(1) if (m := re.search(name + r': "((?:[^"\\]|\\.)*)"', line)) else None)
+    for i, start in enumerate(starts):
+        block = text[start : starts[i + 1] if i + 1 < len(starts) else len(text)]
+        field = lambda name: (m.group(1) if (m := re.search(name + r': "((?:[^"\\]|\\.)*)"', block)) else None)
         pubs.append({k: field(k) for k in ("id", "title", "date", "thematique", "region")})
     return pubs
 
@@ -245,9 +249,14 @@ def cover(pub, regions):
     img.save(OUT / f"{pub['id']}.jpg", "JPEG", quality=84, optimize=True, progressive=True)
 
 
-def fetch(url):
+def fetch(url, attempts=3):
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    return urllib.request.urlopen(request, timeout=120).read()
+    for attempt in range(attempts):
+        try:
+            return urllib.request.urlopen(request, timeout=120).read()
+        except (TimeoutError, OSError):
+            if attempt == attempts - 1:
+                raise
 
 
 def commons_info(file_title):
@@ -263,7 +272,7 @@ def commons_info(file_title):
             "license": text("LicenseShortName"), "license_url": text("LicenseUrl")}
 
 
-def photo(pub, entry):
+def photo(target, entry):
     info = commons_info(entry["file"])
     img = Image.open(io.BytesIO(fetch(info["url"]))).convert("RGB")
     # Recadrage 16:9 : toute la largeur si possible, position verticale choisie par « y ».
@@ -288,32 +297,40 @@ def photo(pub, entry):
     draw.text((W - width - 24, H - 40), credit, font=f, fill=(255, 255, 255, 235))
     # 1280 × 720 : assez pour la fiche de la publication, deux fois plus léger que 1600 × 900.
     Image.alpha_composite(img, layer).convert("RGB").resize((1280, 720), Image.LANCZOS).save(
-        OUT / f"{pub['id']}.jpg", "JPEG", quality=78, optimize=True, progressive=True)
+        target, "JPEG", quality=78, optimize=True, progressive=True)
     return info
+
+
+def credit_row(name, entry, info):
+    license = f"[{info['license']}]({info['license_url']})" if info["license_url"] else info["license"]
+    return f"| `{name}` | [{entry['file'][5:]}]({info['page']}) | {info['author']} | {license} |"
 
 
 def main():
     OUT.mkdir(exist_ok=True)
+    OUT_NEWS.mkdir(exist_ok=True)
     regions = read_regions()
     photos = json.loads(PHOTOS.read_text(encoding="utf-8"))
     pubs = read_publications()
     credits = []
     for pub in pubs:
-        if pub["id"] in photos:
-            info = photo(pub, photos[pub["id"]])
-            credits.append(f"| `{pub['id']}.jpg` | [{photos[pub['id']]['file'][5:]}]({info['page']}) | {info['author']} | "
-                           f"[{info['license']}]({info['license_url']}) |" if info["license_url"] else
-                           f"| `{pub['id']}.jpg` | [{photos[pub['id']]['file'][5:]}]({info['page']}) | {info['author']} | {info['license']} |")
+        entry = photos["publications"].get(pub["id"])
+        if entry:
+            info = photo(OUT / f"{pub['id']}.jpg", entry)
+            credits.append(credit_row(f"publications/{pub['id']}.jpg", entry, info))
         else:
             cover(pub, regions)
+    for news_id, entry in photos["actualites"].items():
+        info = photo(OUT_NEWS / f"{news_id}.jpg", entry)
+        credits.append(credit_row(f"actualites/{news_id}.jpg", entry, info))
     CREDITS.write_text(
-        "# Crédits des photos des publications de démonstration\n\n"
+        "# Crédits des photos des publications et actualités de démonstration\n\n"
         "Photos de Wikimedia Commons sous licence libre, recadrées (1280 × 720) et légendées par "
         "`build-images.py` ; le crédit figure aussi sur chaque image. Les modifications (recadrage, légende) "
         "sont diffusées sous la même licence que l'original.\n\n"
         "| Image | Original | Auteur | Licence |\n|---|---|---|---|\n" + "\n".join(credits) + "\n",
         encoding="utf-8")
-    print(f"{len(pubs)} images dans {OUT.relative_to(ROOT)}, dont {len(credits)} photos (crédits : {CREDITS.name})")
+    print(f"{len(pubs)} publications et {len(photos['actualites'])} actualités, {len(credits)} photos (crédits : {CREDITS.name})")
 
 
 if __name__ == "__main__":

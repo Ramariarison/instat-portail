@@ -30,8 +30,16 @@ export interface NavItem {
 export interface NewsItem {
   id: string;
   title: string;
+  /** Date de tri, AAAA-MM-JJ. */
+  date?: string;
+  /** Libellé affiché à la place de la date (« 22 et 23 janvier 2026 »). */
   dateLabel?: string;
   context?: string;
+  /** Image de l'actualité, adresse renvoyée par le service Fichiers. */
+  imageUrl?: string;
+  /** Texte de l'actualité, paragraphes séparés par une ligne vide. */
+  content?: string;
+  /** Page de l'actualité (#/actualites/<id>), ou lien enregistré. */
   href: string;
 }
 

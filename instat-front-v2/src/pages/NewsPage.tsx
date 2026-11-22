@@ -3,6 +3,7 @@ import { StatusLine } from "../components/home/SectionHead";
 import { LoadingRegion, Skeleton } from "../components/ui/Skeleton";
 import { news as sampleNews } from "../data/news";
 import { useApiData } from "../hooks/useApiData";
+import { newsDateLabel, paragraphs } from "../lib/news";
 import type { NewsItem } from "../types";
 
 /** Fil complet des actualités, les plus récentes d'abord. */
@@ -38,12 +39,18 @@ export default function NewsPage() {
         ) : (
           <ul className="border-t-2 border-ink">
             {result.data.map((item) => (
-              <li key={item.id} className="grid gap-x-8 gap-y-1 border-b border-line py-6 sm:grid-cols-[13rem_minmax(0,1fr)]">
-                <p className="pt-1 text-xs text-muted">{item.dateLabel ?? "Date non précisée"}</p>
-                <div>
-                  <h2 className="text-xl leading-snug font-semibold">{item.title}</h2>
-                  {item.context && <p className="mt-1 text-sm text-muted">{item.context}</p>}
-                </div>
+              <li key={item.id} className="border-b border-line">
+                <a href={item.href} className="group grid gap-x-8 gap-y-3 py-6 sm:grid-cols-[13rem_minmax(0,1fr)_12rem]">
+                  <p className="pt-1 text-xs text-muted">{newsDateLabel(item) ?? "Date non précisée"}</p>
+                  <div className="min-w-0">
+                    <h2 className="text-xl leading-snug font-semibold group-hover:text-paddy">{item.title}</h2>
+                    {item.context && <p className="mt-1 text-sm text-muted">{item.context}</p>}
+                    {item.content && <p className="mt-3 line-clamp-2 text-[0.95rem] text-ink/80">{paragraphs(item.content)[0]}</p>}
+                  </div>
+                  {item.imageUrl && (
+                    <img src={item.imageUrl} alt="" className="aspect-video w-full border border-line bg-paper object-cover sm:order-none" />
+                  )}
+                </a>
               </li>
             ))}
           </ul>

@@ -6,6 +6,7 @@ import { news as sampleNews } from "../../data/news";
 import { publications as samplePublications } from "../../data/publications";
 import { useApiData } from "../../hooks/useApiData";
 import { formatDate } from "../../lib/format";
+import { newsDateLabel } from "../../lib/news";
 import type { NewsItem, Publication } from "../../types";
 import DecorativeBars from "../layout/DecorativeBars";
 import { LoadingRegion, Skeleton, SkeletonText } from "../ui/Skeleton";
@@ -157,7 +158,7 @@ function NewsCarousel({ news }: { news: NewsItem[] }) {
                 className={`flex min-h-56 w-full shrink-0 flex-col px-5 pt-5 pb-4 transition-opacity duration-500 ${current ? "opacity-100" : "opacity-0"}`}
               >
                 <p className="flex flex-wrap items-baseline gap-x-2 text-xs text-muted">
-                  {entry.dateLabel && <span className="font-semibold tracking-[0.04em] text-laterite uppercase">{entry.dateLabel}</span>}
+                  {newsDateLabel(entry) && <span className="font-semibold tracking-[0.04em] text-laterite uppercase">{newsDateLabel(entry)}</span>}
                   {entry.context && <span>{entry.context}</span>}
                 </p>
                 <h3 className="mt-3 text-[1.3rem] leading-snug font-semibold">

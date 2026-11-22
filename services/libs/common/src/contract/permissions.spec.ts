@@ -17,6 +17,13 @@ describe("matrice des droits (RBAC)", () => {
     expect(can("editor", "thematiques", "view")).toBe(false);
   });
 
+  it("réserve les actualités aux administrateurs", () => {
+    expect(can("admin", "actualites", "create")).toBe(true);
+    expect(can("super_admin", "actualites", "delete")).toBe(true);
+    expect(can("editor", "actualites", "create")).toBe(false);
+    expect(can("editor", "actualites", "view")).toBe(false);
+  });
+
   it("laisse l'administrateur valider et gérer les comptes, sans en supprimer", () => {
     expect(can("admin", "publications", "validate")).toBe(true);
     expect(can("admin", "users", "create")).toBe(true);

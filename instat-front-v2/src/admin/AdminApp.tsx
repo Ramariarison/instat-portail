@@ -18,6 +18,7 @@ import IndicateursPage from "./pages/chiffres/IndicateursPage";
 import KeyFiguresPage from "./pages/chiffres/KeyFiguresPage";
 import TypesPage from "./pages/chiffres/TypesPage";
 import PublicationFormPage from "./pages/publications/PublicationFormPage";
+import ActualitesPage from "./pages/actualites/ActualitesPage";
 import PublicationsPage from "./pages/publications/PublicationsPage";
 import RegionsPage from "./pages/publications/RegionsPage";
 import ThematiquesPage from "./pages/publications/ThematiquesPage";
@@ -38,6 +39,8 @@ function renderPage(route: AdminRoute): ReactNode {
       return <PublicationsPage />;
     case "publication-form":
       return <PublicationFormPage id={route.id} />;
+    case "news":
+      return <ActualitesPage />;
     case "types":
       return <TypesPage />;
     case "indicateurs":

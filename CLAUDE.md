@@ -116,7 +116,7 @@ Lecture publique sauf mention ; écriture = jeton `Authorization: Bearer …` + 
 | Service | Routes |
 |---|---|
 | auth | `POST /auth/login` → `{ token, expiresIn, user }` · `GET /auth/me` · `PATCH /auth/me` (nom) · `POST /auth/password` · `GET /auth/permissions` · `/users` (droit `users`) |
-| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&sector=…&limit=&offset=` → `Publication[]` (total dans `X-Total-Count` ; `sector` répétable : au moins un des secteurs) · `GET /publications/:id` · `GET /publications/latest-nipc` (site public : publications en ligne seulement) · `/admin/publications` (droit `publications`) + `POST /admin/publications/:id/submit` · `/publish` · `/return` `{ comment }` (droit `validate`) · `GET /admin/publications/:id/reviews` · `GET /admin/publications/stats` (tableau de bord) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` |
+| publications | `GET /publications?scope=&thematiqueId=&regionId=&q=&sector=…&limit=&offset=` → `Publication[]` (total dans `X-Total-Count` ; `sector` répétable : au moins un des secteurs) · `GET /publications/:id` · `GET /publications/latest-nipc` (site public : publications en ligne seulement) · `/admin/publications` (droit `publications`) + `POST /admin/publications/:id/submit` · `/publish` · `/return` `{ comment }` (droit `validate`) · `GET /admin/publications/:id/reviews` · `GET /admin/publications/stats` (tableau de bord) · `/thematiques` · `/regions` · `GET /sectors` · `/news` → `NewsItem[]` (image et texte ; écriture : droit `actualites`) |
 | chiffres | `GET /indicators` → `Indicator[]` (chiffres clés de l'accueil : valeur nationale la plus récente des indicateurs choisis) · `/chiffres/key-figures` (choix et ordre de ces indicateurs, droit `indicateurs`) · `/chiffres/types` · `/chiffres/indicators?typeId=` · `/chiffres/regions` · `/chiffres/values?figureRegionId=&indicatorId=` |
 | files | `POST /files` (multipart, champ `file`, tout utilisateur connecté) → `{ id, name, size, type, url }` · `GET /files/:id` · `DELETE /files/:id` |
 
@@ -134,6 +134,7 @@ Rôles (matrice dans `libs/common/src/contract/permissions.ts`, identique au fro
 | | Super administrateur | Administrateur | Éditeur |
 |---|---|---|---|
 | Publications | tout, dont valider | tout, dont valider | créer, modifier les siennes, soumettre |
+| Actualités | tout | tout | — |
 | Thématiques, régions, types, indicateurs | tout | tout | — |
 | Données par régions (`figures`) | tout | tout | consulter, ajouter, modifier |
 | Comptes (`users`) | tout | comptes éditeurs : créer, consulter, modifier | — |
@@ -170,7 +171,7 @@ Fichier `services/<service>/migrations/NNN_description.sql`, appliqué au démar
 
 Relié à l'API (voir « Microservices » dans `instat-front-v2/README.md`). Pages publiques (`src/pages/`, routées dans `App.tsx`) :
 `#/publications` (liste filtrable, filtres gardés dans l'adresse), `#/publications/:id` (fiche et documents),
-`#/actualites`, `#/madagascar-en-chiffres` (carte des 23 régions colorée selon un indicateur, fiche de la région ;
+`#/actualites` et `#/actualites/:id` (page d'une actualité : image, texte, autres actualités), `#/madagascar-en-chiffres` (carte des 23 régions colorée selon un indicateur, fiche de la région ;
 choix gardés dans l'adresse), `#/themes/<slug>` (rubriques du menu « Thèmes et données » : `slug` = alias d'une thématique
 du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; toute autre route `#/…` affiche
 « Page en préparation ». Repères :
@@ -182,6 +183,8 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
 - `#/connexion` : page de connexion à part (`src/pages/LoginPage.tsx`), avec `retour=` et `expiree=1` ; le site public n'y
   mène que par le lien « Espace agents » de la barre du haut, `#/admin` sans session y redirige.
 - `#/admin/chiffres/chiffres-cles` : chiffres clés de l'accueil (indicateur, libellé, décimales, ordre), valeur affichée en aperçu.
+- `#/admin/actualites` : actualités (titre, date, date affichée, contexte, image, texte), administrateurs seulement ;
+  enregistrées, elles paraissent aussitôt sur l'accueil et la page « Actualités ».
 - `#/admin/compte` : « Mon compte » (nom, mot de passe), pour tous les rôles, depuis le menu du compte.
 - `#/admin` : tableau de bord selon le rôle (`src/admin/pages/tableau-de-bord/`) — éditeur : ses publications à
   corriger, en attente, en brouillon ; administrateur : file « À valider », activité récente, publications en ligne par
@@ -193,8 +196,7 @@ du back-office, ou groupe de secteurs défini dans `src/data/collections.ts`) ; 
 ## Points ouverts
 
 - `Publication.kind` n'est pas saisi dans le back-office : il est déduit du premier secteur (`kindOf()` dans `apps/publications/src/publications/publication-kind.ts`).
-- Les actualités (`/news`) n'ont pas d'écran d'administration dans le front.
-- Les actualités n'ont pas de contenu (seulement titre, date, contexte) : pas de page de détail, « Lire l'actualité » mène à la page « en préparation ».
+- Les actualités paraissent dès leur enregistrement : pas de brouillon ni de validation, contrairement aux publications.
 - Routage par hash (`#/…`, `src/lib/route.ts`) : simple, mais invisible pour les moteurs de recherche. Passer à React Router (adresses `/publications/…`) le jour où le référencement compte.
 - Documents d'exemple (`doc-…` des données de démonstration) : aucun fichier réel derrière.
 - `figure_regions.region_id` désigne une région du service Publications sans clé étrangère (bases séparées) :

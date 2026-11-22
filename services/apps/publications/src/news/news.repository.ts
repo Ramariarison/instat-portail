@@ -9,7 +9,15 @@ export class NewsRepository extends SqlRepository<StoredNews> {
     name: "news",
     label: "Actualité",
     idPrefix: "news",
-    columns: { title: "title", date: "date", dateLabel: "date_label", context: "context", href: "href" },
+    columns: {
+      title: "title",
+      date: "date",
+      dateLabel: "date_label",
+      context: "context",
+      imageUrl: "image_url",
+      content: "content",
+      href: "href",
+    },
     orderBy: "date DESC NULLS LAST, created_at DESC",
   };
 

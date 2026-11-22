@@ -6,7 +6,7 @@ import { ListNewsQuery } from "./dto/list-news.query";
 import { UpdateNewsDto } from "./dto/update-news.dto";
 import { NewsService } from "./news.service";
 
-/** Actualités : lecture publique ; écriture avec le droit « publications ». */
+/** Actualités : lecture publique ; écriture avec le droit « actualites » (administrateurs). */
 @ApiTags("Actualités")
 @Controller("news")
 export class NewsController {
@@ -26,14 +26,14 @@ export class NewsController {
 
   @ApiBearerAuth()
   @Post()
-  @RequirePermission("publications", "create")
+  @RequirePermission("actualites", "create")
   create(@Body() dto: CreateNewsDto): Promise<NewsItem> {
     return this.news.create(dto);
   }
 
   @ApiBearerAuth()
   @Patch(":id")
-  @RequirePermission("publications", "update")
+  @RequirePermission("actualites", "update")
   update(@Param("id") id: string, @Body() dto: UpdateNewsDto): Promise<NewsItem> {
     return this.news.update(id, dto);
   }
@@ -41,7 +41,7 @@ export class NewsController {
   @ApiBearerAuth()
   @Delete(":id")
   @HttpCode(204)
-  @RequirePermission("publications", "delete")
+  @RequirePermission("actualites", "delete")
   remove(@Param("id") id: string): Promise<void> {
     return this.news.remove(id);
   }

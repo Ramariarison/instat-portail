@@ -1,13 +1,16 @@
 import { Inject, Injectable, Logger, type OnApplicationBootstrap } from "@nestjs/common";
 import type { Pool, PoolClient } from "pg";
 import { PG_POOL, runInTransaction, slug } from "@app/common";
-import { newsSeeds } from "./data/news.data";
+import { newsSeeds, type NewsSeed } from "./data/news.data";
 import { basePublicationSeeds, extraPublicationSeeds } from "./data/publications.data";
 import { regionNames } from "./data/regions.data";
 import { thematiqueSeeds } from "./data/thematiques.data";
 
 const regionId = (name: string) => `reg-${slug(name)}`;
 const thematiqueId = (name: string) => `th-${slug(name)}`;
+const newsImage = (id: string) => `/demo/actualites/${id}.jpg`;
+/** Actualités de démonstration arrivées après le socle (lot « actualites-completes »). */
+const NEWS_ADDED_LATER = ["rgph-4-formation", "epm-2026-collecte", "mics-7-validation"];
 
 /** Texte de la fiche : un paragraphe par élément, séparés par une ligne vide. */
 const content = (body: string[]) => body.join("\n\n");
@@ -32,6 +35,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
     await this.runOnce("publications-par-thematique", (client) => this.seedExtraPublications(client));
     await this.runOnce("couvertures-publications", (client) => this.seedCovers(client));
     await this.runOnce("textes-publications", (client) => this.seedTexts(client));
+    await this.runOnce("actualites-completes", (client) => this.seedNewsPages(client));
   }
 
   /** Exécute un lot dans une transaction, s'il n'est pas déjà marqué dans demo_seeds. */
@@ -79,11 +83,15 @@ export class DemoSeedService implements OnApplicationBootstrap {
         ],
       );
     }
-    for (const n of newsSeeds) {
-      await client.query("INSERT INTO news (id, title, date, date_label, context, href) VALUES ($1, $2, $3, $4, $5, $6)", [
-        n.id, n.title, n.date ?? null, n.dateLabel ?? null, n.context ?? null, n.href,
-      ]);
-    }
+    for (const n of newsSeeds) await this.insertNews(client, n);
+  }
+
+  private async insertNews(client: PoolClient, n: NewsSeed): Promise<void> {
+    await client.query(
+      `INSERT INTO news (id, title, date, date_label, context, image_url, content)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING`,
+      [n.id, n.title, n.date ?? null, n.dateLabel ?? null, n.context ?? null, newsImage(n.id), content(n.body)],
+    );
   }
 
   /** Au moins une publication par thématique ; seulement par-dessus le socle (jamais sur une base réelle). */
@@ -136,6 +144,28 @@ export class DemoSeedService implements OnApplicationBootstrap {
         "UPDATE publications SET title = $2, date = $3, published_at = $3::date, excerpt = $4, content = $5 WHERE id = $1",
         [`pub-${p.id}`, p.title, p.date, p.excerpt, content(p.body)],
       );
+    }
+  }
+
+  /**
+   * Sur une base chargée avant les pages d'actualités : texte, image et page (#/actualites/<id>) des actualités de
+   * démonstration encore sans texte, et les trois actualités ajoutées ensuite. Seulement par-dessus le socle.
+   */
+  private async seedNewsPages(client: PoolClient): Promise<void> {
+    const { rows } = await client.query<{ count: number }>("SELECT count(*)::int AS count FROM thematiques WHERE id = 'th-economie'");
+    if (rows[0]!.count === 0) return;
+
+    for (const n of newsSeeds) {
+      const existing = await client.query<{ content: string | null }>("SELECT content FROM news WHERE id = $1", [n.id]);
+      if (!existing.rows[0]) {
+        // Une actualité du socle supprimée dans le back-office ne revient pas.
+        if (NEWS_ADDED_LATER.includes(n.id)) await this.insertNews(client, n);
+      } else if (existing.rows[0].content === null) {
+        await client.query(
+          "UPDATE news SET content = $2, image_url = COALESCE(image_url, $3), href = NULL WHERE id = $1",
+          [n.id, content(n.body), newsImage(n.id)],
+        );
+      }
     }
   }
 }

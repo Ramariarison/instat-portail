@@ -15,6 +15,7 @@ import ChiffresPage from "./pages/ChiffresPage";
 import CollectionPage from "./pages/CollectionPage";
 import LoginPage from "./pages/LoginPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
+import NewsArticlePage from "./pages/NewsArticlePage";
 import NewsPage from "./pages/NewsPage";
 import PublicationPage from "./pages/PublicationPage";
 import PublicationsPage from "./pages/PublicationsPage";
@@ -36,7 +37,7 @@ function PublicPage({ segments }: { segments: string[] }) {
   const [section, id, extra] = segments;
   if (!section) return <Home />;
   if (section === "publications" && !extra) return id ? <PublicationPage key={id} id={id} /> : <PublicationsPage />;
-  if (section === "actualites" && !id) return <NewsPage />;
+  if (section === "actualites" && !extra) return id ? <NewsArticlePage key={id} id={id} /> : <NewsPage />;
   if (section === "madagascar-en-chiffres" && !id) return <ChiffresPage />;
   if (section === "themes" && id && !extra) return <CollectionPage key={id} slug={id} />;
   return <ComingSoonPage />;

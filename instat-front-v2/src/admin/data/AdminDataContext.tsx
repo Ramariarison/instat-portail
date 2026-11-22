@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { api, errorMessage } from "../../lib/api";
+import type { NewsItem } from "../../types";
 import { can } from "../permissions";
 import type {
   AdminPublication,
@@ -73,6 +74,9 @@ function useCollection<T extends { id: string }, Input = Omit<T, "id">>(path: st
   );
 }
 
+/** Champs envoyés pour une actualité : sa page (href) est calculée par le service. */
+export type NewsInput = Omit<NewsItem, "id" | "href">;
+
 /** Champs envoyés pour un compte : le mot de passe n'est jamais relu. */
 export type UserInput = Omit<AdminUser, "id" | "lastLogin"> & { password?: string };
 
@@ -84,6 +88,7 @@ interface AdminData {
   thematiques: Collection<Thematique>;
   regions: Collection<Region>;
   publications: Collection<AdminPublication>;
+  news: Collection<NewsItem, NewsInput>;
   dataTypes: Collection<DataType>;
   indicators: Collection<IndicatorDef>;
   figureRegions: Collection<FigureRegion>;
@@ -109,6 +114,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const thematiques = useCollection<Thematique>("/thematiques");
   const regions = useCollection<Region>("/regions");
   const publications = useCollection<AdminPublication>("/admin/publications");
+  const news = useCollection<NewsItem, NewsInput>("/news");
   const dataTypes = useCollection<DataType>("/chiffres/types");
   const indicators = useCollection<IndicatorDef>("/chiffres/indicators");
   const figureRegions = useCollection<FigureRegion>("/chiffres/regions");
@@ -133,6 +139,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       api.get<Thematique[]>("/thematiques"),
       api.get<Region[]>("/regions"),
       api.get<AdminPublication[]>("/admin/publications"),
+      api.get<NewsItem[]>("/news?limit=1000"),
       api.get<DataType[]>("/chiffres/types"),
       api.get<IndicatorDef[]>("/chiffres/indicators"),
       api.get<FigureRegion[]>("/chiffres/regions"),
@@ -141,11 +148,12 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       // Seul le super administrateur a le droit de lister les comptes.
       can(role, "users", "view") ? api.get<AdminUser[]>("/users") : Promise.resolve([]),
     ]).then(
-      ([t, r, p, d, i, fr, fv, kf, u]) => {
+      ([t, r, p, n, d, i, fr, fv, kf, u]) => {
         if (cancelled) return;
         thematiques.setAll(t);
         regions.setAll(r);
         publications.setAll(p);
+        news.setAll(n);
         dataTypes.setAll(d);
         indicators.setAll(i);
         figureRegions.setAll(fr);
@@ -216,13 +224,13 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       state, reload,
-      thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, keyFigures, users,
+      thematiques, regions, publications, news, dataTypes, indicators, figureRegions, figureValues, keyFigures, users,
       savePublication, removeFigureRegion,
       submitPublication, publishPublication, returnPublication, loadReviews,
     }),
     [
-      state, reload, thematiques, regions, publications, dataTypes, indicators, figureRegions, figureValues, keyFigures, users,
-      savePublication, removeFigureRegion, submitPublication, publishPublication, returnPublication, loadReviews,
+      state, reload, thematiques, regions, publications, news, dataTypes, indicators, figureRegions, figureValues, keyFigures,
+      users, savePublication, removeFigureRegion, submitPublication, publishPublication, returnPublication, loadReviews,
     ],
   );
 
