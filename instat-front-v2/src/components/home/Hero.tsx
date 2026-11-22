@@ -149,27 +149,45 @@ function NewsCarousel({ news }: { news: NewsItem[] }) {
         >
           {news.map((entry, entryIndex) => {
             const current = entryIndex === index;
+            // Avec une image : la photo en fond, assombrie vers le bas pour que le texte reste lisible.
+            const photo = Boolean(entry.imageUrl);
             return (
               <article
                 key={entry.id}
                 aria-roledescription="actualité"
                 aria-hidden={!current}
                 inert={!current}
-                className={`flex min-h-56 w-full shrink-0 flex-col px-5 pt-5 pb-4 transition-opacity duration-500 ${current ? "opacity-100" : "opacity-0"}`}
+                className={`relative isolate flex min-h-60 w-full shrink-0 flex-col overflow-hidden px-5 pt-5 pb-4 transition-opacity duration-500 ${current ? "opacity-100" : "opacity-0"} ${photo ? "text-white" : ""}`}
               >
-                <p className="flex flex-wrap items-baseline gap-x-2 text-xs text-muted">
-                  {newsDateLabel(entry) && <span className="font-semibold tracking-[0.04em] text-laterite uppercase">{newsDateLabel(entry)}</span>}
+                {photo && (
+                  <>
+                    <img src={entry.imageUrl} alt="" loading="lazy" className="absolute inset-0 -z-10 size-full object-cover" />
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(9_42_31/0.45)_0%,rgb(9_42_31/0.6)_45%,rgb(9_42_31/0.92)_100%)]"
+                    />
+                  </>
+                )}
+                <p className={`flex flex-wrap items-baseline gap-x-2 text-xs ${photo ? "text-white/80" : "text-muted"}`}>
+                  {newsDateLabel(entry) && (
+                    <span className={`font-semibold tracking-[0.04em] uppercase ${photo ? "text-[#f6c9a0]" : "text-laterite"}`}>
+                      {newsDateLabel(entry)}
+                    </span>
+                  )}
                   {entry.context && <span>{entry.context}</span>}
                 </p>
-                <h3 className="mt-3 text-[1.3rem] leading-snug font-semibold">
-                  <a href={entry.href} className="hover:text-paddy hover:underline hover:decoration-paddy/40 hover:underline-offset-4">
+                <h3 className={`mt-3 text-[1.3rem] leading-snug font-semibold ${photo ? "[text-shadow:0_1px_12px_rgb(0_0_0/0.45)]" : ""}`}>
+                  <a
+                    href={entry.href}
+                    className={photo ? "hover:underline hover:decoration-white/60 hover:underline-offset-4" : "hover:text-paddy hover:underline hover:decoration-paddy/40 hover:underline-offset-4"}
+                  >
                     {entry.title}
                   </a>
                 </h3>
                 <a
                   href={entry.href}
                   aria-label={`Lire l'actualité : ${entry.title}`}
-                  className="group mt-auto inline-flex w-fit items-center gap-1.5 pt-5 text-sm font-medium text-paddy"
+                  className={`group mt-auto inline-flex w-fit items-center gap-1.5 pt-5 text-sm font-medium ${photo ? "text-white" : "text-paddy"}`}
                 >
                   Lire l'actualité
                   <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
