@@ -114,6 +114,16 @@ services:
     depends_on:
       gateway: { condition: service_healthy }
 
+  # Démonstration : adresse publique HTTPS temporaire (https://….trycloudflare.com) vers ce poste, sans compte ni
+  # serveur. docker compose --profile demo up -d, puis l'adresse : voir docs/demo-cloudflare.md.
+  tunnel:
+    image: cloudflare/cloudflared:2026.10.7
+    profiles: ["demo"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://gateway:80
+    depends_on:
+      gateway: { condition: service_healthy }
+
   # Outil de développement, démarré seulement sur demande : docker compose --profile outils up -d
   # → http://localhost:5050 (sans écran de connexion, accessible depuis ce poste uniquement).
   pgadmin:
