@@ -74,8 +74,7 @@ src/
 - Ces raccourcis ne sont qu'un reflet visuel. Les droits réels doivent être contrôlés côté serveur (RBAC dans le service d'authentification).
 
 Comptes de démonstration (mot de passe `demo1234`) : `superadmin@instat.demo`, `admin@instat.demo`, `editeur@instat.demo`.
-Ils sont créés par le service Auth quand `SEED_DEMO=true`, et proposés (repliés) sur la page de connexion selon
-`VITE_SHOW_DEMO_ACCOUNTS` (oui par défaut en développement ; dans l'image Docker, il suit `SEED_DEMO`).
+Ils sont créés par le service Auth quand `SEED_DEMO=true` ; la page de connexion ne les affiche pas.
 
 ## Microservices
 
@@ -102,7 +101,7 @@ Le front ne parle qu'à la passerelle d'API (`/api`), par `src/lib/api.ts`.
   d'une région (`RegionSilhouette.tsx`) est tirée du même tracé.
 - Tableau de bord (`admin/pages/tableau-de-bord/`) : page d'accueil du back-office, adaptée au rôle.
 - Une écriture refusée (doublon, élément utilisé ailleurs, droits) affiche le message du service ; la fenêtre reste ouverte.
-- Réglages au build (`.env.example`) : `VITE_API_URL`, `VITE_API_PROXY`, `VITE_SAMPLE_DATA`, `VITE_SHOW_DEMO_ACCOUNTS`.
+- Réglages au build (`.env.example`) : `VITE_API_URL`, `VITE_API_PROXY`, `VITE_SAMPLE_DATA`.
 
 ## Points à compléter
 

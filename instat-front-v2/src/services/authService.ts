@@ -1,24 +1,10 @@
 import { api, ApiError, getToken, setToken } from "../lib/api";
-import type { Role, User } from "../types";
+import type { User } from "../types";
 
 /**
  * Authentification par le service Auth (via la passerelle) :
  * POST /auth/login renvoie un jeton JWT portant le rôle, envoyé ensuite à chaque requête.
  */
-
-interface DemoAccount {
-  id: string;
-  email: string;
-  password: string;
-  role: Role;
-}
-
-/** Comptes créés par le service Auth quand SEED_DEMO=true (voir SHOW_DEMO_ACCOUNTS dans config.ts). */
-export const demoAccounts: DemoAccount[] = [
-  { id: "demo-1", email: "superadmin@instat.demo", password: "demo1234", role: "super_admin" },
-  { id: "demo-2", email: "admin@instat.demo", password: "demo1234", role: "admin" },
-  { id: "demo-3", email: "editeur@instat.demo", password: "demo1234", role: "editor" },
-];
 
 export class InvalidCredentialsError extends Error {
   constructor() {

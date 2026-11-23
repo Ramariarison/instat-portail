@@ -40,9 +40,9 @@ docker compose --profile demo down      # arrête tout (les données sont conser
 
 ## Sécurité
 
-- Avec `SEED_DEMO=true`, la page de connexion **affiche les comptes de démonstration** et leur mot de passe
-  (`demo1234`). Toute personne qui a l'adresse peut donc se connecter : ne la diffuser qu'au jury, et **arrêter le
-  tunnel après la démonstration**.
+- Avec `SEED_DEMO=true`, les comptes de démonstration existent, avec un mot de passe connu (`demo1234`) ; la page de
+  connexion ne les affiche pas, mais quiconque connaît ce mot de passe et a l'adresse peut se connecter : ne la diffuser
+  qu'au jury, et **arrêter le tunnel après la démonstration**.
 - L'adresse, tirée au hasard, n'est annoncée nulle part ; elle disparaît dès que le tunnel s'arrête.
 - La passerelle voit l'adresse réelle des visiteurs (`X-Forwarded-For` posé par le tunnel, `REAL_IP_FROM`) : la limite
   de tentatives de connexion s'applique bien à chacun.

@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ArrowLeft, ChartColumn, Clock, FileText, Users, type LucideIcon } from "lucide-react";
 import logoInstat from "../assets/logo-instat.png";
-import DemoAccounts from "../components/auth/DemoAccounts";
-import LoginForm, { type Credentials } from "../components/auth/LoginForm";
+import LoginForm from "../components/auth/LoginForm";
 import MadagascarMap from "../components/auth/MadagascarMap";
-import { SHOW_DEMO_ACCOUNTS } from "../config";
 import { useAuth } from "../context/AuthContext";
 import { useHashQuery } from "../lib/route";
 
@@ -30,7 +28,6 @@ export default function LoginPage() {
   const [query] = useHashQuery();
   const target = destination(query.get("retour"));
   const expired = query.get("expiree") === "1";
-  const [prefill, setPrefill] = useState<Credentials>();
 
   useEffect(() => {
     const previous = document.title;
@@ -100,18 +97,12 @@ export default function LoginPage() {
           )}
 
           <div className="mt-8">
-            <LoginForm prefill={prefill} onSuccess={() => window.location.replace(target)} />
+            <LoginForm onSuccess={() => window.location.replace(target)} />
           </div>
 
           <p className="mt-6 text-sm leading-relaxed text-muted">
             Pas de compte ? Les accès sont créés par un super administrateur de l'INSTAT.
           </p>
-
-          {SHOW_DEMO_ACCOUNTS && (
-            <div className="mt-8">
-              <DemoAccounts selected={prefill?.email} onPick={setPrefill} />
-            </div>
-          )}
         </div>
 
         <p className="text-center text-xs text-muted">© Institut national de la statistique de Madagascar</p>
